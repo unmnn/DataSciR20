@@ -51,7 +51,6 @@ slides/*.html
 slides/figures/*
 slides/04-rmarkdown-materials/
 slides/06-shiny-materials/
-slides/libs/
 slides/my_project/
 slides/emji.txt
 !slides/session_info.Rmd
