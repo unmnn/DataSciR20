@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Course Introduction</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Uli Niemann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/fontawesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: title-slide, center, bottom
+
+# 00 - Course Introduction
+
+## Data Science with R &amp;#183; Summer 2020
+
+### Uli Niemann &amp;#183; Knowledge Management &amp; Discovery Lab
+
+#### [https://brain.cs.uni-magdeburg.de/kmd/DataSciR/](https://brain.cs.uni-magdeburg.de/kmd/DataSciR/)
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: middle, center, exercise-blue
+
+
+
+.left-column[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+## Welcome to&lt;br /&gt;Data Science with R!
+
+]
+
+.right-column[
+
+&lt;img src="figures/00-intro/collage.png" width="100%" /&gt;
+
+]
+
+???
+
+- who am i
+
+---
+
+class: middle
+
+&lt;img src="figures/00-intro/stay-at-home.jpg" width="70%" style="display: block; margin: auto;" /&gt;
+
+.font80[Photo by [Amelie &amp; Niklas Ohlrogge](https://unsplash.com/photos/P_2za841j_w)]
+
+???
+
+Corona edition
+
+---
+
+class: middle
+
+## Who are &lt;u&gt;YOU&lt;/u&gt;?
+
+.pull-left60[
+
+- You are studying either **DKE** or another Master FIN degree with focus on data science.
+- You have heard one or more **introductory data science courses** in the previous semesters.
+  - "Data Mining I" by Prof. Spiliopoulou
+  - "Machine Learning" by Prof. Nürnberger
+  - "Visual Analytics" by Prof. Preim
+  - "Information Retrieval" by Prof. Nürnberger
+  - ...
+- While you liked these courses to learn fundamental data science concepts, you 
+have not had the chance to apply this theoretical knowledge in a **practical 
+project on real-world datasets**.
+- You are most proficient in **Python** (or **Java**).
+- You have no or very **little experience with R**, but are keen to learn it either 
+because you either heard of R's reputation to be a powerful language for 
+data science projects or simply to complete your programming skill set.
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/00-intro/student.jpg" width="100%" /&gt;
+
+.font80[Photo by [Wes Hicks](https://unsplash.com/photos/4-EeTnaC1S4)]
+
+]
+
+---
+
+class: middle
+
+## Data Science with R
+
+&lt;img src="figures/00-intro/datascir-workflow.png" width="100%" /&gt;
+
+???
+
+- at the end of the semester, you should be confidently able to use R to gain insights from data 
+- workflow of a typical DS project
+- import data from a file, database, website or web API and load as data frame into R
+- transform and clean
+  - bring it into a form that is consistent with the semantics of the data
+  - transform: feature engineering: derive new variables or do some feature selection or reduction (required most of the time)
+- visualization: shows things that you did not expect, or raise new questions about the data
+  - hints that you are asking the wrong question or need to collect different data
+- models: classification, regression
+- communication: crucial to communicate to others
+- DS often involves a lot of trial and error
+  - don't know the best approach in advance
+- often starts with some initial questions
+  - initial questions are often quite vague, because you are working on an unsolved problem
+  - improve quality of the questions after EDA (better data understanding) or first modeling results
+
+https://simplystatistics.org/2019/04/17/tukey-design-thinking-and-better-questions/
+
+---
+
+class: middle
+
+## Course structure
+
+.pull-left[
+
+.content-box-blue[
+
+.font150[**Part 1: R "crash course"**]
+
+&lt;img src="figures/00-intro/crash-course.jpg" width="100%" /&gt;
+
+.font80[Photo by [NeONBRAND](https://unsplash.com/photos/1-aA2Fadydc)]
+
+]
+
+]
+
+.pull-right[
+
+.content-box-green[
+
+.font150[**Part 2: Data science project**]
+
+&lt;img src="figures/00-intro/students.jpg" width="100%" /&gt;
+
+.font80[Photo by [Annie Spratt](https://unsplash.com/photos/QckxruozjRg)]
+
+]
+
+]
+
+---
+
+## Syllabus
+
+&lt;iframe width="800px" max-width="100%" height="505px"  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRv0afz8wXd2HzZaRZmEbSnrsGNYkDQosi3V1PBt6-rTBFYADttx5-90Udw5pQ6TdqGViA26LHTUL9W/pubhtml?gid=0&amp;amp;single=true&amp;amp;widget=true&amp;amp;headers=false&amp;amp;range=A1:F22"&gt;&lt;/iframe&gt;
+
+???
+
+After successful completion of this course, you will be able to proficiently perform the following tasks in `R`:
+
+- **import and preprocess raw data**
+- **transform data** for modelling
+- perform **exploratory data analysis** with **summary statistics** and **visualization**
+- understand, build and evaluate predictive **classification and prediction models**, including **regression** models, **tree-based** models, **ensembles** and **boosted** models
+- communicate and disseminate results and findings through **reproducible documents**, presentations, websites and **interactive web applications**
+
+???
+
+- first part: i will introduce you to a selection of useful r packages
+- adopt tidyverse family of r packages because they work well together
+- slides are Rmd files that contain code that you can run
+- 01: introduction to `R`:
+  - basic commands
+  - environment and workspace
+  - functions
+  - object indexing
+  - vectors, vector type coercion and vectorization etc
+  - + RStudio IDE
+- 02: tidyverse: set of packages with a shared design-philosophy that work well for data science projects
+  - dplyr for data preprocessing and wrangling
+  - tidyr reshaping data
+- 03: visualization with ggplot2 
+- 04: R markdown, package that facilitates reproducibility
+- 05: tidymodels
+- 06: interactive Shiny web applications 
+- 07: Practical tips
+
+- crash course is not meant to be exhaustive: you have to read additional 
+material (but don't worry for each topic i will provide a selection of recommended 
+readings)
+- "common ground" like packages that all of you are most likely going to use in your projects 
+- however, you are encouraged to use other packages
+- also, I don't force you to use these packages 
+
+
+---
+
+class: middle 
+
+## Resources
+
+.pull-left70[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+.font120[
+
+.content-box-blue[
+- <i class="fas  fa-home "></i> &lt;https://brain.cs.uni-magdeburg.de/kmd/DataSciR/&gt;
+]
+
+.content-box-yellow[
+- <i class="fab  fa-github "></i> &lt;https://github.com/unmnn/DataSciR20&gt;
+]
+
+.content-box-red[
+- <i class="fab  fa-discord "></i> &lt;https://discord.gg/7rmAsdT&gt; (_give it a try at least_)
+]
+
+]
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/00-intro/pile.jpg" width="100%" /&gt;
+
+.font80[Photo by [Sharon McCutcheon](https://unsplash.com/photos/tn57JI3CewI)]
+
+]
+
+---
+
+## Website: .font90[&lt;https://brain.cs.uni-magdeburg.de/kmd/DataSciR/&gt;]
+
+&lt;iframe src="https://brain.cs.uni-magdeburg.de/kmd/DataSciR/" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+## Project
+
+&lt;iframe src="https://brain.cs.uni-magdeburg.de/kmd/DataSciR/project.html" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+???
+
+- description
+- project team
+- milestones
+- team formation
+- topic
+- R Markdown process notebook
+- Code
+- project website
+- screencast
+  - Please ensure a sufficient sound quality.  
+  - It may be worthwhile to borrow or invest in an external USB microphone.
+  - What do you feel is the best part of your project?
+  - What insights did you gain?
+  - What is the single most important thing you would like your audience to take away?
+  - Make sure it is upfront and center rather than at the end.
+- final presentation
+- submission instructions
+- hall of fame
+
+---
+
+## Deliverables &amp; Hard Deadlines
+
+.pull-left60[
+
+&amp;nbsp;
+
+.font130[
+
+Date          | Description
+:------------ | :---------------------------------------------------------
+20.05.        | team formation &amp; project proposal submission; registration
+22.05.        | project proposal feedback
+08.07.        | final project submission due
+10.07.        | final presentations shown in class, location/exact time to be updated
+
+]
+
+]
+.pull-right40[
+
+&lt;img src="figures/00-intro/time.jpg" width="100%" /&gt;
+
+.font80[Photo by [Kevin Ku](https://unsplash.com/photos/aiyBwbrWWlo)]
+
+]
+
+---
+
+### Market research for supermarket customer loyalty improvement
+
+.pull-left70[
+
+In this project, you will work with data from a representative supermarket customer satisfaction survey. 2303 regular customers (Stammkunden) of a supermarket across Germany were asked to report their satisfaction with respect to different item groups, services, and overall shopping experience with the supermarket, besides attitude and demographic data. 
+
+**Project goals:**
+
+- **Customer segmentation**: Identify customer subgroups that are homogenous with respect to customer satisfaction. Which factors (and values/ value ranges) describe these subgroups?
+- **"Customer satisfaction index" development**: Create a novel (multi-dimensional) metric that provides a more nuanced representation of a customer's level of satisfaction with the supermarket.
+- **Customer satisfaction vs. recommendation potential**. Analyze the relationship between customer satisfaction and recommendation likeliness. 
+
+&amp;xrarr; [Project outline](materials/datascir20_iwd-project-outline.pdf)
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/00-intro/supermarket.jpg" width="100%" /&gt;
+
+.font80[Photo by [Bernard Hermant](https://unsplash.com/photos/nHRXNv2qeDE)]
+
+]
+
+.footnote[In cooperation with [IWD Market Research GmbH](https://www.iwd-marketresearch.de/)]
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&amp;nbsp;
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

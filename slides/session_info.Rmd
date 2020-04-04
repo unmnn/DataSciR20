@@ -1,0 +1,43 @@
+## Session info
+
+```{r echo = F}
+session_info <- devtools::session_info()
+session_info$platform
+```
+
+<div style="font-size:80%;">
+
+.pull-left[
+
+```{r echo = F}
+# packages <- session_info$packages %>% select(package, )
+packages <- dplyr::select(dplyr::filter(session_info$packages, attached), package, version = ondiskversion, date, source)
+num_packages <- nrow(packages)
+half_num_packages <- round(num_packages/2)
+one_column <- TRUE
+if(num_packages >= 10) one_column <- FALSE 
+# packages <- dplyr::mutate(packages, source = stringr::str_replace_all(source, "/", "/ "))
+if(one_column) {
+  knitr::kable(packages[1:num_packages, ], format = "html", row.names = FALSE)
+} else {
+  knitr::kable(packages[1:half_num_packages, ], format = "html", row.names = FALSE)
+}
+
+```
+
+]
+
+.pull-right[
+
+```{r echo = F}
+if(!one_column) {
+  knitr::kable(
+    dplyr::mutate(packages[(half_num_packages+1):num_packages, ],
+                  source = stringr::str_replace(source, "@.*", ")")),
+    format = "html", row.names = FALSE)
+}
+```
+
+]
+
+</div>

@@ -37,3 +37,28 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+admin/
+exercises/*.R
+exercises/*.Rmd
+exercises/*.html
+exercises/*_files/
+datascir20_figures.pptx
+packages.R
+website/
+slides/*.Rmd
+slides/*.html
+slides/figures/*
+slides/04-rmarkdown-materials/
+slides/06-shiny-materials/
+slides/libs/
+slides/my_project/
+slides/emji.txt
+!slides/session_info.Rmd
+!slides/00-intro.Rmd
+!slides/00-intro.html
+!slides/01-R-Fundamentals.Rmd
+!slides/01-R-Fundamentals.html
+!slides/figures/_gen/
+!slides/figures/00-intro/
+!slides/figures/01-R-Fundamentals/

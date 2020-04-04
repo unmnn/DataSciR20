@@ -1,0 +1,3299 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>01 - R Fundamentals</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Uli Niemann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/countdown/countdown.css" rel="stylesheet" />
+    <script src="libs/countdown/countdown.js"></script>
+    <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+class: title-slide, center, bottom
+
+# 01 - R Fundamentals
+
+## Data Science with R &amp;#183; Summer 2020
+
+### Uli Niemann &amp;#183; Knowledge Management &amp; Discovery Lab
+
+#### [https://brain.cs.uni-magdeburg.de/kmd/DataSciR/](https://brain.cs.uni-magdeburg.de/kmd/DataSciR/)
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: center, middle, inverse
+
+# Intro to R and RStudio
+
+---
+
+## What is `R`?
+
+.pull-left70[
+- **statistical programming language** with focus on **reproducible data analysis**
+- **free, open source** and **available for every major OS**
+- since January 2017 more than **10,000 packages** available
+  - various **statistics** and **machine learning** packages
+  - elaborate packages to create aesthetically appealing **graphics** and **charts**
+  - high-quality packages with comprehensive documentation on **CRAN**
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/01-R-Fundamentals//R_logo.svg.png" width="100%" /&gt;
+
+]
+
+- **reproducible &amp; automated report creation** with **R Markdown** 
+- **interactive web applications** with **shiny**
+- **end-to-end** programming language with functionalities for data preparation, data analysis and presentation of results in one single system
+- **RStudio** as IDE tailored to `R` for **interactive data analysis** and **statistical programming**
+- **active community**: [Twitter](https://twitter.com/hashtag/rstats), 
+[stackoverflow](https://stackoverflow.com/questions/tagged/r), 
+[RStudio Community](https://community.rstudio.com/), 
+[R Bloggers](https://www.r-bloggers.com/), 
+[R Weekly](https://rweekly.org/)
+
+---
+
+## Stack overflow traffic growth by programming language 
+
+&lt;img src="figures/01-R-Fundamentals//r_growth.png" width="90%" /&gt;
+
+.footnote[
+
+Figure: David Robinson. ["The Impressive Growth of R"](https://stackoverflow.blog/2017/10/10/impressive-growth-r/). Stackoverflow.com. Accessed 06.07.2018. 
+
+]
+
+???
+
+- left: general traffic (x) and growth from 2016 to 2017 (y)
+- right: for R 2016 traffic (x) vs. 2017 traffic (y) by industry
+
+---
+
+## Packages on CRAN
+
+&lt;img src="figures/01-R-Fundamentals//r_cran_2.png" width="85%" /&gt;
+
+.footnote[
+
+https://gist.github.com/daroczig/3cf06d6db4be2bbe3368
+]
+
+---
+
+## Popularity of `R`
+
+.pull-left60[
+
+
+&lt;img src="figures/01-R-Fundamentals//redmonk_lang_rankings_2019.png" width="100%" /&gt;
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/01-R-Fundamentals//ieee_ranking_2019.png" width="100%" /&gt;
+
+
+]
+
+.footnote[
+
+Left figure: Stephen O'Grady. ["The RedMonk Programming Language Rankings: Q3 2019"](https://redmonk.com/sogrady/2019/07/18/language-rankings-6-19/). redmonk.com. Accessed 20.02.2020.
+
+Right figure: ["Interactive: The Top Programming Languages 2019"](https://spectrum.ieee.org/static/interactive-the-top-programming-languages-2016). IEEE SPECTRUM. Accessed 20.02.2020.  
+
+]
+
+---
+
+
+##  Brief history of `R`
+
+.pull-left60[
+
+- developed by the statisticians **R**oss Ihaka and **R**obert Gentleman in Auckland, NZ
+- **first release in 1994**
+- designed as **open-source alternative to expensive proprietary systems** like SAS, SPSS, MATLAB, etc.
+- until 2007 little usage of outside of universities, partly because of steep learning curve
+- since then remarkable increase in popularity due to:
+  - development of **packages for a broader audience**, especially the **[`tidyverse`](https://www.tidyverse.org/) packages** `dplyr`, `ggplot2`, `tidyr`, etc. (Hadley Wickham, et al.), [`knitr`](https://yihui.name/knitr/) and [`shiny`](https://shiny.rstudio.com/)
+  - **RStudio** as company that developed the eponymous IDE and has dedicated to open-source software development&lt;sup&gt;*&lt;/sup&gt;
+  - `R` has considerably benefited from the general **data science &amp; AI boom** (similar to other languages like Python) 
+
+&amp;nbsp;
+
+.font60[
+- Blog post reviewing the history of `R`, its positioning as a data analysis system and as a programming language: Roger Peng. ["Teaching R to New Users - From tapply to the Tidyverse"](https://simplystatistics.org/2018/07/12/use-r-keynote-2018/). Simplystatistics.org. Accessed 17.07.2018.
+- &lt;sup&gt;*&lt;/sup&gt;Blog post by the RStudio CEO announcing the company to become 
+a "public benefit coorporation". J.J. Allaire. [RStudio, PBC](https://blog.rstudio.com/2020/01/29/rstudio-pbc). blog.rstudio.com. Accessed 20.02.2020.
+]
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/01-R-Fundamentals//r_history.png" width="100%" /&gt;
+
+&lt;small&gt;Figure sources: [1](https://thermanuals.wordpress.com/r-program/66-2/), [2](https://osf.io/69gub/wiki/home/), [3](https://twitter.com/hadleywickham), [4](https://rstudio.com/slides/rstudio-pbc/#32)&lt;/small&gt;
+
+]
+
+
+
+???
+
+- especially for people that used SAS, Stata, SPSS, Excel who wanted to build custom tools on top of what was available
+- R provided flexiblitity and the ability to program whatever one needed
+- however, R was not a great system for doing data analysis
+- other tools had been designed as interactive data analysis environments and had simple ways to do complex data wrangling
+- developed by statisticians -&gt; sometimes weird syntax
+- hard to adopt for people without prior knowledge of the other tools
+- Hadley: COPSS Presidents' Award in 2019 (Nobelpreis der Statistik)
+- RStudio PBC: self-commitment to develop open-source software in the long run
+
+---
+
+## RStudio
+
+.pull-left70[
+
+- open source _Integrated Development Environment_ (IDE) for `R`
+- first release in 2011
+- two major versions: **RStudio Desktop** and **RStudio Server**
+- Download &amp; Installation of `R` and RStudio:
+  - [`R`](https://www.r-project.org/)
+  - [RStudio](https://www.rstudio.com/products/rstudio/download/)
+  - optional for Windows: [Rtools](https://cran.r-project.org/bin/windows/Rtools/)
+]
+
+.pull-right30[
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_logo.png" width="100%" /&gt;
+
+]
+
+---
+
+## RStudio IDE 
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_ide_components.png" width="90%" /&gt;
+
+???
+
+https://www.tu-chemnitz.de/hsw/psychologie/professuren/method/homepages/mb/01_Einf%C3%BChrung_RStudio_beta.pdf
+
+---
+
+## Console
+
+.pull-left[
+
+- run commands with **Enter↵**
+
+&lt;img src="figures/01-R-Fundamentals//enter.gif" width="40%" /&gt;
+
+- auto completion with **Tab ↹**
+
+&lt;img src="figures/01-R-Fundamentals//tab.gif" width="55%" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+- restore previous commands with **↑**
+- show list of previous commands with **Ctrl**+**↑**
+
+&lt;img src="figures/01-R-Fundamentals//strg_hoch.gif" width="70%" /&gt;
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_console.png" width="375" style="display: block; margin: auto;" /&gt;
+
+]
+
+&lt;!-- - Titel zeigt aktuelles **working directory** --&gt;
+&lt;!-- - Langandauernde Berechnungen abbrechen mit Klick auf **STOP** --&gt;
+
+.footnote[
+
+- [RStudio Console Documentation](https://support.rstudio.com/hc/en-us/articles/200404846); 
+- RStudio IDE-Shortcuts: _Tools_ `\(\rightarrow\)` _Keyboard Shortcuts Help_
+
+]
+
+---
+
+## Code editor
+
+.pull-left60[
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_code_editor.png" width="100%" /&gt;
+
+- edit `R` scripts (&amp;asymp; text document with successive commands)
+- similar to a normal text editor
+- create new script with _File_ `\(\rightarrow\)` _New File_ `\(\rightarrow\)` _R Script_
+- unsaved changes are highlighted by red color and an asterisk at the end of the file name 
+- run the current selection or the current line (where the cursor is) wiht **Ctrl**+**Enter↵**
+- run an entire script with **Ctrl**+**⇧Shift**+**Enter↵**
+
+]
+
+.pull-right40[
+
+![](figures/01-R-Fundamentals//source.gif)&lt;!-- --&gt;
+
+]
+
+---
+
+## Environment &amp; History
+
+.pull-left[
+
+**Environment**-Tab enthält Objekte der aktuellen Environment = **Workspace**
+
+&lt;img src="figures/01-R-Fundamentals//environment.png" width="375" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+The **History** tab contains previously executed commands-
+
+&lt;img src="figures/01-R-Fundamentals//history.png" width="375" /&gt;
+
+]
+
+---
+
+## Packages
+
+.content-box-blue[
+
+A **package** is a **collection of functions, datasets and documentation** that extends 
+the capabilities of base R.
+
+]
+
+Install and load packages using the "Packages" tab:
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_package_installer.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Help
+
+Show the documentation of a function
+
+
+&lt;img src="figures/01-R-Fundamentals//help.png" width="400px" /&gt;
+
+---
+
+class: center, middle, inverse
+
+# The Language
+
+---
+
+## Basic commands
+
+`R` can be used just like a normal calculator:
+
+.pull-left[
+
+
+```r
+3 + 4
+```
+
+```
+## [1] 7
+```
+
+```r
+1 / 2  - 0.5
+```
+
+```
+## [1] 0
+```
+
+```r
+2^3
+```
+
+```
+## [1] 8
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```r
+(100 * 2 - 12^2) / 7 * 5 + 2
+```
+
+```
+## [1] 42
+```
+
+```r
+8 / 2 * (2 + 2)
+```
+
+```
+## [1] 16
+```
+
+```r
+2 * pi
+```
+
+```
+## [1] 6.283185
+```
+
+]
+
+--
+
+&amp;#x1F914; _"How can I see a complete list of &lt;u&gt;all&lt;/u&gt; available arithmetic operations?"_
+
+???
+
+- Why does each console output start with "[1]"?
+- ?Constants
+
+---
+
+## Help
+
+Show the documentation of a function, dataset or topic:
+
+.pull-left[
+
+
+```r
+?mean # or...
+help(mean) # or...
+# ...place the cursor within the 
+# function name and press F1
+```
+
+]
+
+.pull-right[
+
+&lt;img src="figures/01-R-Fundamentals//help.png" width="100%" /&gt;
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 1
+
+You can run `?Arithmetic` to see a complete list of arithmetic operations.
+
+&lt;img src="figures/01-R-Fundamentals//arithmetic.png" width="350px" /&gt;
+
+--
+
+Use the help to learn about R's built-in **constants** like `pi`.  
+How many built-in constants are available?
+
+<div class="countdown" id="timer_5e885c64" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">02</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## Basic commands
+
+You can assign a name to a vector or function using `&lt;-` or `=`:
+
+
+```r
+x &lt;- 3
+```
+
+
+```r
+y = 4
+```
+
+
+```r
+x + y
+```
+
+```
+## [1] 7
+```
+
+.footnote[
+.content-box-yellow[
+&amp;#x1F9D0; Both `&lt;-` and `=` can be used for object name assignment. 
+Only `=` can be used to assign function arguments, e.g. `mean(x = c(3,6,9))`. 
+Thus, for better code readability, it is recommended to use `&lt;-` to assign a name 
+to an object. [1](https://google.github.io/styleguide/Rguide.html) 
+[2](https://colinfay.me/r-assignment/)
+]
+]
+
+---
+
+## Comments
+
+
+```r
+# This is a comment. 
+# Everything after `#` in a line won't get executed. 
+123 + 321 # Everything until `#` gets executed.
+```
+
+```
+## [1] 444
+```
+
+--
+
+.footnote[
+&lt;!-- &amp;#x1F4A8; **Ctrl**+**⇧Shift**+**Enter↵** --&gt;
+&amp;#x1F4A8; To comment one or multiple lines, mark the lines and press **Ctrl**+**⇧Shift**+**c**.
+]
+
+---
+
+## Creating vectors
+
+**Vectors** can be created with `c()`, `:`, `seq()` or `rep()`.
+
+.pull-left[
+
+
+```r
+# "C"ombine elements to a vector
+c(1,2,3)
+```
+
+```
+## [1] 1 2 3
+```
+
+
+```r
+# integer sequence
+1:3
+```
+
+```
+## [1] 1 2 3
+```
+
+
+```r
+# sequence with an increment of 0.5
+seq(1, 3, by = 0.5) 
+```
+
+```
+## [1] 1.0 1.5 2.0 2.5 3.0
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```r
+# repeat the whole vector
+rep(1:3, times = 2)
+```
+
+```
+## [1] 1 2 3 1 2 3
+```
+
+
+```r
+# repeat each element of the vector
+rep(1:3, each = 2)
+```
+
+```
+## [1] 1 1 2 2 3 3
+```
+
+]
+
+--
+
+.footnote[
+.content-box-yellow[
+
+&amp;#x1F9D0; There is no special data structure for scalars in `R`. 
+Scalars are simply vectors of length 1.
+
+]
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 2
+
+We saw that the `rep(x, ...)` function can be used with different arguments:
+
+- `times`: number of times to repeat the whole vector
+- `each`: number of times to repeat each element
+- `length.out`: the desired length of the output vector
+
+--
+
+Read the documentation of `?seq` and write a command that yields the same output 
+as 
+
+
+```r
+seq(0, 3, by = 0.75)
+```
+
+```
+## [1] 0.00 0.75 1.50 2.25 3.00
+```
+
+while still using `seq()` but with a different argument than `by`.
+
+---
+
+## Environments and workspace
+
+Every object is stored inside an **environment**. 
+The **global environment** is the interactive workspace in RStudio.
+
+.pull-left[
+
+The RStudio tab _Environment_ shows all objects inside the **current** 
+environment. 
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_environment.png" width="100%" /&gt;
+]
+
+--
+
+.pull-right[
+
+Alternatively, you can use `ls()` to list all objects within the current 
+environment.
+
+
+```r
+ls()
+```
+
+
+```
+## [1] "x" "y"
+```
+
+Remove an object inside the current environment with `rm()`.
+
+
+```r
+# remove a single object
+rm(y)
+# remove all objects
+rm(list = ls())
+ls()
+```
+
+
+```
+## character(0)
+```
+
+]
+
+---
+
+## Working directory
+
+The **working directory** is the directory where `R` starts to search for 
+files to read and write.  
+
+The current working directory is shown at the top of the console.
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_working_dir.png" width="45%" /&gt;
+
+Alternatively, the current working directory can be printed in the console with 
+`getwd()`.
+
+
+```r
+getwd()
+```
+
+
+```
+## [1] "C:/Users/ulini/Dropbox/KMD/Data_Science_with_R/DataSciR20"
+```
+
+
+You can change the working directory with `setwd()`.
+
+---
+
+class: middle
+
+&amp;#x1F914; _"What is a good way of setting up an efficient folder structure 
+within my working directory?"_
+
+--
+
+It is good practice to store **all** files of a data science project in a 
+dedicated directory, including raw data, `R` scripts, results, figures and 
+reports.
+
+--
+
+## &amp;rarr; RStudio projects &amp;#x1F973;
+
+---
+
+## RStudio Projects
+
+.pull-left60[
+
+Create a new RStudio project:  
+File &amp;rarr; New Project &amp;rarr; New Directoy &amp;rarr; Empty Project
+
+The working directory corresponds to the root directory of the project 
+(where the `.Rproj` file is). All project files should be organized in 
+subfolders of the project's root directory. In the code, the files should 
+be referenced with **relative paths**. 
+
+]
+
+.pull-right40[
+
+![](figures/01-R-Fundamentals//new_rstudio_project.gif)&lt;!-- --&gt;
+
+&lt;img src="figures/01-R-Fundamentals//new_project.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.footnote[
+
+Further reading:
+
+- best practices: [RStudio Projects](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects)
+- chapter [Where does your analysis live?](http://r4ds.had.co.nz/workflow-projects.html#where-does-your-analysis-live) in [R for Data Science](http://r4ds.had.co.nz/)
+- [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+
+]
+
+???
+
+- file extension `.Rproj`: text file with project-specific settings
+- hidden folder `.Rproj.user`: project-specific temporary files (_better not touch it_)
+
+---
+class: middle
+
+A basic folder structure could look like so:
+
+
+
+
+```
+my_project
++-- data
+|   +-- processed
+|   \-- raw
++-- my_project.Rproj
++-- output
++-- R
++-- README.md
+\-- run_analyses.R
+```
+
+???
+
+also helpful: https://chrisvoncsefalvay.com/2018/08/09/structuring-r-projects/
+
+---
+
+## The `R` ecosystem
+
+The CRAN version of `R` (called **base R**) contains essential functions and 
+multiple toy datasets.
+
+At each startup of an `R` session, the following packages are loaded 
+(including `base`):
+
+
+```
+## [1] "datasets"  "utils"     "grDevices" "graphics"  "stats"     "methods"
+```
+
+--
+
+.footnote[
+.content-box-yellow[
+
+&amp;#x1F9D0; [CRAN](https://cran.rstudio.com/), the _The Comprehensive R Archive Network_, consists of 
+multiple worldwide mirror servers, used to distribute `R` and `R` packages.
+
+]
+]
+
+---
+
+## R packages &amp;#x1F4E6;
+
+Base `R` contains functions that are needed by the majority of users.
+
+Additional functions can be used on demand by loading **packages**.
+
+--
+
+.content-box-blue[
+
+A **package** is a **collection of functions, datasets and documentation** that extends 
+the capabilities of base R.
+
+]
+
+---
+
+## Downloading, installing and loading packages
+
+
+```r
+# A package has to be installed only once, but...
+install.packages("dplyr") # install package "dplyr" from CRAN
+# ...it has to be loaded in each session where its functions/datasets are called.
+library("dplyr")
+```
+
+--
+
+Alternatively, you can install and load packages in RStudio using the Packages 
+tab.
+
+&lt;img src="figures/01-R-Fundamentals//rstudio_package_installer.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+--
+
+.footnote[
+To install a package that is hosted on GitHub use `devtools::install_github("&lt;REPOSITORY&gt;")`.
+]
+
+---
+
+## Loading multiple packages &amp;#x1F4CE;
+
+In some situations, you have to be careful with the order in which you load packages.
+
+.pull-left[
+
+&lt;center&gt;.font150[&amp;#x1F60A;]&lt;/center&gt;
+
+
+```r
+library("Hmisc")
+summarize(iris$Sepal.Width, iris$Species, mean)
+```
+
+
+```
+##   iris$Species iris$Sepal.Width
+## 1       setosa            3.428
+## 2   versicolor            2.770
+## 3    virginica            2.974
+```
+
+]
+
+.pull-right[
+
+&lt;center&gt;.font150[&amp;#x1F62D;]&lt;/center&gt;
+
+
+```r
+library("Hmisc")
+library("dplyr")
+summarize(iris$Sepal.Width, iris$Species, mean)
+```
+
+
+```
+## Error in UseMethod("summarise_"): no applicable
+## method for 'summarise_' applied to an object of
+## class "c('double', 'numeric')"
+```
+
+]
+
+--
+
+`R` uses the **search path** to look up function in the following order:
+
+1. global environment
+1. last loaded package
+1. second-last loaded package
+1. third-last loaded package
+1. ...
+1. base `R` packages like `stats`, `utils` and `base`
+
+When a package is loaded, it gets inserted into the second position of 
+the search path, directly after the global environment. All other packages 
+are moved one position backwards.
+
+???
+
+- search path: list of all packages of the current R session
+
+---
+
+## Namespace conflicts
+
+In case of a **namespace conflict**, use the `::` (pronounced: _double colon_) 
+operator to use objects that were **masked** by a package that were loaded 
+later on.
+
+--
+
+
+```r
+library("Hmisc")
+library("dplyr")
+Hmisc::summarize(iris$Sepal.Width, iris$Species, mean)
+```
+
+```
+##   iris$Species iris$Sepal.Width
+## 1       setosa            3.428
+## 2   versicolor            2.770
+## 3    virginica            2.974
+```
+
+---
+
+## Namespace conflicts
+
+&amp;#x1F914; _"Which functions are currently masked?"_
+
+
+```r
+conflicts()
+```
+
+```
+##  [1] "src"         "summarize"   "enexpr"      "enexprs"     "enquo"       "enquos"     
+##  [7] "ensym"       "ensyms"      "expr"        "quo"         "quo_name"    "quos"       
+## [13] "sym"         "syms"        "vars"        "filter"      "lag"         "body&lt;-"     
+## [19] "format.pval" "intersect"   "kronecker"   "Position"    "setdiff"     "setequal"   
+## [25] "union"       "units"
+```
+
+--
+
+&amp;#x1F914; _"How can I inspect the search path?"_
+
+
+```r
+search()
+```
+
+```
+##  [1] ".GlobalEnv"        "package:dplyr"     "package:Hmisc"     "package:ggplot2"  
+##  [5] "package:Formula"   "package:survival"  "package:lattice"   "package:countdown"
+##  [9] "package:stats"     "package:graphics"  "package:grDevices" "package:utils"    
+## [13] "package:datasets"  "package:methods"   "Autoloads"         "package:base"
+```
+
+.footnote[
+
+Further reading:
+
+- Section ["Search Path"](http://r-pkgs.had.co.nz/namespace.html#search-path) from: Hadley Wickham. ["R Packages"](http://r-pkgs.had.co.nz). O'Reilly Media, 2015.
+
+]
+
+---
+
+## Names
+
+Object names must by **syntactically valid**. Important requirements include:
+
+- only consists of letters, digits, `_` and `.`,
+- must begin with a letter or with `.` _not_ followed by a digit
+- example: `.7up` ist not valid, but `.sevenup` is
+- must not be one of the reserved words, e.g. `if`, `else`, `for`, `TRUE`, `NULL`...
+
+--
+
+.content-box-green[
+
+It is good practice to use `_` (**snake_case** &amp;#x1F40D;) for names consisting of 
+multiple words. You are free to use `.`, but please mind consistency. 
+
+]
+
+.pull-left[
+
+
+```r
+# good
+day_one
+day_1
+
+# bad
+first_day_of_the_month # too long
+djm1 # too short
+DayOne # rather start with lowercase letter
+dayone # rather separated words
+```
+
+]
+
+.pull-right[
+
+.content-box-yellow[
+
+- `?make.names` describes all requirements for syntactically valid names
+- `?reserved` lists all reserved words in `R`'s parser.
+
+]
+
+]
+
+---
+
+## Calling functions
+
+.left-column[
+
+Basic function call scheme:
+
+
+```r
+some_function(arg_1 = val_1, 
+              arg_2 = val_2, 
+              ...)
+```
+
+&lt;img src="figures/01-R-Fundamentals//mean_help.png" width="95%" /&gt;
+
+]
+
+.right-column[
+
+Example: the `mean()` function:
+
+- `x` is the only mandatory argument
+- arguments `trim` and `na.rm` have default values
+
+
+```r
+x &lt;- 1:10
+mean(x) # trim = 0 and na.rm = FALSE
+```
+{{content}}
+
+]
+
+--
+
+
+```
+## [1] 5.5
+```
+{{content}}
+
+--
+
+
+```r
+x &lt;- c(1:10, NA)
+mean(x)
+```
+{{content}}
+
+&lt;!-- # Mean of a vector with &gt;=1 NA's yields NA --&gt;
+
+--
+
+
+```
+## [1] NA
+```
+{{content}}
+
+--
+
+
+```r
+mean(x, na.rm = TRUE) # NA's will be ignored
+```
+
+```
+## [1] 5.5
+```
+{{content}}
+
+--
+
+
+```r
+mean(x, TRUE) # match unnamed args to their position
+```
+{{content}}
+
+--
+
+
+```
+## Error in mean.default(x, TRUE): 'trim' must be numeric of length one
+```
+{{content}}
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 3
+
+Assume you created a vector `y` as follows: 
+
+
+```r
+y &lt;- c(NA, 1:10, NA)
+```
+
+The following code gives an error. Correct it to compute the arithmetic mean of
+`y`:
+
+
+```r
+mean(y = y, na.mr = TRUE) 
+```
+
+```
+## Error in mean.default(y = y, na.mr = TRUE): argument "x" is missing, with no default
+```
+
+<div class="countdown" id="timer_5e885d00" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">01</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">30</span></code>
+</div>
+
+---
+
+## Basic vector operations
+
+
+```r
+(v &lt;- c(5, 2, 9, 1, 6, 2, 4, 5, 5, 1))
+```
+
+```
+##  [1] 5 2 9 1 6 2 4 5 5 1
+```
+
+Sort the elements of a vector with `sort()`:
+
+
+```r
+sort(v) #  order() returns the order of the values as vector indices
+```
+
+```
+##  [1] 1 1 2 2 4 5 5 5 6 9
+```
+
+--
+
+Unique values of a vector with `unique()`:
+
+
+```r
+unique(v)
+```
+
+```
+## [1] 5 2 9 1 6 4
+```
+
+--
+
+Continguency tables with `table()`:
+
+
+```r
+table(v)
+```
+
+```
+## v
+## 1 2 4 5 6 9 
+## 2 2 1 3 1 1
+```
+
+---
+
+## Vectors in `R`
+
+.pull-left60[
+
+In `R`, there exist 2 vector types: **atomic vectors** and **lists**. 
+
+Lists are recursive vectors, i.e., lists can contain other lists.
+
+An atomic vector is a sequence of elements of the same data type. 
+
+The most important atomic data types are:
+
+- `logical`: `FALSE` or `TRUE`
+- `integer`: whole number, e.g. `5L`
+- `double`: floating-point number, e.g. `3.4`
+- `character`: character string, e.g. `"DataSciR"`
+]
+
+
+.pull-right40[
+
+&lt;img src="figures/01-R-Fundamentals//data-structures-overview.png" width="450px" /&gt;
+
+]
+
+.footnote[Figure: Hadley Wickham and Garrett Grolemund. _[R for Data Science](http://r4ds.had.co.nz/)_. O'Reilly, 2017.]
+
+---
+
+## Vectors in `R`
+
+Vectors have two major properties: **type** and **length**.
+
+
+```r
+x &lt;- 1:5
+typeof(x)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+length(x)
+```
+
+```
+## [1] 5
+```
+
+---
+
+
+## Vectors in `R`
+
+Naming and renaming of vector elements:
+
+
+```r
+names(x) &lt;- letters[1:5] # same as x &lt;- c(a = 1, b = 2, c = 3, d = 4, e = 5)
+x
+```
+
+```
+## a b c d e 
+## 1 2 3 4 5
+```
+
+```r
+typeof(x)
+```
+
+```
+## [1] "integer"
+```
+
+--
+
+Access vector elements:
+
+.pull-left[
+
+
+```r
+x[2] # the second element
+```
+
+```
+## b 
+## 2
+```
+
+
+
+```r
+x["b"] # the element named "b" 
+```
+
+```
+## b 
+## 2
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```r
+x[-2] # all elements but the second
+```
+
+```
+## a c d e 
+## 1 3 4 5
+```
+
+
+
+```r
+x[-(3:5)] # all elements but the third to fifth
+```
+
+```
+## a b 
+## 1 2
+```
+
+]
+
+---
+
+## Vectors in `R`
+
+
+```r
+x
+```
+
+```
+## a b c d e 
+## 1 2 3 4 5
+```
+
+.pull-left[
+
+
+```r
+x[c(1,5)] # first and fifth element
+```
+
+```
+## a e 
+## 1 5
+```
+{{content}}
+
+]
+
+--
+
+
+```r
+x == 2 # equal to 2? (attention: == vs. =)
+```
+
+```
+##     a     b     c     d     e 
+## FALSE  TRUE FALSE FALSE FALSE
+```
+{{content}}
+
+--
+
+
+```r
+which(x == 2) # returns indices
+```
+
+```
+## b 
+## 2
+```
+
+--
+
+.pull-right[
+
+```r
+x[x == 2] # returns values
+```
+
+```
+## b 
+## 2
+```
+{{content}}
+]
+
+--
+
+
+```r
+x &lt; 5
+```
+
+```
+##     a     b     c     d     e 
+##  TRUE  TRUE  TRUE  TRUE FALSE
+```
+{{content}}
+
+--
+
+
+```r
+x[x %in% c(1,4,5)] # elements == 1, 4 OR 5
+```
+
+```
+## a d e 
+## 1 4 5
+```
+
+---
+
+## Vector coercion &amp;#x1F528;
+
+.content-box-blue[
+
+A vector must be homogenous with respect to the type of its elements. 
+In case elements are of mixed types, `R` tries to convert the elements into the 
+**most flexible** type (=**vector coercion**) of its elements. 
+As a result, creating a vector with 
+elements of mixed types does not yield an error.
+
+]
+
+--
+
+.pull-left[
+
+**Order of types**, from _least flexible_ to _most flexible_:
+
+1. `logical` (`FALSE`, `TRUE`)
+2. `integer` (`1L`, `2L`)
+3. `double` (`0.51`, `3.19`)
+4. `character` (`"abc"`, `"xz"`)
+
+]
+
+--
+
+.pull-right[
+
+```r
+x &lt;- c(1, 4, 1, 3, 2)
+typeof(x) # why not integer?
+```
+
+```
+## [1] "double"
+```
+{{content}}
+
+]
+
+--
+
+
+```r
+x &lt;- c(x, "4") 
+x
+```
+
+```
+## [1] "1" "4" "1" "3" "2" "4"
+```
+
+```r
+typeof(x)
+```
+
+```
+## [1] "character"
+```
+
+--
+
+.content-box-green[
+
+In contrast to atomic vectors, lists can be used to combine elements of 
+different types.
+
+]
+
+---
+
+## Implicit coercion
+
+Functions that require a specific vector type use implicit coercion:
+
+
+```r
+# Draw a random sample with replacement from c(FALSE, TRUE) 
+lgl_vec &lt;- sample(c(FALSE, TRUE), size = 10, replace = TRUE)
+lgl_vec
+```
+
+```
+##  [1] FALSE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+```
+
+```r
+sum(lgl_vec) # sum() requires numeric type ---&gt; FALSE -&gt; 0, TRUE -&gt; 1
+```
+
+```
+## [1] 5
+```
+
+```r
+mean(lgl_vec) # mean() requires numeric type ---&gt;  FALSE -&gt; 0, TRUE -&gt; 1
+```
+
+```
+## [1] 0.5
+```
+
+--
+
+.pull-left60[
+
+
+```r
+paste("this", "is", "a", "test") # concatenate strings
+```
+
+```
+## [1] "this is a test"
+```
+
+```r
+paste(c("this", "is", "a", "test"), collapse = " ")
+```
+
+```
+## [1] "this is a test"
+```
+
+]
+
+.pull-right40[
+
+
+```r
+paste(lgl_vec, collapse = " ")
+```
+
+&amp;#x1F914; _What is the result?_
+{{content}}
+
+]
+
+--
+
+
+```
+## [1] "FALSE FALSE FALSE TRUE TRUE FALSE TRUE TRUE FALSE TRUE"
+```
+
+???
+
+- collapse: character string to separate the results
+
+---
+
+## Explicit coercion
+
+
+```r
+x &lt;- c(1, 4, 1, 3, 2, "4.0")
+x
+```
+
+```
+## [1] "1"   "4"   "1"   "3"   "2"   "4.0"
+```
+
+Convert a `character` vector into a `double` vector (explicit coercion):
+
+
+```r
+as.numeric(x[3])
+```
+
+```
+## [1] 1
+```
+
+--
+
+.content-box-green[
+
+Besides `as.numeric()` explicit coercion can be realized with 
+`as.logical()`, `as.integer()`, `as.double()` and `as.character()`.
+
+]
+
+---
+
+## Explicit coercion
+
+One of `R`'s biggest strengths is that most functions are  **vectorized**.
+
+The following code 
+
+
+```r
+c(
+  as.numeric(x[1]),
+  as.numeric(x[2]),
+  as.numeric(x[3]),
+  as.numeric(x[4]),
+  as.numeric(x[5]),
+  as.numeric(x[6])
+)
+```
+
+can be compactly written as 
+
+
+```r
+as.numeric(x)
+```
+
+```
+## [1] 1 4 1 3 2 4
+```
+
+---
+
+class: middle, exercise-blue
+
+## Quiz
+
+Can you guess the output of the following code?
+
+
+```r
+x &lt;- c(1, 4, 1, 3, 2, "4,0") # note: , instead of .
+as.numeric(x)
+```
+
+--
+
+
+```
+## Warning: NAs introduced by coercion
+```
+
+```
+## [1]  1  4  1  3  2 NA
+```
+
+???
+
+This command yields a **warning**. `R` does not know how to convert `"4,0"` 
+into a number. This element is replaced with `NA`.
+
+---
+
+## Missing Values &amp;#x274C;
+
+**Missing values** or **unknown values** are represented as `NA` (not applicable). 
+
+These special values can be identified with `is.na()`.
+
+
+```r
+is.na(as.numeric(x))
+```
+
+```
+## [1] FALSE FALSE FALSE FALSE FALSE  TRUE
+```
+
+--
+
+Further special values besides `NA` include:
+
+- `NaN` (not a number): e.g. `sqrt(-2)` `\(\rightarrow\)` `is.nan()`
+- `Inf`: e.g. `1/0` `\(\rightarrow\)` `is.infinite()`
+- `NULL`: absence of a whole vector `\(\rightarrow\)` `is.null()`
+
+---
+
+## Vector recycling &amp;#x267B;&amp;#xFE0F;
+
+In addition to the implicit type coercion, `R` tries to match the lengths of 
+vectors so that they are compatible. 
+
+**Vector recycling** means that the elements of the shorter of two vectors are 
+replicated so that the lengths of the two vectors are equal.
+
+.pull-left[
+
+
+```r
+1:6 + 1:3
+```
+
+```
+## [1] 2 4 6 5 7 9
+```
+{{content}}
+]
+
+--
+
+
+```r
+1:5 + 1:3
+```
+
+&amp;#x1F914; _What is the result?_
+
+--
+
+.pull-right[
+
+
+```r
+1:5 + 1:3
+```
+
+```
+## Warning in 1:5 + 1:3: longer object length is
+## not a multiple of shorter object length
+```
+
+```
+## [1] 2 4 6 5 7
+```
+{{content}}
+]
+
+--
+
+Equivalent with:
+
+
+```r
+1:5 + c(1:3, 1, 2)
+```
+
+```
+## [1] 2 4 6 5 7
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 4
+
+The following formula can be used to convert temperature measurements from 
+degree Fahrenheit to degree Celsius:
+
+`C = 5/9 * (F - 32)`
+
+Take advantage of vectorisation and vector recycling by converting the following 
+temperature measurements from degree Fahrenheit to degree Celsius with just 
+one line of code: `45, 77, 20, 19, 101, 120, 212`
+
+<div class="countdown" id="timer_5e885b67" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+???
+
+5/9 * (c(45, 77, 20, 19, 101, 120, 212) - 32)
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 5
+
+Use the vector `c(2,4,6)`, the vector `c(1,2)` and the function `rep()` to 
+create the following output:
+
+2, 4, 6, 4, 8, 12
+
+<div class="countdown" id="timer_5e885d87" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+???
+
+rep(c(2,4,6), 2) * c(1,2)
+rep(c(2,4,6), 2) * rep(c(1,2), each = 3)
+
+---
+
+## Lists 
+
+A **list** is a **recursive vector**, because it can contain other lists.   
+They can be used to represent hierarchical or tree-like structures.
+
+--
+
+.pull-left[
+
+Create a list with `list()`:
+
+
+```r
+x &lt;- list(1:5)
+x
+```
+
+```
+## [[1]]
+## [1] 1 2 3 4 5
+```
+
+```r
+y &lt;- list(1, 2, 3, 4, 5)
+y
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 2
+## 
+## [[3]]
+## [1] 3
+## 
+## [[4]]
+## [1] 4
+## 
+## [[5]]
+## [1] 5
+```
+
+]
+
+--
+
+.pull-right[
+
+Inspect the **str**ucture of a list with `str()`:
+
+
+```r
+str(y)
+```
+
+```
+## List of 5
+##  $ : num 1
+##  $ : num 2
+##  $ : num 3
+##  $ : num 4
+##  $ : num 5
+```
+
+]
+
+
+---
+
+## Lists
+
+A list is a vector that can contain **elements of different types**:
+
+
+```r
+x &lt;- list(TRUE, 1L, 1.23, "u")
+str(x)
+```
+
+```
+## List of 4
+##  $ : logi TRUE
+##  $ : int 1
+##  $ : num 1.23
+##  $ : chr "u"
+```
+
+--
+
+Lists can contain other lists:
+
+
+```r
+x &lt;- list(list(TRUE, 1L), list(1.23, "u"))
+str(x)
+```
+
+```
+## List of 2
+##  $ :List of 2
+##   ..$ : logi TRUE
+##   ..$ : int 1
+##  $ :List of 2
+##   ..$ : num 1.23
+##   ..$ : chr "u"
+```
+
+---
+
+## List subsetting
+
+There are 3 ways to access list elements:
+
+- `[]` extracts a **sublist**. The results is **always** a list,
+
+--
+
+- `[[]]` exctracts a **single element** and removes one level of hierarchy,
+
+--
+
+- `$` extracts a **named element**.
+
+--
+
+.pull-left[
+
+
+```r
+x &lt;- list(
+  list(TRUE, 1L), 
+  list(1.23, "u")
+)
+str(x)
+```
+
+```
+## List of 2
+##  $ :List of 2
+##   ..$ : logi TRUE
+##   ..$ : int 1
+##  $ :List of 2
+##   ..$ : num 1.23
+##   ..$ : chr "u"
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```r
+str(x[1])
+```
+
+```
+## List of 1
+##  $ :List of 2
+##   ..$ : logi TRUE
+##   ..$ : int 1
+```
+
+```r
+str(x[[1]])
+```
+
+```
+## List of 2
+##  $ : logi TRUE
+##  $ : int 1
+```
+
+```r
+str(x[[1]][[1]])
+```
+
+```
+##  logi TRUE
+```
+
+
+]
+
+---
+
+## List subsetting
+
+Compare list subsetting to this unusual pepper shaker:
+
+&lt;img src="figures/01-R-Fundamentals//list_subsetting.png" width="100%" /&gt;
+
+.footnote[
+
+Figure adapted from: Hadley Wickham and Garrett Grolemund. _["R for Data Science"](http://r4ds.had.co.nz/)_. O'Reilly, 2017.
+
+]
+
+???
+
+Analogy: 
+
+- pepper corns represent a vector
+- sachet represents a list
+- shaker represents a list
+
+shaker contains multiple sachets, each of which contain pepper corns
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 6
+
+Assume the following list is given: 
+
+
+```r
+shaker &lt;- list(
+  pepper = list(
+    sachet1 = 1:154,
+    sachet2 = 1:146
+  ),
+  salt = list(sachet1 = 1:843),
+  toothpick = 1:50,
+  tabasco = TRUE
+)
+```
+
+1. Write a command that returns the corns (elements) of the second pepper sachet.
+1. Write a command that returns only the elements `"salt"` and `"tabasco"`.
+1. Rename the element `"tabasco"` to `"spicy ketchup"`.
+1. Write a command that checks whether there are more pepper corns that 
+salt corns in the shaker? (Use `length()` to get the number of corns in a sachet.)
+
+<div class="countdown" id="timer_5e885d23" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## Data Frames
+
+**Data Frame** is `R`'s data structure for a **table**.  
+A `data.frame` is a rectangular collection of data, arranged by: 
+
+- **variables** (or **columns**) and 
+- **observations** (or: **rows**). 
+
+Example: the `mtcars` dataset
+
+
+```r
+mtcars
+```
+
+
+```
+##                    mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+## Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+## Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+## Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+## Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+## Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1
+```
+
+.footnote[
+
+&gt; The data was extracted from the 1974 Motor Trend US magazine, and comprises 
+fuel consumption and 10 aspects of automobile design and performance for 32 
+automobiles (1973–74 models).
+
+]
+
+---
+
+Number of observations (rows) und variables (columns):
+
+.pull-left[
+
+
+```r
+nrow(mtcars)
+```
+
+```
+## [1] 32
+```
+
+```r
+ncol(mtcars)
+```
+
+```
+## [1] 11
+```
+
+]
+
+
+.pull-right[
+
+
+```r
+dim(mtcars)
+```
+
+```
+## [1] 32 11
+```
+
+
+]
+
+--
+
+
+```r
+head(mtcars) # first 6 rows
+```
+
+```
+##                    mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+## Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+## Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+## Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+## Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+## Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1
+```
+
+```r
+tail(mtcars) # last 6 rows
+```
+
+```
+##                 mpg cyl  disp  hp drat    wt qsec vs am gear carb
+## Porsche 914-2  26.0   4 120.3  91 4.43 2.140 16.7  0  1    5    2
+## Lotus Europa   30.4   4  95.1 113 3.77 1.513 16.9  1  1    5    2
+## Ford Pantera L 15.8   8 351.0 264 4.22 3.170 14.5  0  1    5    4
+## Ferrari Dino   19.7   6 145.0 175 3.62 2.770 15.5  0  1    5    6
+## Maserati Bora  15.0   8 301.0 335 3.54 3.570 14.6  0  1    5    8
+## Volvo 142E     21.4   4 121.0 109 4.11 2.780 18.6  1  1    4    2
+```
+
+---
+
+Useful summary functions:
+
+
+```r
+View(mtcars) # opens spreadsheet-like view in RStudio
+```
+
+
+```r
+summary(mtcars)
+```
+
+```
+##       mpg             cyl             disp             hp             drat      
+##  Min.   :10.40   Min.   :4.000   Min.   : 71.1   Min.   : 52.0   Min.   :2.760  
+##  1st Qu.:15.43   1st Qu.:4.000   1st Qu.:120.8   1st Qu.: 96.5   1st Qu.:3.080  
+##  Median :19.20   Median :6.000   Median :196.3   Median :123.0   Median :3.695  
+##  Mean   :20.09   Mean   :6.188   Mean   :230.7   Mean   :146.7   Mean   :3.597  
+##  3rd Qu.:22.80   3rd Qu.:8.000   3rd Qu.:326.0   3rd Qu.:180.0   3rd Qu.:3.920  
+##  Max.   :33.90   Max.   :8.000   Max.   :472.0   Max.   :335.0   Max.   :4.930  
+##        wt             qsec             vs               am              gear      
+##  Min.   :1.513   Min.   :14.50   Min.   :0.0000   Min.   :0.0000   Min.   :3.000  
+##  1st Qu.:2.581   1st Qu.:16.89   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:3.000  
+##  Median :3.325   Median :17.71   Median :0.0000   Median :0.0000   Median :4.000  
+##  Mean   :3.217   Mean   :17.85   Mean   :0.4375   Mean   :0.4062   Mean   :3.688  
+##  3rd Qu.:3.610   3rd Qu.:18.90   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:4.000  
+##  Max.   :5.424   Max.   :22.90   Max.   :1.0000   Max.   :1.0000   Max.   :5.000  
+##       carb      
+##  Min.   :1.000  
+##  1st Qu.:2.000  
+##  Median :2.000  
+##  Mean   :2.812  
+##  3rd Qu.:4.000  
+##  Max.   :8.000
+```
+
+---
+
+
+```r
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+
+
+---
+
+## Extracting data frame elements
+
+.content-box-blue[
+
+Data frames are built on top of regular lists. Thus, element indexing works 
+similar. An important difference between data frames and lists is that 
+a data frame requires its vectors (variables) to have the same length while 
+a list does not.
+
+`class(mtcars)` &amp;rarr; data.frame &amp;nbsp;&amp;nbsp;&amp;nbsp; 
+`typeof(mtcars)` &amp;rarr; list
+
+]
+
+--
+
+&lt;!-- ## Extracting a single element --&gt;
+
+You can extract a single element (such as a variable of a data frame) 
+with `$` or `[[]]`:
+
+
+```r
+mtcars[[1]] # [[]] using the column index
+```
+
+```
+##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4 10.4 14.7
+## [18] 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7 15.0 21.4
+```
+
+```r
+mtcars[["mpg"]] # [[]] using a character string 
+```
+
+```
+##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4 10.4 14.7
+## [18] 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7 15.0 21.4
+```
+
+```r
+mtcars$mpg # $ (without quotes!!!)
+```
+
+```
+##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4 10.4 14.7
+## [18] 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7 15.0 21.4
+```
+
+---
+
+&lt;!-- ## Extracting multiple elements --&gt;
+
+To access one or more elements, you can use `[]`:
+
+
+```r
+mtcars[c("mpg", "disp")]
+```
+
+```
+##                      mpg  disp
+## Mazda RX4           21.0 160.0
+## Mazda RX4 Wag       21.0 160.0
+## Datsun 710          22.8 108.0
+## Hornet 4 Drive      21.4 258.0
+## Hornet Sportabout   18.7 360.0
+## Valiant             18.1 225.0
+## Duster 360          14.3 360.0
+## Merc 240D           24.4 146.7
+## Merc 230            22.8 140.8
+## Merc 280            19.2 167.6
+## Merc 280C           17.8 167.6
+## Merc 450SE          16.4 275.8
+## Merc 450SL          17.3 275.8
+## Merc 450SLC         15.2 275.8
+## Cadillac Fleetwood  10.4 472.0
+## Lincoln Continental 10.4 460.0
+## Chrysler Imperial   14.7 440.0
+## Fiat 128            32.4  78.7
+## Honda Civic         30.4  75.7
+## Toyota Corolla      33.9  71.1
+## Toyota Corona       21.5 120.1
+## Dodge Challenger    15.5 318.0
+## AMC Javelin         15.2 304.0
+## Camaro Z28          13.3 350.0
+## Pontiac Firebird    19.2 400.0
+## Fiat X1-9           27.3  79.0
+## Porsche 914-2       26.0 120.3
+## Lotus Europa        30.4  95.1
+## Ford Pantera L      15.8 351.0
+## Ferrari Dino        19.7 145.0
+## Maserati Bora       15.0 301.0
+## Volvo 142E          21.4 121.0
+```
+
+---
+
+.pull-left[
+
+You can filter rows and subset variables at the same time:
+
+
+```r
+mtcars[1:3, c("mpg", "disp")]
+```
+
+```
+##                mpg disp
+## Mazda RX4     21.0  160
+## Mazda RX4 Wag 21.0  160
+## Datsun 710    22.8  108
+```
+
+]
+
+.pull-right[
+
+Alternatively, if the rows are named:
+
+
+```r
+mtcars[c("Mazda RX4", "Mazda RX4 Wag", 
+         "Datsun 710"), 
+       c("mpg", "disp")]
+```
+
+```
+##                mpg disp
+## Mazda RX4     21.0  160
+## Mazda RX4 Wag 21.0  160
+## Datsun 710    22.8  108
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 7
+
+Filter cars (rows) from `mtcars` with more than 150 HP (`hp`) and &lt;u&gt;not&lt;/u&gt; 4 gears (`gear`).
+
+
+<div class="countdown" id="timer_5e885b90" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">04</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+???
+
+
+```r
+mtcars[mtcars$hp &gt; 200 &amp; mtcars$gear != 4, ]
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 8
+
+Your workspace contains the data frame `mtcars2` which looks as follows:
+
+
+```
+##                    mpg cyl disp
+## Mazda RX4         21.0   6  160
+## Mazda RX4 Wag     21.0   6  160
+## Datsun 710        22.8   4  108
+## Hornet 4 Drive    21.4   6  258
+## Hornet Sportabout 18.7   8  360
+```
+
+Which of the following commands return the variable `cyl` as atomic vector? 
+
+1. `mtcars2[[cyl]]`
+1. `mtcars2[["cyl"]]`
+1. `mtcars2[cyl]`
+1. `mtcars2["cyl"]`
+1. `mtcars2$cyl`
+1. `mtcars2$"cyl"`
+1. `mtcars2[[2]]`
+1. `mtcars2[-c(1,3)]`
+1. `mtcars2[-c(1,3)][[1]]`
+1. `mtcars2[-c(1,3)][[2]]`
+
+
+<div class="countdown" id="timer_5e885cee" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">02</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+???
+
+2., 5., 7., 9.
+
+---
+
+## Factors
+
+A **factor** is a **vector class** built on top of an integer vector. 
+
+A **factor** vector contains predefined values, the so called **levels**.
+
+Factors are mainly used for **categorical** data.
+
+
+```r
+(gender &lt;- factor(c("m", "f", "f", "m", "m"), levels = c("f", "m", "d")))
+```
+
+```
+## [1] m f f m m
+## Levels: f m d
+```
+
+```r
+class(gender)
+```
+
+```
+## [1] "factor"
+```
+
+```r
+typeof(gender)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+levels(gender)
+```
+
+```
+## [1] "f" "m" "d"
+```
+
+---
+
+## Factors
+
+A values that is not an element of the set of levels must not be used:
+
+
+```r
+gender[2] &lt;- "male"
+```
+
+```
+## Warning in `[&lt;-.factor`(`*tmp*`, 2, value = "male"): invalid factor level, NA generated
+```
+
+```r
+gender
+```
+
+```
+## [1] m    &lt;NA&gt; f    m    m   
+## Levels: f m d
+```
+
+---
+
+## Factors
+
+Factors are particularly useful if all possible values are known in advance, although 
+some of them might not occur initially. 
+
+
+```r
+table(gender)
+```
+
+```
+## gender
+## f m d 
+## 1 3 0
+```
+
+--
+
+Compare with:
+
+
+```r
+x &lt;- as.character(gender)
+table(x)
+```
+
+```
+## x
+## f m 
+## 1 3
+```
+
+---
+
+## Functions
+
+Custom function that computs the mean of the elements in a vector:
+
+
+```r
+avg &lt;- function(x = 1:5){
+  return(sum(x)/length(x))
+}
+avg(1:10)
+```
+
+```
+## [1] 5.5
+```
+
+```r
+avg()
+```
+
+```
+## [1] 3
+```
+
+- `avg` is the function **name**
+- **a function is an object**. Thus, the `&lt;-` operator can be used.
+- `x` is the sole **argument** of the function, with the **default** value `1:5`.
+- multiple arguments are separated with `,`.
+- use `return()` to return an object. If `return()` is not used, the last 
+evaluated command will be returned. 
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 9
+
+Create the function `my_kth_number()` which returns the k-th largest value 
+of a numeric vector by completing the following template. By default, 
+the second-largest element should be returned.
+
+
+```r
+my_kth_number &lt;- __________(x, k = __________) {
+  if(!is.numeric(x)) stop("`x` is not a numeric vector.")
+  if(length(x) &lt; k) stop("`x` contains less than `k` elements.")
+  
+  xs &lt;- __________(x, decreasing = TRUE) # sort values of x in decreasing order
+  __________ # return the k-th element of xs
+}
+```
+
+`my_kth_number(mtcars$mpg)` &amp;rarr; 32.4
+`my_kth_number(mtcars$mpg, 5)` &amp;rarr; 27.3
+
+<div class="countdown" id="timer_5e885ae3" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+???
+
+
+```r
+my_kth_number &lt;- function(x, k = 2L) {
+  if(!is.numeric(x)) stop("`x` is not a numeric vector.")
+  if(length(x) &lt; k) stop("`x` contains less than `k` elements.")
+  
+  xs &lt;- sort(x, decreasing = TRUE) # sort values of x in decreasing order
+  xs[k] # return the k-th element of xs
+}
+```
+
+---
+
+## Lexical scoping
+
+**Scoping** describes in which order `R` searches for names. 
+
+
+```r
+a &lt;- 3
+f &lt;- function() {
+  a &lt;- 5
+  b &lt;- 2
+  a^b
+}
+```
+
+&amp;#x1F914; _"What is the result of running `f()`?"_
+
+--
+
+
+```r
+f()
+```
+
+```
+## [1] 25
+```
+
+&amp;#x1F914; _"Why is the result not 9?"_
+
+--
+
+Initially, `R` searches for names in the environment of the called function.
+
+If the names does not exisit in this environment, `R` searches in the 
+next higher environment level.
+
+???
+
+- each environment has a parent environment
+- if a name is not found in an environment, then R will look in its parent (and so on)
+
+---
+
+## Lexical Scoping
+
+.pull-left[
+
+
+```r
+a &lt;- 3
+f &lt;- function() {
+  a &lt;- 5
+  b &lt;- 2
+  a^b
+}
+f()
+```
+
+```
+## [1] 25
+```
+
+]
+
+.pull-right[
+
+
+```r
+a &lt;- 3
+g &lt;- function() {
+  b &lt;- 2
+  a^b
+}
+g()
+```
+
+```
+## [1] 9
+```
+
+
+]
+
+---
+
+## Lexical Scoping 
+
+Each function call starts with a new environment:
+
+
+
+
+
+```r
+h &lt;- function() {
+  if(!exists("x")) {
+    x &lt;- 1
+  } else {
+    x &lt;- x + 1
+  }
+  print(x)
+}
+```
+
+
+```r
+h()
+```
+
+```
+## [1] 1
+```
+
+```r
+h()
+```
+
+```
+## [1] 1
+```
+
+```r
+x
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'x' not found
+```
+
+---
+
+## `for` loops
+
+
+```r
+df &lt;- data.frame(a = c(1, 9, 4, 8),
+                 b = c(4, 2, 0, 5),
+                 c = c(9, 9, 4, 1),
+                 d = c(6, 1, 8, 7))
+
+for(i in 1:ncol(df)) {
+  print(mean(df[[i]]))
+}
+```
+
+&amp;#x1F914; _"What is the result?"_
+
+--
+
+
+```
+## [1] 5.5
+## [1] 2.75
+## [1] 5.75
+## [1] 5.5
+```
+
+--
+
+`for` loops consist of 3 elements:
+
+- **sequence**: `i in 1:ncol(df)`
+- **body**: `print(mean(df[[i]]))`
+- **output**
+
+--
+
+Mögliche Verbesserungen für dieses erste Beispiel:
+
+- Erstellung einer robusten Sequenz mit `seq_along()`
+- Speichern des Outputs als Variable (statt Konsolenprint)
+???
+
+- it is also possible to loop over columns of a data frame or elements of a list
+
+---
+
+## `for` loops
+
+
+```r
+df &lt;- data.frame(a = c(1, 9, 4, 8),
+                 b = c(4, 2, 0, 5),
+                 c = c(9, 9, 4, 1),
+                 d = c(6, 1, 8, 7))
+
+out &lt;- vector("double", ncol(df))
+
+for(i in seq_along(df)) {
+  out[i] &lt;- mean(df[[i]])
+}
+out
+```
+
+```
+## [1] 5.50 2.75 5.75 5.50
+```
+
+--
+
+.content-box-yellow[
+
+Alternatively, `while` loops can be used in situations where the 
+number of iterations is unknown in advance.
+]
+
+---
+
+## Short excursus to functionals
+
+In general, loops should be avoided, because they are hard to read and hard to 
+debug. Instead, it is recommended to use **functionals** which make the code 
+more concise and readable.
+
+--
+
+.content-box-blue[
+
+A **functional** is a function which takes another function as input and returns 
+a vector as output. 
+Hence, operations that are applied to each column individually can be split up 
+into independent parts. 
+
+]
+
+--
+
+.pull-left[
+
+Example: the `apply(X, MARGIN, FUN)` function:
+
+- `X`: `data.frame` or `matrix`
+- `MARGIN`: 1=rowwise, 2=columnwise
+- `FUN`: aggregation function
+
+
+```r
+apply(df, 2, mean)
+```
+
+```
+##    a    b    c    d 
+## 5.50 2.75 5.75 5.50
+```
+
+]
+
+.pull-right[
+
+&lt;img src="figures/01-R-Fundamentals//apply.png" width="80%" /&gt;
+
+]
+
+.footnote[
+.content-box-green[
+
+Going further:  
+The `purrr` package provides various functionals which are more 
+intuitive to use and produce more robust outputs in comparison with `apply()`.
+]
+]
+
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 10
+
+Use `apply()` to calculate the **rowwise** median of values in `mtcars`. 
+
+<div class="countdown" id="timer_5e885c69" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">02</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+???
+
+apply(mtcars, 1, median)
+
+---
+
+## Documentation &amp; further materials
+
+.pull-left70[
+- [The Comprehensive R Archive Network (CRAN)](https://cran.r-project.org/)
+- [RStudio](https://www.rstudio.com/products/rstudio/download/)
+- [Getting Help with R](https://support.rstudio.com/hc/en-us/articles/200552336-Getting-Help-with-R)
+- News and tutorials aggregators: [R-Bloggers](https://www.r-bloggers.com/), [R Weekly](https://rweekly.org/)
+- **Hadley Wickham, and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017.**
+- Norman Matloff: ["The Art of R Programming"](https://www.amazon.de/Art-Programming-Statistical-Software-Design/dp/1593273843). No Starch Press, 2011.
+- Patrick Burns. ["The R Inferno"](http://servidor.dia.uned.es/31106065/Complementario_R/R_inferno.pdf). burns-stat.com, 2011.
+- learn `R` interactively via the console [swirl](http://swirlstats.com/)
+- website with cookbook-like tutorials on data import, statistics and chart creation: [Quick-R](http://www.statmethods.net/)
+- "Cheat sheets" for `R`: [RStudio Cheat Sheets](https://www.rstudio.com/resources/cheatsheets/), [R Reference Card](https://cran.r-project.org/doc/contrib/Short-refcard.pdf)
+
+]
+
+.pull-right30[
+&lt;img src="figures/01-R-Fundamentals//r4ds_cover.png" width="100%" /&gt;
+]
+
+---
+
+## RStudio primers &lt;https://rstudio.cloud/learn/primers&gt;
+
+&lt;iframe src="https://rstudio.cloud/learn/primers" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+
+background-image: url("figures/01-R-Fundamentals/r-cheat-sheet-3_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/01-R-Fundamentals/r-cheat-sheet-3_2.png")
+background-size: contain
+
+---
+
+
+## Session info
+
+
+```
+##  setting  value                       
+##  version  R version 3.6.3 (2020-02-29)
+##  os       Windows 10 x64              
+##  system   x86_64, mingw32             
+##  ui       RTerm                       
+##  language (EN)                        
+##  collate  English_United States.1252  
+##  ctype    English_United States.1252  
+##  tz       Europe/Berlin               
+##  date     2020-04-04
+```
+
+&lt;div style="font-size:80%;"&gt;
+
+.pull-left[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; package &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; version &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; date &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; source &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; countdown &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.3.5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-20 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (gadenbuie/countdown@a544fa4) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; dplyr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.8.99.9002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-29 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/dplyr@c7f2936) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Formula &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.2.3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2018-05-03 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.0) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ggplot2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.3.0.9000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/ggplot2@53815f8) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Hmisc &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 4.4.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-23 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; lattice &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.20.38 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2018-11-04 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; survival &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.1.8 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-12-03 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+.pull-right[
+
+
+
+]
+
+&lt;/div&gt;
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&amp;nbsp;
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
+
+&lt;!-- ## Environments und Workspace --&gt;
+
+&lt;!-- ```{r, echo=FALSE} --&gt;
+&lt;!-- knitr::include_graphics(file.path("figures", "rstudio_environment_load_save.png")) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- Workspaces können als `.RData` gespeichert und später wieder geladen werden.   --&gt;
+
+&lt;!-- Aber... --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- .content-box-red[ --&gt;
+
+&lt;!-- &amp;#x1F620; Workspaces ständig als `.RData` abzuspeichern ist  --&gt;
+&lt;!-- schlechte Geflogenheit und sollte vermieden werden. Es  --&gt;
+&lt;!-- ist besser, mit einer "frischen" `R`-Session zu starten und den Workspace durch ein  --&gt;
+&lt;!-- `R`-Skript wiederherzustellen.  --&gt;
+
+&lt;!-- &lt;!-- _Erinnern Sie sich in 2 Wochen noch, wie Sie das Data Frame `df` aus Ihrem  --&gt; --&gt;
+&lt;!-- &lt;!-- abgespeicherten Workspace erstellt haben?_ --&gt; --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+
+&lt;!-- ## Projekt-Einstellungen --&gt;
+
+&lt;!-- -  _Tools_ `\(\rightarrow\)` _Project Options..._ --&gt;
+
+&lt;!-- Empfohlenes Setup: --&gt;
+
+&lt;!-- ```{r, echo=FALSE} --&gt;
+&lt;!-- knitr::include_graphics(file.path("figures", "project_options.png")) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- .font80[ --&gt;
+
+&lt;!-- .content-box-purple[ --&gt;
+
+&lt;!-- &amp;#x1F913; Jennifer Bryan. ["Tidyverse: Project-oriented workflow"](https://www.tidyverse.org/articles/2017/12/workflow-vs-script/). Tidyverse.org. Stand: 07.07.2018. --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+
+&lt;!-- ## Mein erstes Data Frame &amp;#x1F476; --&gt;
+
+&lt;!-- Die meisten Datensätze in `R` sind **Data Frame**'s, ein tabellenkalkulations-ähnliches Format. --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- &gt; Beispiel: Wir wollen den Datensatz `msleep` vom `ggplot2`-Package anschauen. Der Datensatz enthält Information zu verschiedenen Säugetierarten, zum Beispiel Schlafzeiten und Gewichtsangaben. --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- # Überprüfe ob ggplot2 installiert ist bevor es geladen wird. --&gt;
+&lt;!-- library(ggplot2) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## Print `msleep` --&gt;
+
+&lt;!-- ```{r allocate-msleep, include=FALSE} --&gt;
+&lt;!-- msleep &lt;- ggplot2::msleep --&gt;
+&lt;!-- ``` --&gt;
+
+
+&lt;!-- ```{r msleep} --&gt;
+&lt;!-- msleep # identisch zu print(msleep) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- Informationen, die wir aus dem Konsolenoutput entnehmen können: --&gt;
+
+&lt;!-- - Klasse [tibble](https://blog.rstudio.com/2016/03/24/tibble-1-0-0/#tibbles-vs-data-frames) (Weiterentwicklung eines gewöhnlichen Data Frames)  --&gt;
+&lt;!-- - 83 Zeilen &amp;rarr; **observations** --&gt;
+&lt;!-- - 11 Spalten &amp;rarr; **variables** --&gt;
+&lt;!-- - Output zeigt nur die ersten 10 Zeilen  --&gt;
+&lt;!-- - `# ... with 73 more rows`: kennzeichnet, dass es 73 weitere Zeilen gibt, die im Konsolenoutput weggelassen wurden --&gt;
+&lt;!-- - die Variablen sind vom Typ character (`chr`) und double (`dbl`) --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## `View()` --&gt;
+
+&lt;!-- ```{r, eval = FALSE} --&gt;
+&lt;!-- View(msleep) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, echo=FALSE, out.width="95%"} --&gt;
+&lt;!-- knitr::include_graphics(file.path("figures", "rstudio_view_tab.png")) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- - `View()` erzeugt ein neues Tab, in dem das Data Frame im Tabellenformat angezeigt wird. --&gt;
+
+&lt;!-- .content-box-yellow[ --&gt;
+
+&lt;!-- &amp;#x1F9D0; `View()` ist eine von sehr wenigen Funktionen, deren Name mit einem Großbuchstaben anfängt. --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## `dplyr::glimpse()` --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- # glimpse ist eine Funktion des Packages dplyr --&gt;
+&lt;!-- library(dplyr) --&gt;
+&lt;!-- glimpse(msleep) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- Informationen, die wir aus dem Konsolenoutput entnehmen können: --&gt;
+
+&lt;!-- - Anzahl von Observationen und Variablen --&gt;
+&lt;!-- - Name, Typ und die ersten paar Werte für jede Variable --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## `summary()` --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- summary(msleep) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- - Infos zur Verteilung jeder Variable --&gt;
+&lt;!-- - Für numerische Variablen: min/max, Quartile, Mittelwert, Anz. fehlender Werte --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## Zugreifen auf einzelne Variablen mit dem `$`-Operator --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- msleep$sleep_total --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## Einfache Summary Statistics --&gt;
+
+&lt;!-- Wie lange die durchschnittliche Schlafzeit? --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- mean(msleep$sleep_total) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- Wie groß ist die kürzeste/ längste Schlafzeit? --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- range(msleep$sleep_total) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- --- --&gt;
+
+&lt;!-- ## Einfache Visualisierungen --&gt;
+
+&lt;!-- .pull-left[ --&gt;
+
+&lt;!-- Verteilung der Schlafzeit als Histogramm. --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- hist(msleep$sleep_total) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- -- --&gt;
+
+&lt;!-- .pull-right[ --&gt;
+
+&lt;!-- Verteilung der Schlafzeit nach Gattung (vore) als Boxplot. --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- boxplot(sleep_total ~ vore, data = msleep) --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- ] --&gt;
+
+&lt;!-- ```{r remove-msleep, include=FALSE} --&gt;
+&lt;!-- rm(msleep) --&gt;
+&lt;!-- ``` --&gt;
+
+
+&lt;!-- --- --&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

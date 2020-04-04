@@ -1,0 +1,2448 @@
+---
+title: "01 - R Fundamentals"
+subtitle: "Data Science with R &#183; Summer 2020"
+author: "Uli Niemann"
+session: 01
+institute: "Knowledge Management & Discovery Lab"
+# date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: ["default", "assets/css/my-theme.css", "assets/css/my-fonts.css"]
+    seal: false # custom title slide
+    lib_dir: libs
+    nature:
+      # highlightStyle: solarized-light
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: true
+      ratio: "16:9"
+params:
+  url: "https://brain.cs.uni-magdeburg.de/kmd/DataSciR/"
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale("LC_ALL","English")
+Sys.setenv(LANG = "en_US.UTF-8")
+Sys.setlocale("LC_TIME", "English")
+
+# The version number in the directory name of an HTML dependency can be
+# suppressed by setting options(htmltools.dir.version = FALSE) when the
+# dependency is copied via `copyDependencyToDir()`. 
+options(htmltools.dir.version = FALSE)
+options(width = 90) # width of console output
+# load fonts (mainly Fira Sans)
+# extrafont::font_import()
+extrafont::loadfonts("win", quiet = TRUE)
+
+yt_counter <- 0
+
+# set default knitr options
+knitr::opts_chunk$set(fig.width = 5, fig.height = 4, fig.retina = 4)
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE, warning = TRUE, 
+                      message = FALSE, cache = FALSE)
+# directory of generated figures
+knitr::opts_chunk$set(fig.path = "figures/_gen/01-R-Fundamentals/")
+# directory of included figures
+fig_path <- "figures/01-R-Fundamentals/"
+
+library(countdown)
+```
+
+class: title-slide, center, bottom
+
+# `r rmarkdown::metadata$title`
+
+## `r rmarkdown::metadata$subtitle`
+
+### `r rmarkdown::metadata$author` &#183; `r rmarkdown::metadata$institute`
+
+#### [`r params$url`](`r params$url`)
+
+.courtesy[&#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: center, middle, inverse
+
+# Intro to R and RStudio
+
+---
+
+## What is `R`?
+
+.pull-left70[
+- **statistical programming language** with focus on **reproducible data analysis**
+- **free, open source** and **available for every major OS**
+- since January 2017 more than **10,000 packages** available
+  - various **statistics** and **machine learning** packages
+  - elaborate packages to create aesthetically appealing **graphics** and **charts**
+  - high-quality packages with comprehensive documentation on **CRAN**
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "R_logo.svg.png"))
+```
+
+]
+
+- **reproducible & automated report creation** with **R Markdown** 
+- **interactive web applications** with **shiny**
+- **end-to-end** programming language with functionalities for data preparation, data analysis and presentation of results in one single system
+- **RStudio** as IDE tailored to `R` for **interactive data analysis** and **statistical programming**
+- **active community**: [Twitter](https://twitter.com/hashtag/rstats), 
+[stackoverflow](https://stackoverflow.com/questions/tagged/r), 
+[RStudio Community](https://community.rstudio.com/), 
+[R Bloggers](https://www.r-bloggers.com/), 
+[R Weekly](https://rweekly.org/)
+
+---
+
+## Stack overflow traffic growth by programming language 
+
+```{r, echo=FALSE, out.width = "90%"}
+knitr::include_graphics(file.path(fig_path, "r_growth.png"))
+```
+
+.footnote[
+
+Figure: David Robinson. ["The Impressive Growth of R"](https://stackoverflow.blog/2017/10/10/impressive-growth-r/). Stackoverflow.com. Accessed 06.07.2018. 
+
+]
+
+???
+
+- left: general traffic (x) and growth from 2016 to 2017 (y)
+- right: for R 2016 traffic (x) vs. 2017 traffic (y) by industry
+
+---
+
+## Packages on CRAN
+
+```{r, echo=FALSE, out.width = "85%"}
+knitr::include_graphics(file.path(fig_path, "r_cran_2.png"))
+```
+
+.footnote[
+
+https://gist.github.com/daroczig/3cf06d6db4be2bbe3368
+]
+
+---
+
+## Popularity of `R`
+
+.pull-left60[
+
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "redmonk_lang_rankings_2019.png"))
+```
+
+]
+
+.pull-right40[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "ieee_ranking_2019.png"))
+```
+
+
+]
+
+.footnote[
+
+Left figure: Stephen O'Grady. ["The RedMonk Programming Language Rankings: Q3 2019"](https://redmonk.com/sogrady/2019/07/18/language-rankings-6-19/). redmonk.com. Accessed 20.02.2020.
+
+Right figure: ["Interactive: The Top Programming Languages 2019"](https://spectrum.ieee.org/static/interactive-the-top-programming-languages-2016). IEEE SPECTRUM. Accessed 20.02.2020.  
+
+]
+
+---
+
+
+##  Brief history of `R`
+
+.pull-left60[
+
+- developed by the statisticians **R**oss Ihaka and **R**obert Gentleman in Auckland, NZ
+- **first release in 1994**
+- designed as **open-source alternative to expensive proprietary systems** like SAS, SPSS, MATLAB, etc.
+- until 2007 little usage of outside of universities, partly because of steep learning curve
+- since then remarkable increase in popularity due to:
+  - development of **packages for a broader audience**, especially the **[`tidyverse`](https://www.tidyverse.org/) packages** `dplyr`, `ggplot2`, `tidyr`, etc. (Hadley Wickham, et al.), [`knitr`](https://yihui.name/knitr/) and [`shiny`](https://shiny.rstudio.com/)
+  - **RStudio** as company that developed the eponymous IDE and has dedicated to open-source software development<sup>*</sup>
+  - `R` has considerably benefited from the general **data science & AI boom** (similar to other languages like Python) 
+
+&nbsp;
+
+.font60[
+- Blog post reviewing the history of `R`, its positioning as a data analysis system and as a programming language: Roger Peng. ["Teaching R to New Users - From tapply to the Tidyverse"](https://simplystatistics.org/2018/07/12/use-r-keynote-2018/). Simplystatistics.org. Accessed 17.07.2018.
+- <sup>*</sup>Blog post by the RStudio CEO announcing the company to become 
+a "public benefit coorporation". J.J. Allaire. [RStudio, PBC](https://blog.rstudio.com/2020/01/29/rstudio-pbc). blog.rstudio.com. Accessed 20.02.2020.
+]
+
+]
+
+.pull-right40[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "r_history.png"))
+```
+
+<small>Figure sources: [1](https://thermanuals.wordpress.com/r-program/66-2/), [2](https://osf.io/69gub/wiki/home/), [3](https://twitter.com/hadleywickham), [4](https://rstudio.com/slides/rstudio-pbc/#32)</small>
+
+]
+
+
+
+???
+
+- especially for people that used SAS, Stata, SPSS, Excel who wanted to build custom tools on top of what was available
+- R provided flexiblitity and the ability to program whatever one needed
+- however, R was not a great system for doing data analysis
+- other tools had been designed as interactive data analysis environments and had simple ways to do complex data wrangling
+- developed by statisticians -> sometimes weird syntax
+- hard to adopt for people without prior knowledge of the other tools
+- Hadley: COPSS Presidents' Award in 2019 (Nobelpreis der Statistik)
+- RStudio PBC: self-commitment to develop open-source software in the long run
+
+---
+
+## RStudio
+
+.pull-left70[
+
+- open source _Integrated Development Environment_ (IDE) for `R`
+- first release in 2011
+- two major versions: **RStudio Desktop** and **RStudio Server**
+- Download & Installation of `R` and RStudio:
+  - [`R`](https://www.r-project.org/)
+  - [RStudio](https://www.rstudio.com/products/rstudio/download/)
+  - optional for Windows: [Rtools](https://cran.r-project.org/bin/windows/Rtools/)
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "rstudio_logo.png"))
+```
+
+]
+
+---
+
+## RStudio IDE 
+
+```{r, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "rstudio_ide_components.png"))
+```
+
+???
+
+https://www.tu-chemnitz.de/hsw/psychologie/professuren/method/homepages/mb/01_Einf%C3%BChrung_RStudio_beta.pdf
+
+---
+
+## Console
+
+.pull-left[
+
+- run commands with **Enter↵**
+
+```{r, echo=FALSE, out.width='40%'}
+knitr::include_graphics(file.path(fig_path, "enter.gif"))
+```
+
+- auto completion with **Tab ↹**
+
+```{r, echo=FALSE, out.width='55%'}
+knitr::include_graphics(file.path(fig_path, "tab.gif"))
+```
+
+]
+
+--
+
+.pull-right[
+
+- restore previous commands with **↑**
+- show list of previous commands with **Ctrl**+**↑**
+
+```{r, echo=FALSE, out.width='70%'}
+knitr::include_graphics(file.path(fig_path, "strg_hoch.gif"))
+```
+
+```{r, echo=FALSE, fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "rstudio_console.png"))
+```
+
+]
+
+<!-- - Titel zeigt aktuelles **working directory** -->
+<!-- - Langandauernde Berechnungen abbrechen mit Klick auf **STOP** -->
+
+.footnote[
+
+- [RStudio Console Documentation](https://support.rstudio.com/hc/en-us/articles/200404846); 
+- RStudio IDE-Shortcuts: _Tools_ $\rightarrow$ _Keyboard Shortcuts Help_
+
+]
+
+---
+
+## Code editor
+
+.pull-left60[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "rstudio_code_editor.png"))
+```
+
+- edit `R` scripts (&asymp; text document with successive commands)
+- similar to a normal text editor
+- create new script with _File_ $\rightarrow$ _New File_ $\rightarrow$ _R Script_
+- unsaved changes are highlighted by red color and an asterisk at the end of the file name 
+- run the current selection or the current line (where the cursor is) wiht **Ctrl**+**Enter↵**
+- run an entire script with **Ctrl**+**⇧Shift**+**Enter↵**
+
+]
+
+.pull-right40[
+
+```{r source, echo=FALSE}
+knitr::include_graphics(file.path(fig_path, "source.gif"))
+```
+
+]
+
+---
+
+## Environment & History
+
+.pull-left[
+
+**Environment**-Tab enthält Objekte der aktuellen Environment = **Workspace**
+
+```{r, echo=FALSE}
+knitr::include_graphics(file.path(fig_path, "environment.png"))
+```
+
+]
+
+--
+
+.pull-right[
+
+The **History** tab contains previously executed commands-
+
+```{r, echo=FALSE}
+knitr::include_graphics(file.path(fig_path, "history.png"))
+```
+
+]
+
+---
+
+## Packages
+
+.content-box-blue[
+
+A **package** is a **collection of functions, datasets and documentation** that extends 
+the capabilities of base R.
+
+]
+
+Install and load packages using the "Packages" tab:
+
+```{r, echo=FALSE, out.width='75%', fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "rstudio_package_installer.png"))
+```
+
+---
+
+## Help
+
+Show the documentation of a function
+
+
+```{r, echo=FALSE, out.width = "400px"}
+knitr::include_graphics(file.path(fig_path, "help.png"))
+```
+
+---
+
+class: center, middle, inverse
+
+# The Language
+
+---
+
+## Basic commands
+
+`R` can be used just like a normal calculator:
+
+.pull-left[
+
+```{r basic1}
+3 + 4
+1 / 2  - 0.5
+2^3
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r}
+(100 * 2 - 12^2) / 7 * 5 + 2
+8 / 2 * (2 + 2)
+2 * pi
+```
+
+]
+
+--
+
+&#x1F914; _"How can I see a complete list of <u>all</u> available arithmetic operations?"_
+
+???
+
+- Why does each console output start with "[1]"?
+- ?Constants
+
+---
+
+## Help
+
+Show the documentation of a function, dataset or topic:
+
+.pull-left[
+
+```{r, eval=F}
+?mean # or...
+help(mean) # or...
+# ...place the cursor within the 
+# function name and press F1
+```
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, out.width = "100%"}
+knitr::include_graphics(file.path(fig_path, "help.png"))
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+You can run `?Arithmetic` to see a complete list of arithmetic operations.
+
+```{r, echo=FALSE, out.width = "350px"}
+knitr::include_graphics(file.path(fig_path, "arithmetic.png"))
+```
+
+--
+
+Use the help to learn about R's built-in **constants** like `pi`.  
+How many built-in constants are available?
+
+```{r echo = FALSE}
+countdown(minutes = 2)
+```
+
+---
+
+## Basic commands
+
+You can assign a name to a vector or function using `<-` or `=`:
+
+```{r}
+x <- 3
+```
+
+```{r}
+y = 4
+```
+
+```{r}
+x + y
+```
+
+.footnote[
+.content-box-yellow[
+&#x1F9D0; Both `<-` and `=` can be used for object name assignment. 
+Only `=` can be used to assign function arguments, e.g. `mean(x = c(3,6,9))`. 
+Thus, for better code readability, it is recommended to use `<-` to assign a name 
+to an object. [1](https://google.github.io/styleguide/Rguide.html) 
+[2](https://colinfay.me/r-assignment/)
+]
+]
+
+---
+
+## Comments
+
+```{r}
+# This is a comment. 
+# Everything after `#` in a line won't get executed. 
+123 + 321 # Everything until `#` gets executed.
+```
+
+--
+
+.footnote[
+<!-- &#x1F4A8; **Ctrl**+**⇧Shift**+**Enter↵** -->
+&#x1F4A8; To comment one or multiple lines, mark the lines and press **Ctrl**+**⇧Shift**+**c**.
+]
+
+---
+
+## Creating vectors
+
+**Vectors** can be created with `c()`, `:`, `seq()` or `rep()`.
+
+.pull-left[
+
+```{r}
+# "C"ombine elements to a vector
+c(1,2,3)
+```
+
+```{r}
+# integer sequence
+1:3
+```
+
+```{r}
+# sequence with an increment of 0.5
+seq(1, 3, by = 0.5) 
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r}
+# repeat the whole vector
+rep(1:3, times = 2)
+```
+
+```{r}
+# repeat each element of the vector
+rep(1:3, each = 2)
+```
+
+]
+
+--
+
+.footnote[
+.content-box-yellow[
+
+&#x1F9D0; There is no special data structure for scalars in `R`. 
+Scalars are simply vectors of length 1.
+
+]
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+We saw that the `rep(x, ...)` function can be used with different arguments:
+
+- `times`: number of times to repeat the whole vector
+- `each`: number of times to repeat each element
+- `length.out`: the desired length of the output vector
+
+--
+
+Read the documentation of `?seq` and write a command that yields the same output 
+as 
+
+```{r}
+seq(0, 3, by = 0.75)
+```
+
+while still using `seq()` but with a different argument than `by`.
+
+---
+
+## Environments and workspace
+
+Every object is stored inside an **environment**. 
+The **global environment** is the interactive workspace in RStudio.
+
+.pull-left[
+
+The RStudio tab _Environment_ shows all objects inside the **current** 
+environment. 
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "rstudio_environment.png"))
+```
+]
+
+--
+
+.pull-right[
+
+Alternatively, you can use `ls()` to list all objects within the current 
+environment.
+
+```{r, eval = FALSE}
+ls()
+```
+
+```{r, echo = FALSE}
+c("x", "y")
+```
+
+Remove an object inside the current environment with `rm()`.
+
+```{r, eval=FALSE}
+# remove a single object
+rm(y)
+# remove all objects
+rm(list = ls())
+ls()
+```
+
+```{r, echo=FALSE}
+character(0)
+```
+
+]
+
+---
+
+## Working directory
+
+The **working directory** is the directory where `R` starts to search for 
+files to read and write.  
+
+The current working directory is shown at the top of the console.
+
+```{r, echo=FALSE, out.width='45%'}
+knitr::include_graphics(file.path(fig_path, "rstudio_working_dir.png"))
+```
+
+Alternatively, the current working directory can be printed in the console with 
+`getwd()`.
+
+```{r, eval = FALSE}
+getwd()
+```
+
+```{r, echo = FALSE}
+"C:/Users/ulini/Dropbox/KMD/Data_Science_with_R/DataSciR20"
+```
+
+
+You can change the working directory with `setwd()`.
+
+---
+
+class: middle
+
+&#x1F914; _"What is a good way of setting up an efficient folder structure 
+within my working directory?"_
+
+--
+
+It is good practice to store **all** files of a data science project in a 
+dedicated directory, including raw data, `R` scripts, results, figures and 
+reports.
+
+--
+
+## &rarr; RStudio projects &#x1F973;
+
+---
+
+## RStudio Projects
+
+.pull-left60[
+
+Create a new RStudio project:  
+File &rarr; New Project &rarr; New Directoy &rarr; Empty Project
+
+The working directory corresponds to the root directory of the project 
+(where the `.Rproj` file is). All project files should be organized in 
+subfolders of the project's root directory. In the code, the files should 
+be referenced with **relative paths**. 
+
+]
+
+.pull-right40[
+
+```{r, echo=FALSE}
+knitr::include_graphics(file.path(fig_path, "new_rstudio_project.gif"))
+```
+
+```{r, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "new_project.png"))
+```
+
+]
+
+.footnote[
+
+Further reading:
+
+- best practices: [RStudio Projects](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects)
+- chapter [Where does your analysis live?](http://r4ds.had.co.nz/workflow-projects.html#where-does-your-analysis-live) in [R for Data Science](http://r4ds.had.co.nz/)
+- [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+
+]
+
+???
+
+- file extension `.Rproj`: text file with project-specific settings
+- hidden folder `.Rproj.user`: project-specific temporary files (_better not touch it_)
+
+---
+class: middle
+
+A basic folder structure could look like so:
+
+```{r, eval = FALSE, echo = FALSE}
+fs::dir_tree(path = file.path("slides", "my_project"), recurse = TRUE)
+```
+
+
+```
+my_project
++-- data
+|   +-- processed
+|   \-- raw
++-- my_project.Rproj
++-- output
++-- R
++-- README.md
+\-- run_analyses.R
+```
+
+???
+
+also helpful: https://chrisvoncsefalvay.com/2018/08/09/structuring-r-projects/
+
+---
+
+## The `R` ecosystem
+
+The CRAN version of `R` (called **base R**) contains essential functions and 
+multiple toy datasets.
+
+At each startup of an `R` session, the following packages are loaded 
+(including `base`):
+
+```{r, echo = FALSE}
+getOption("defaultPackages")
+```
+
+--
+
+.footnote[
+.content-box-yellow[
+
+&#x1F9D0; [CRAN](https://cran.rstudio.com/), the _The Comprehensive R Archive Network_, consists of 
+multiple worldwide mirror servers, used to distribute `R` and `R` packages.
+
+]
+]
+
+---
+
+## R packages &#x1F4E6;
+
+Base `R` contains functions that are needed by the majority of users.
+
+Additional functions can be used on demand by loading **packages**.
+
+--
+
+.content-box-blue[
+
+A **package** is a **collection of functions, datasets and documentation** that extends 
+the capabilities of base R.
+
+]
+
+---
+
+## Downloading, installing and loading packages
+
+```{r, eval=F}
+# A package has to be installed only once, but...
+install.packages("dplyr") # install package "dplyr" from CRAN
+# ...it has to be loaded in each session where its functions/datasets are called.
+library("dplyr")
+```
+
+--
+
+Alternatively, you can install and load packages in RStudio using the Packages 
+tab.
+
+```{r, echo=FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "rstudio_package_installer.png"))
+```
+
+--
+
+.footnote[
+To install a package that is hosted on GitHub use `devtools::install_github("<REPOSITORY>")`.
+]
+
+---
+
+## Loading multiple packages &#x1F4CE;
+
+In some situations, you have to be careful with the order in which you load packages.
+
+.pull-left[
+
+<center>.font150[&#x1F60A;]</center>
+
+```{r, eval = FALSE}
+library("Hmisc")
+summarize(iris$Sepal.Width, iris$Species, mean)
+```
+
+```{r, echo = FALSE}
+Hmisc::summarize(iris$Sepal.Width, iris$Species, mean) 
+```
+
+]
+
+.pull-right[
+
+<center>.font150[&#x1F62D;]</center>
+
+```{r, eval = FALSE}
+library("Hmisc")
+library("dplyr")
+summarize(iris$Sepal.Width, iris$Species, mean)
+```
+
+```{r, echo = FALSE, error = TRUE, warning=FALSE}
+# , R.options=list(width=45)
+cat(stringr::str_wrap(as.character(purrr::safely(dplyr::summarize)(iris$Sepal.Width, iris$Species, mean)$error), 50))
+```
+
+]
+
+--
+
+`R` uses the **search path** to look up function in the following order:
+
+1. global environment
+1. last loaded package
+1. second-last loaded package
+1. third-last loaded package
+1. ...
+1. base `R` packages like `stats`, `utils` and `base`
+
+When a package is loaded, it gets inserted into the second position of 
+the search path, directly after the global environment. All other packages 
+are moved one position backwards.
+
+???
+
+- search path: list of all packages of the current R session
+
+---
+
+## Namespace conflicts
+
+In case of a **namespace conflict**, use the `::` (pronounced: _double colon_) 
+operator to use objects that were **masked** by a package that were loaded 
+later on.
+
+--
+
+```{r}
+library("Hmisc")
+library("dplyr")
+Hmisc::summarize(iris$Sepal.Width, iris$Species, mean)
+```
+
+---
+
+## Namespace conflicts
+
+&#x1F914; _"Which functions are currently masked?"_
+
+```{r}
+conflicts()
+```
+
+--
+
+&#x1F914; _"How can I inspect the search path?"_
+
+```{r}
+search()
+```
+
+.footnote[
+
+Further reading:
+
+- Section ["Search Path"](http://r-pkgs.had.co.nz/namespace.html#search-path) from: Hadley Wickham. ["R Packages"](http://r-pkgs.had.co.nz). O'Reilly Media, 2015.
+
+]
+
+---
+
+## Names
+
+Object names must by **syntactically valid**. Important requirements include:
+
+- only consists of letters, digits, `_` and `.`,
+- must begin with a letter or with `.` _not_ followed by a digit
+- example: `.7up` ist not valid, but `.sevenup` is
+- must not be one of the reserved words, e.g. `if`, `else`, `for`, `TRUE`, `NULL`...
+
+--
+
+.content-box-green[
+
+It is good practice to use `_` (**snake_case** &#x1F40D;) for names consisting of 
+multiple words. You are free to use `.`, but please mind consistency. 
+
+]
+
+.pull-left[
+
+```{r, eval=FALSE}
+# good
+day_one
+day_1
+
+# bad
+first_day_of_the_month # too long
+djm1 # too short
+DayOne # rather start with lowercase letter
+dayone # rather separated words
+```
+
+]
+
+.pull-right[
+
+.content-box-yellow[
+
+- `?make.names` describes all requirements for syntactically valid names
+- `?reserved` lists all reserved words in `R`'s parser.
+
+]
+
+]
+
+---
+
+## Calling functions
+
+.left-column[
+
+Basic function call scheme:
+
+```{r eval=FALSE}
+some_function(arg_1 = val_1, 
+              arg_2 = val_2, 
+              ...)
+```
+
+```{r, echo=FALSE, out.width="95%"}
+knitr::include_graphics(file.path(fig_path, "mean_help.png"))
+```
+
+]
+
+.right-column[
+
+Example: the `mean()` function:
+
+- `x` is the only mandatory argument
+- arguments `trim` and `na.rm` have default values
+
+```{r mean-1, error = TRUE, echo = TRUE, eval = FALSE}
+x <- 1:10
+mean(x) # trim = 0 and na.rm = FALSE
+```
+{{content}}
+
+]
+
+--
+
+```{r ref.label='mean-1', error = TRUE, echo = FALSE, eval = TRUE}
+```
+{{content}}
+
+--
+
+```{r mean-2, error = TRUE, echo = TRUE, eval = FALSE}
+x <- c(1:10, NA)
+mean(x)
+```
+{{content}}
+
+<!-- # Mean of a vector with >=1 NA's yields NA -->
+
+--
+
+```{r ref.label='mean-2', error = TRUE, echo = FALSE, eval = TRUE}
+```
+{{content}}
+
+--
+
+```{r mean-3, error = TRUE, echo = TRUE, eval = TRUE}
+mean(x, na.rm = TRUE) # NA's will be ignored
+```
+{{content}}
+
+--
+
+```{r mean-4, error = TRUE, echo = TRUE, eval = FALSE}
+mean(x, TRUE) # match unnamed args to their position
+```
+{{content}}
+
+--
+
+```{r ref.label='mean-4', error = TRUE, echo = FALSE, eval = TRUE}
+```
+{{content}}
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Assume you created a vector `y` as follows: 
+
+```{r}
+y <- c(NA, 1:10, NA)
+```
+
+The following code gives an error. Correct it to compute the arithmetic mean of
+`y`:
+
+```{r, error = TRUE}
+mean(y = y, na.mr = TRUE) 
+```
+
+```{r echo = FALSE}
+countdown(minutes = 1, seconds = 30)
+```
+
+---
+
+## Basic vector operations
+
+```{r}
+(v <- c(5, 2, 9, 1, 6, 2, 4, 5, 5, 1))
+```
+
+Sort the elements of a vector with `sort()`:
+
+```{r}
+sort(v) #  order() returns the order of the values as vector indices
+```
+
+--
+
+Unique values of a vector with `unique()`:
+
+```{r}
+unique(v)
+```
+
+--
+
+Continguency tables with `table()`:
+
+```{r}
+table(v)
+```
+
+---
+
+## Vectors in `R`
+
+.pull-left60[
+
+In `R`, there exist 2 vector types: **atomic vectors** and **lists**. 
+
+Lists are recursive vectors, i.e., lists can contain other lists.
+
+An atomic vector is a sequence of elements of the same data type. 
+
+The most important atomic data types are:
+
+- `logical`: `FALSE` or `TRUE`
+- `integer`: whole number, e.g. `5L`
+- `double`: floating-point number, e.g. `3.4`
+- `character`: character string, e.g. `"DataSciR"`
+]
+
+
+.pull-right40[
+
+```{r, echo=FALSE, out.width="450px"}
+knitr::include_graphics(file.path(fig_path, "data-structures-overview.png"))
+```
+
+]
+
+.footnote[Figure: Hadley Wickham and Garrett Grolemund. _[R for Data Science](http://r4ds.had.co.nz/)_. O'Reilly, 2017.]
+
+---
+
+## Vectors in `R`
+
+Vectors have two major properties: **type** and **length**.
+
+```{r}
+x <- 1:5
+typeof(x)
+length(x)
+```
+
+---
+
+
+## Vectors in `R`
+
+Naming and renaming of vector elements:
+
+```{r}
+names(x) <- letters[1:5] # same as x <- c(a = 1, b = 2, c = 3, d = 4, e = 5)
+x
+typeof(x)
+```
+
+--
+
+Access vector elements:
+
+.pull-left[
+
+```{r}
+x[2] # the second element
+```
+
+
+```{r}
+x["b"] # the element named "b" 
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r}
+x[-2] # all elements but the second
+```
+
+
+```{r}
+x[-(3:5)] # all elements but the third to fifth
+```
+
+]
+
+---
+
+## Vectors in `R`
+
+```{r}
+x
+```
+
+.pull-left[
+
+```{r}
+x[c(1,5)] # first and fifth element
+```
+{{content}}
+
+]
+
+--
+
+```{r}
+x == 2 # equal to 2? (attention: == vs. =)
+```
+{{content}}
+
+--
+
+```{r}
+which(x == 2) # returns indices
+```
+
+--
+
+.pull-right[
+```{r}
+x[x == 2] # returns values
+```
+{{content}}
+]
+
+--
+
+```{r}
+x < 5
+```
+{{content}}
+
+--
+
+```{r}
+x[x %in% c(1,4,5)] # elements == 1, 4 OR 5
+```
+
+---
+
+## Vector coercion &#x1F528;
+
+.content-box-blue[
+
+A vector must be homogenous with respect to the type of its elements. 
+In case elements are of mixed types, `R` tries to convert the elements into the 
+**most flexible** type (=**vector coercion**) of its elements. 
+As a result, creating a vector with 
+elements of mixed types does not yield an error.
+
+]
+
+--
+
+.pull-left[
+
+**Order of types**, from _least flexible_ to _most flexible_:
+
+1. `logical` (`FALSE`, `TRUE`)
+2. `integer` (`1L`, `2L`)
+3. `double` (`0.51`, `3.19`)
+4. `character` (`"abc"`, `"xz"`)
+
+]
+
+--
+
+.pull-right[
+```{r}
+x <- c(1, 4, 1, 3, 2)
+typeof(x) # why not integer?
+```
+{{content}}
+
+]
+
+--
+
+```{r}
+x <- c(x, "4") 
+x
+typeof(x)
+```
+
+--
+
+.content-box-green[
+
+In contrast to atomic vectors, lists can be used to combine elements of 
+different types.
+
+]
+
+---
+
+## Implicit coercion
+
+Functions that require a specific vector type use implicit coercion:
+
+```{r}
+# Draw a random sample with replacement from c(FALSE, TRUE) 
+lgl_vec <- sample(c(FALSE, TRUE), size = 10, replace = TRUE)
+lgl_vec
+sum(lgl_vec) # sum() requires numeric type ---> FALSE -> 0, TRUE -> 1
+mean(lgl_vec) # mean() requires numeric type --->  FALSE -> 0, TRUE -> 1
+```
+
+--
+
+.pull-left60[
+
+```{r}
+paste("this", "is", "a", "test") # concatenate strings
+paste(c("this", "is", "a", "test"), collapse = " ")
+```
+
+]
+
+.pull-right40[
+
+```{r paste, eval=FALSE}
+paste(lgl_vec, collapse = " ")
+```
+
+&#x1F914; _What is the result?_
+{{content}}
+
+]
+
+--
+
+```{r ref.label="paste", echo = FALSE, R.options=list(width=40)}
+```
+
+???
+
+- collapse: character string to separate the results
+
+---
+
+## Explicit coercion
+
+```{r}
+x <- c(1, 4, 1, 3, 2, "4.0")
+x
+```
+
+Convert a `character` vector into a `double` vector (explicit coercion):
+
+```{r}
+as.numeric(x[3])
+```
+
+--
+
+.content-box-green[
+
+Besides `as.numeric()` explicit coercion can be realized with 
+`as.logical()`, `as.integer()`, `as.double()` and `as.character()`.
+
+]
+
+---
+
+## Explicit coercion
+
+One of `R`'s biggest strengths is that most functions are  **vectorized**.
+
+The following code 
+
+```{r, eval = FALSE}
+c(
+  as.numeric(x[1]),
+  as.numeric(x[2]),
+  as.numeric(x[3]),
+  as.numeric(x[4]),
+  as.numeric(x[5]),
+  as.numeric(x[6])
+)
+```
+
+can be compactly written as 
+
+```{r, warning=T}
+as.numeric(x)
+```
+
+---
+
+class: middle, exercise-blue
+
+## Quiz
+
+Can you guess the output of the following code?
+
+```{r q-coercion, eval = FALSE}
+x <- c(1, 4, 1, 3, 2, "4,0") # note: , instead of .
+as.numeric(x)
+```
+
+--
+
+```{r ref.label="q-coercion", echo = FALSE}
+```
+
+???
+
+This command yields a **warning**. `R` does not know how to convert `"4,0"` 
+into a number. This element is replaced with `NA`.
+
+---
+
+## Missing Values &#x274C;
+
+**Missing values** or **unknown values** are represented as `NA` (not applicable). 
+
+These special values can be identified with `is.na()`.
+
+```{r, warning = FALSE}
+is.na(as.numeric(x))
+```
+
+--
+
+Further special values besides `NA` include:
+
+- `NaN` (not a number): e.g. `sqrt(-2)` $\rightarrow$ `is.nan()`
+- `Inf`: e.g. `1/0` $\rightarrow$ `is.infinite()`
+- `NULL`: absence of a whole vector $\rightarrow$ `is.null()`
+
+---
+
+## Vector recycling &#x267B;&#xFE0F;
+
+In addition to the implicit type coercion, `R` tries to match the lengths of 
+vectors so that they are compatible. 
+
+**Vector recycling** means that the elements of the shorter of two vectors are 
+replicated so that the lengths of the two vectors are equal.
+
+.pull-left[
+
+```{r}
+1:6 + 1:3
+```
+{{content}}
+]
+
+--
+
+```{r, eval=FALSE}
+1:5 + 1:3
+```
+
+&#x1F914; _What is the result?_
+
+--
+
+.pull-right[
+
+```{r, warning=TRUE, R.options=list(width=45)}
+1:5 + 1:3
+```
+{{content}}
+]
+
+--
+
+Equivalent with:
+
+```{r}
+1:5 + c(1:3, 1, 2)
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+The following formula can be used to convert temperature measurements from 
+degree Fahrenheit to degree Celsius:
+
+`C = 5/9 * (F - 32)`
+
+Take advantage of vectorisation and vector recycling by converting the following 
+temperature measurements from degree Fahrenheit to degree Celsius with just 
+one line of code: `45, 77, 20, 19, 101, 120, 212`
+
+```{r echo = FALSE}
+countdown(minutes = 3)
+```
+
+???
+
+5/9 * (c(45, 77, 20, 19, 101, 120, 212) - 32)
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Use the vector `c(2,4,6)`, the vector `c(1,2)` and the function `rep()` to 
+create the following output:
+
+`r c(2,4,6,4,8,12)`
+
+```{r echo = FALSE}
+countdown(minutes = 3)
+```
+
+???
+
+rep(c(2,4,6), 2) * c(1,2)
+rep(c(2,4,6), 2) * rep(c(1,2), each = 3)
+
+---
+
+## Lists 
+
+A **list** is a **recursive vector**, because it can contain other lists.   
+They can be used to represent hierarchical or tree-like structures.
+
+--
+
+.pull-left[
+
+Create a list with `list()`:
+
+```{r}
+x <- list(1:5)
+x
+y <- list(1, 2, 3, 4, 5)
+y
+```
+
+]
+
+--
+
+.pull-right[
+
+Inspect the **str**ucture of a list with `str()`:
+
+```{r}
+str(y)
+```
+
+]
+
+
+---
+
+## Lists
+
+A list is a vector that can contain **elements of different types**:
+
+```{r}
+x <- list(TRUE, 1L, 1.23, "u")
+str(x)
+```
+
+--
+
+Lists can contain other lists:
+
+```{r}
+x <- list(list(TRUE, 1L), list(1.23, "u"))
+str(x)
+```
+
+---
+
+## List subsetting
+
+There are 3 ways to access list elements:
+
+- `[]` extracts a **sublist**. The results is **always** a list,
+
+--
+
+- `[[]]` exctracts a **single element** and removes one level of hierarchy,
+
+--
+
+- `$` extracts a **named element**.
+
+--
+
+.pull-left[
+
+```{r}
+x <- list(
+  list(TRUE, 1L), 
+  list(1.23, "u")
+)
+str(x)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r}
+str(x[1])
+str(x[[1]])
+str(x[[1]][[1]])
+```
+
+
+]
+
+---
+
+## List subsetting
+
+Compare list subsetting to this unusual pepper shaker:
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "list_subsetting.png"))
+```
+
+.footnote[
+
+Figure adapted from: Hadley Wickham and Garrett Grolemund. _["R for Data Science"](http://r4ds.had.co.nz/)_. O'Reilly, 2017.
+
+]
+
+???
+
+Analogy: 
+
+- pepper corns represent a vector
+- sachet represents a list
+- shaker represents a list
+
+shaker contains multiple sachets, each of which contain pepper corns
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Assume the following list is given: 
+
+```{r}
+shaker <- list(
+  pepper = list(
+    sachet1 = 1:154,
+    sachet2 = 1:146
+  ),
+  salt = list(sachet1 = 1:843),
+  toothpick = 1:50,
+  tabasco = TRUE
+)
+```
+
+1. Write a command that returns the corns (elements) of the second pepper sachet.
+1. Write a command that returns only the elements `"salt"` and `"tabasco"`.
+1. Rename the element `"tabasco"` to `"spicy ketchup"`.
+1. Write a command that checks whether there are more pepper corns that 
+salt corns in the shaker? (Use `length()` to get the number of corns in a sachet.)
+
+```{r echo = FALSE}
+countdown(minutes = 5)
+```
+
+---
+
+## Data Frames
+
+**Data Frame** is `R`'s data structure for a **table**.  
+A `data.frame` is a rectangular collection of data, arranged by: 
+
+- **variables** (or **columns**) and 
+- **observations** (or: **rows**). 
+
+Example: the `mtcars` dataset
+
+```{r, eval=FALSE}
+mtcars
+```
+
+```{r, echo=FALSE}
+head(mtcars)
+```
+
+.footnote[
+
+> The data was extracted from the 1974 Motor Trend US magazine, and comprises 
+fuel consumption and 10 aspects of automobile design and performance for 32 
+automobiles (1973–74 models).
+
+]
+
+---
+
+Number of observations (rows) und variables (columns):
+
+.pull-left[
+
+```{r}
+nrow(mtcars)
+ncol(mtcars)
+```
+
+]
+
+
+.pull-right[
+
+```{r}
+dim(mtcars)
+```
+
+
+]
+
+--
+
+```{r}
+head(mtcars) # first 6 rows
+tail(mtcars) # last 6 rows
+```
+
+---
+
+Useful summary functions:
+
+```{r, eval = FALSE}
+View(mtcars) # opens spreadsheet-like view in RStudio
+```
+
+```{r}
+summary(mtcars)
+```
+
+---
+
+```{r}
+str(mtcars)
+```
+
+
+---
+
+## Extracting data frame elements
+
+.content-box-blue[
+
+Data frames are built on top of regular lists. Thus, element indexing works 
+similar. An important difference between data frames and lists is that 
+a data frame requires its vectors (variables) to have the same length while 
+a list does not.
+
+`class(mtcars)` &rarr; `r class(mtcars)` &nbsp;&nbsp;&nbsp; 
+`typeof(mtcars)` &rarr; `r typeof(mtcars)`
+
+]
+
+--
+
+<!-- ## Extracting a single element -->
+
+You can extract a single element (such as a variable of a data frame) 
+with `$` or `[[]]`:
+
+```{r, eval = TRUE}
+mtcars[[1]] # [[]] using the column index
+mtcars[["mpg"]] # [[]] using a character string 
+mtcars$mpg # $ (without quotes!!!)
+```
+
+---
+
+<!-- ## Extracting multiple elements -->
+
+To access one or more elements, you can use `[]`:
+
+```{r}
+mtcars[c("mpg", "disp")]
+```
+
+---
+
+.pull-left[
+
+You can filter rows and subset variables at the same time:
+
+```{r}
+mtcars[1:3, c("mpg", "disp")]
+```
+
+]
+
+.pull-right[
+
+Alternatively, if the rows are named:
+
+```{r}
+mtcars[c("Mazda RX4", "Mazda RX4 Wag", 
+         "Datsun 710"), 
+       c("mpg", "disp")]
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Filter cars (rows) from `mtcars` with more than 150 HP (`hp`) and <u>not</u> 4 gears (`gear`).
+
+
+```{r echo = FALSE}
+countdown(minutes = 4)
+```
+
+???
+
+```{r, eval = FALSE}
+mtcars[mtcars$hp > 200 & mtcars$gear != 4, ]
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Your workspace contains the data frame `mtcars2` which looks as follows:
+
+```{r, echo = FALSE}
+(mtcars2 <- mtcars[1:5, c("mpg", "cyl", "disp")])
+```
+
+Which of the following commands return the variable `cyl` as atomic vector? 
+
+1. `mtcars2[[cyl]]`
+1. `mtcars2[["cyl"]]`
+1. `mtcars2[cyl]`
+1. `mtcars2["cyl"]`
+1. `mtcars2$cyl`
+1. `mtcars2$"cyl"`
+1. `mtcars2[[2]]`
+1. `mtcars2[-c(1,3)]`
+1. `mtcars2[-c(1,3)][[1]]`
+1. `mtcars2[-c(1,3)][[2]]`
+
+
+```{r echo = FALSE}
+countdown(minutes = 2)
+```
+
+???
+
+2., 5., 7., 9.
+
+---
+
+## Factors
+
+A **factor** is a **vector class** built on top of an integer vector. 
+
+A **factor** vector contains predefined values, the so called **levels**.
+
+Factors are mainly used for **categorical** data.
+
+```{r}
+(gender <- factor(c("m", "f", "f", "m", "m"), levels = c("f", "m", "d")))
+class(gender)
+typeof(gender)
+levels(gender)
+```
+
+---
+
+## Factors
+
+A values that is not an element of the set of levels must not be used:
+
+```{r, warning = T}
+gender[2] <- "male"
+gender
+```
+
+---
+
+## Factors
+
+Factors are particularly useful if all possible values are known in advance, although 
+some of them might not occur initially. 
+
+```{r}
+table(gender)
+```
+
+--
+
+Compare with:
+
+```{r}
+x <- as.character(gender)
+table(x)
+```
+
+---
+
+## Functions
+
+Custom function that computs the mean of the elements in a vector:
+
+```{r}
+avg <- function(x = 1:5){
+  return(sum(x)/length(x))
+}
+avg(1:10)
+avg()
+```
+
+- `avg` is the function **name**
+- **a function is an object**. Thus, the `<-` operator can be used.
+- `x` is the sole **argument** of the function, with the **default** value `1:5`.
+- multiple arguments are separated with `,`.
+- use `return()` to return an object. If `return()` is not used, the last 
+evaluated command will be returned. 
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Create the function `my_kth_number()` which returns the k-th largest value 
+of a numeric vector by completing the following template. By default, 
+the second-largest element should be returned.
+
+```{r, eval=FALSE}
+my_kth_number <- __________(x, k = __________) {
+  if(!is.numeric(x)) stop("`x` is not a numeric vector.")
+  if(length(x) < k) stop("`x` contains less than `k` elements.")
+  
+  xs <- __________(x, decreasing = TRUE) # sort values of x in decreasing order
+  __________ # return the k-th element of xs
+}
+```
+
+`my_kth_number(mtcars$mpg)` &rarr; 32.4
+`my_kth_number(mtcars$mpg, 5)` &rarr; 27.3
+
+```{r echo = FALSE}
+countdown(minutes = 5)
+```
+
+???
+
+```{r, eval=FALSE}
+my_kth_number <- function(x, k = 2L) {
+  if(!is.numeric(x)) stop("`x` is not a numeric vector.")
+  if(length(x) < k) stop("`x` contains less than `k` elements.")
+  
+  xs <- sort(x, decreasing = TRUE) # sort values of x in decreasing order
+  xs[k] # return the k-th element of xs
+}
+```
+
+---
+
+## Lexical scoping
+
+**Scoping** describes in which order `R` searches for names. 
+
+```{r}
+a <- 3
+f <- function() {
+  a <- 5
+  b <- 2
+  a^b
+}
+```
+
+&#x1F914; _"What is the result of running `f()`?"_
+
+--
+
+```{r}
+f()
+```
+
+&#x1F914; _"Why is the result not 9?"_
+
+--
+
+Initially, `R` searches for names in the environment of the called function.
+
+If the names does not exisit in this environment, `R` searches in the 
+next higher environment level.
+
+???
+
+- each environment has a parent environment
+- if a name is not found in an environment, then R will look in its parent (and so on)
+
+---
+
+## Lexical Scoping
+
+.pull-left[
+
+```{r}
+a <- 3
+f <- function() {
+  a <- 5
+  b <- 2
+  a^b
+}
+f()
+```
+
+]
+
+.pull-right[
+
+```{r}
+a <- 3
+g <- function() {
+  b <- 2
+  a^b
+}
+g()
+```
+
+
+]
+
+---
+
+## Lexical Scoping 
+
+Each function call starts with a new environment:
+
+```{r, warning=FALSE, echo=FALSE}
+rm(x)
+```
+
+
+```{r}
+h <- function() {
+  if(!exists("x")) {
+    x <- 1
+  } else {
+    x <- x + 1
+  }
+  print(x)
+}
+```
+
+```{r, error = TRUE}
+h()
+h()
+x
+```
+
+---
+
+## `for` loops
+
+```{r for-loop, eval=FALSE}
+df <- data.frame(a = c(1, 9, 4, 8),
+                 b = c(4, 2, 0, 5),
+                 c = c(9, 9, 4, 1),
+                 d = c(6, 1, 8, 7))
+
+for(i in 1:ncol(df)) {
+  print(mean(df[[i]]))
+}
+```
+
+&#x1F914; _"What is the result?"_
+
+--
+
+```{r, ref.label='for-loop', echo = FALSE}
+
+```
+
+--
+
+`for` loops consist of 3 elements:
+
+- **sequence**: `i in 1:ncol(df)`
+- **body**: `print(mean(df[[i]]))`
+- **output**
+
+--
+
+Mögliche Verbesserungen für dieses erste Beispiel:
+
+- Erstellung einer robusten Sequenz mit `seq_along()`
+- Speichern des Outputs als Variable (statt Konsolenprint)
+???
+
+- it is also possible to loop over columns of a data frame or elements of a list
+
+---
+
+## `for` loops
+
+```{r}
+df <- data.frame(a = c(1, 9, 4, 8),
+                 b = c(4, 2, 0, 5),
+                 c = c(9, 9, 4, 1),
+                 d = c(6, 1, 8, 7))
+
+out <- vector("double", ncol(df))
+
+for(i in seq_along(df)) {
+  out[i] <- mean(df[[i]])
+}
+out
+```
+
+--
+
+.content-box-yellow[
+
+Alternatively, `while` loops can be used in situations where the 
+number of iterations is unknown in advance.
+]
+
+---
+
+## Short excursus to functionals
+
+In general, loops should be avoided, because they are hard to read and hard to 
+debug. Instead, it is recommended to use **functionals** which make the code 
+more concise and readable.
+
+--
+
+.content-box-blue[
+
+A **functional** is a function which takes another function as input and returns 
+a vector as output. 
+Hence, operations that are applied to each column individually can be split up 
+into independent parts. 
+
+]
+
+--
+
+.pull-left[
+
+Example: the `apply(X, MARGIN, FUN)` function:
+
+- `X`: `data.frame` or `matrix`
+- `MARGIN`: 1=rowwise, 2=columnwise
+- `FUN`: aggregation function
+
+```{r}
+apply(df, 2, mean)
+```
+
+]
+
+.pull-right[
+
+```{r, echo=FALSE, out.width="80%"}
+knitr::include_graphics(file.path(fig_path, "apply.png"))
+```
+
+]
+
+.footnote[
+.content-box-green[
+
+Going further:  
+The `purrr` package provides various functionals which are more 
+intuitive to use and produce more robust outputs in comparison with `apply()`.
+]
+]
+
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Use `apply()` to calculate the **rowwise** median of values in `mtcars`. 
+
+```{r echo = FALSE}
+countdown(minutes = 2)
+```
+
+???
+
+apply(mtcars, 1, median)
+
+---
+
+## Documentation & further materials
+
+.pull-left70[
+- [The Comprehensive R Archive Network (CRAN)](https://cran.r-project.org/)
+- [RStudio](https://www.rstudio.com/products/rstudio/download/)
+- [Getting Help with R](https://support.rstudio.com/hc/en-us/articles/200552336-Getting-Help-with-R)
+- News and tutorials aggregators: [R-Bloggers](https://www.r-bloggers.com/), [R Weekly](https://rweekly.org/)
+- **Hadley Wickham, and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017.**
+- Norman Matloff: ["The Art of R Programming"](https://www.amazon.de/Art-Programming-Statistical-Software-Design/dp/1593273843). No Starch Press, 2011.
+- Patrick Burns. ["The R Inferno"](http://servidor.dia.uned.es/31106065/Complementario_R/R_inferno.pdf). burns-stat.com, 2011.
+- learn `R` interactively via the console [swirl](http://swirlstats.com/)
+- website with cookbook-like tutorials on data import, statistics and chart creation: [Quick-R](http://www.statmethods.net/)
+- "Cheat sheets" for `R`: [RStudio Cheat Sheets](https://www.rstudio.com/resources/cheatsheets/), [R Reference Card](https://cran.r-project.org/doc/contrib/Short-refcard.pdf)
+
+]
+
+.pull-right30[
+```{r, echo=FALSE, out.width = "100%"}
+knitr::include_graphics(file.path(fig_path, "r4ds_cover.png"))
+```
+]
+
+---
+
+## RStudio primers <https://rstudio.cloud/learn/primers>
+
+```{r rstudio-primers, echo=FALSE, out.width="100%"}
+knitr::include_url("https://rstudio.cloud/learn/primers", height = "550px")
+```
+
+---
+
+
+background-image: url("figures/01-R-Fundamentals/r-cheat-sheet-3_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/01-R-Fundamentals/r-cheat-sheet-3_2.png")
+background-size: contain
+
+---
+
+```{r, child="session_info.Rmd"}
+```
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&nbsp;
+
+.courtesy[&#x1F4F7; Photo courtesy of Stefan Berger]
+
+<!-- ## Environments und Workspace -->
+
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::include_graphics(file.path("figures", "rstudio_environment_load_save.png")) -->
+<!-- ``` -->
+
+<!-- Workspaces können als `.RData` gespeichert und später wieder geladen werden.   -->
+
+<!-- Aber... -->
+
+<!-- -- -->
+
+<!-- .content-box-red[ -->
+
+<!-- &#x1F620; Workspaces ständig als `.RData` abzuspeichern ist  -->
+<!-- schlechte Geflogenheit und sollte vermieden werden. Es  -->
+<!-- ist besser, mit einer "frischen" `R`-Session zu starten und den Workspace durch ein  -->
+<!-- `R`-Skript wiederherzustellen.  -->
+
+<!-- <!-- _Erinnern Sie sich in 2 Wochen noch, wie Sie das Data Frame `df` aus Ihrem  --> -->
+<!-- <!-- abgespeicherten Workspace erstellt haben?_ --> -->
+
+<!-- ] -->
+
+<!-- --- -->
+
+
+<!-- ## Projekt-Einstellungen -->
+
+<!-- -  _Tools_ $\rightarrow$ _Project Options..._ -->
+
+<!-- Empfohlenes Setup: -->
+
+<!-- ```{r, echo=FALSE} -->
+<!-- knitr::include_graphics(file.path("figures", "project_options.png")) -->
+<!-- ``` -->
+
+<!-- .font80[ -->
+
+<!-- .content-box-purple[ -->
+
+<!-- &#x1F913; Jennifer Bryan. ["Tidyverse: Project-oriented workflow"](https://www.tidyverse.org/articles/2017/12/workflow-vs-script/). Tidyverse.org. Stand: 07.07.2018. -->
+
+<!-- ] -->
+
+<!-- ] -->
+
+<!-- --- -->
+
+
+<!-- ## Mein erstes Data Frame &#x1F476; -->
+
+<!-- Die meisten Datensätze in `R` sind **Data Frame**'s, ein tabellenkalkulations-ähnliches Format. -->
+
+<!-- -- -->
+
+<!-- > Beispiel: Wir wollen den Datensatz `msleep` vom `ggplot2`-Package anschauen. Der Datensatz enthält Information zu verschiedenen Säugetierarten, zum Beispiel Schlafzeiten und Gewichtsangaben. -->
+
+<!-- -- -->
+
+<!-- ```{r} -->
+<!-- # Überprüfe ob ggplot2 installiert ist bevor es geladen wird. -->
+<!-- library(ggplot2) -->
+<!-- ``` -->
+
+<!-- --- -->
+
+<!-- ## Print `msleep` -->
+
+<!-- ```{r allocate-msleep, include=FALSE} -->
+<!-- msleep <- ggplot2::msleep -->
+<!-- ``` -->
+
+
+<!-- ```{r msleep} -->
+<!-- msleep # identisch zu print(msleep) -->
+<!-- ``` -->
+
+<!-- -- -->
+
+<!-- Informationen, die wir aus dem Konsolenoutput entnehmen können: -->
+
+<!-- - Klasse [tibble](https://blog.rstudio.com/2016/03/24/tibble-1-0-0/#tibbles-vs-data-frames) (Weiterentwicklung eines gewöhnlichen Data Frames)  -->
+<!-- - `r nrow(msleep)` Zeilen &rarr; **observations** -->
+<!-- - `r ncol(msleep)` Spalten &rarr; **variables** -->
+<!-- - Output zeigt nur die ersten 10 Zeilen  -->
+<!-- - `# ... with 73 more rows`: kennzeichnet, dass es 73 weitere Zeilen gibt, die im Konsolenoutput weggelassen wurden -->
+<!-- - die Variablen sind vom Typ character (`chr`) und double (`dbl`) -->
+
+<!-- --- -->
+
+<!-- ## `View()` -->
+
+<!-- ```{r, eval = FALSE} -->
+<!-- View(msleep) -->
+<!-- ``` -->
+
+<!-- ```{r, echo=FALSE, out.width="95%"} -->
+<!-- knitr::include_graphics(file.path("figures", "rstudio_view_tab.png")) -->
+<!-- ``` -->
+
+<!-- - `View()` erzeugt ein neues Tab, in dem das Data Frame im Tabellenformat angezeigt wird. -->
+
+<!-- .content-box-yellow[ -->
+
+<!-- &#x1F9D0; `View()` ist eine von sehr wenigen Funktionen, deren Name mit einem Großbuchstaben anfängt. -->
+
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ## `dplyr::glimpse()` -->
+
+<!-- ```{r} -->
+<!-- # glimpse ist eine Funktion des Packages dplyr -->
+<!-- library(dplyr) -->
+<!-- glimpse(msleep) -->
+<!-- ``` -->
+
+<!-- -- -->
+
+<!-- Informationen, die wir aus dem Konsolenoutput entnehmen können: -->
+
+<!-- - Anzahl von Observationen und Variablen -->
+<!-- - Name, Typ und die ersten paar Werte für jede Variable -->
+
+<!-- --- -->
+
+<!-- ## `summary()` -->
+
+<!-- ```{r} -->
+<!-- summary(msleep) -->
+<!-- ``` -->
+
+<!-- - Infos zur Verteilung jeder Variable -->
+<!-- - Für numerische Variablen: min/max, Quartile, Mittelwert, Anz. fehlender Werte -->
+
+<!-- --- -->
+
+<!-- ## Zugreifen auf einzelne Variablen mit dem `$`-Operator -->
+
+<!-- ```{r} -->
+<!-- msleep$sleep_total -->
+<!-- ``` -->
+
+<!-- --- -->
+
+<!-- ## Einfache Summary Statistics -->
+
+<!-- Wie lange die durchschnittliche Schlafzeit? -->
+
+<!-- ```{r} -->
+<!-- mean(msleep$sleep_total) -->
+<!-- ``` -->
+
+<!-- -- -->
+
+<!-- Wie groß ist die kürzeste/ längste Schlafzeit? -->
+
+<!-- ```{r} -->
+<!-- range(msleep$sleep_total) -->
+<!-- ``` -->
+
+<!-- --- -->
+
+<!-- ## Einfache Visualisierungen -->
+
+<!-- .pull-left[ -->
+
+<!-- Verteilung der Schlafzeit als Histogramm. -->
+
+<!-- ```{r} -->
+<!-- hist(msleep$sleep_total) -->
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- -- -->
+
+<!-- .pull-right[ -->
+
+<!-- Verteilung der Schlafzeit nach Gattung (vore) als Boxplot. -->
+
+<!-- ```{r} -->
+<!-- boxplot(sleep_total ~ vore, data = msleep) -->
+<!-- ``` -->
+
+<!-- ] -->
+
+<!-- ```{r remove-msleep, include=FALSE} -->
+<!-- rm(msleep) -->
+<!-- ``` -->
+
+
+<!-- --- -->
