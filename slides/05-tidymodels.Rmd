@@ -1,0 +1,2024 @@
+---
+title: "Machine Learning with tidymodels"
+subtitle: "Data Science with R &#183; Summer 2020"
+author: "Uli Niemann"
+session: "05"
+institute: "Knowledge Management & Discovery Lab"
+# date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: ["default", "assets/css/my-theme.css", "assets/css/my-fonts.css"]
+    seal: false # custom title slide
+    lib_dir: libs
+    nature:
+      # highlightStyle: solarized-light
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: true
+      ratio: "16:9"
+      # beforeInit: "https://platform.twitter.com/widgets.js"
+params:
+  url: "https://brain.cs.uni-magdeburg.de/kmd/DataSciR/"
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale("LC_ALL","English")
+Sys.setenv(LANG = "en_US.UTF-8")
+Sys.setlocale("LC_TIME", "English")
+
+# The version number in the directory name of an HTML dependency can be
+# suppressed by setting options(htmltools.dir.version = FALSE) when the
+# dependency is copied via `copyDependencyToDir()`. 
+options(htmltools.dir.version = FALSE)
+options(width = 90) # width of console output
+options(scipen = 999) # avoid expressing numbers in scientific notation
+# load fonts (mainly Fira Sans)
+# extrafont::font_import()
+extrafont::loadfonts("win", quiet = TRUE)
+
+yt_counter <- 01
+
+# set default knitr options
+knitr::opts_chunk$set(fig.width = 15/2.54, fig.height = 11/2.54, fig.retina = 4)
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE, warning = TRUE, 
+                      message = TRUE, cache = TRUE)
+# directory of generated figures
+knitr::opts_chunk$set(fig.path = "figures/_gen/05-tidymodels/")
+# directory of included figures
+fig_path <- "figures/05-tidymodels/"
+
+library(countdown)
+
+source("ggplot2_theme.R", echo = FALSE)
+```
+
+class: title-slide, center, bottom
+
+# `r paste(rmarkdown::metadata$session, "-", rmarkdown::metadata$title)`
+
+## `r rmarkdown::metadata$subtitle`
+
+### `r rmarkdown::metadata$author` &#183; `r rmarkdown::metadata$institute`
+
+#### [`r params$url`](`r params$url`)
+
+.courtesy[&#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+## tidymodels
+
+```{r tidymodels-workflow, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "tidymodels-workflow.png"))
+```
+
+<!-- ## tidymodels ecosystem -->
+
+???
+
+tidymodels is a "meta-package" for modeling and statistical analysis that share the underlying design philosophy, grammar, and data structures of the tidyverse.
+
+Today, we will cover the packages
+
+- parsnip: tidy, unified interface to creating models
+- rsample: resampling data
+- yardstick: model evaluation (metrics such as accuracy, RMSE)
+- tune: hyperparameter optimization
+- workflows: combine pre-processing steps and models into single objects
+- recipes: data preprocessing: feature engineering, imputation, etc
+- dials? has tools to create and manage values of tuning parameters.
+
+---
+
+class: bottom, center
+
+background-image: url("figures/05-tidymodels/caret-obs.png")
+background-size: contain
+
+<!-- .font100[Data Science with R WS 2018/19] -->
+
+---
+
+## Robust and capable alternative: [mlr3](https://mlr3.mlr-org.com/)
+
+```{r mlr3-verse, echo=FALSE, out.width="70%", fig.align='center'}
+knitr::include_graphics("https://raw.githubusercontent.com/mlr-org/mlr3/master/man/figures/mlr3verse.svg?sanitize=true")
+```
+
+.footnote[Figure source: <https://mlr3.mlr-org.com/>]
+
+???
+
+- Currently provides more comprehensive functionalities than tidymodels
+- tidymodels is likely to catch up until 2021
+
+---
+
+class: middle
+
+This tutorial is a condensed version of the 2-day
+workshop ["Introduction to Machine Learning with the Tidyverse"](https://conf20-intro-ml.netlify.app/) 
+held by Dr. Alison Hill at the 
+[rstudio::conf 2020](https://rstudio.com/conference/).
+
+```{r include-url-rstudio-conf-workshop, echo=FALSE, out.width="100%"}
+knitr::include_url("https://conf20-intro-ml.netlify.app/", height = "450px")
+```
+
+---
+
+## Setup
+
+```{r load-libs, message=TRUE}
+library(tidyverse)
+library(tidymodels)
+```
+
+---
+
+## Ames Iowa Housing Dataset
+
+.left-column[
+
+&nbsp;
+
+> "Data set contains information from the Ames Assessor’s Office used in 
+computing assessed values for individual residential properties sold in Ames, 
+IA from 2006 to 2010." &mdash; 
+[Dataset documentation](http://jse.amstat.org/v19n3/decock/DataDocumentation.txt)
+
+&nbsp; 
+
+.font80[
+
+De Cock, Dean. "Ames, Iowa: Alternative to the Boston housing data as an end of 
+semester regression project." Journal of Statistics Education 19.3 (2011). 
+[URL](http://jse.amstat.org/v19n3/decock.pdf)
+
+]
+
+]
+
+.right-column[
+
+```{r prep-ames, message=TRUE, R.options=list(width = 70)}
+library(AmesHousing)
+(ames <- make_ames() %>% select(-matches("Qu")))
+```
+
+]
+
+
+???
+
+- 2930 observations, 74 variables
+- remove quality columns: why?
+
+---
+
+class: center, inverse, middle
+name: parsnip
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+# Specify a model with parsnip
+
+]
+
+.pull-right30[
+
+```{r parsnip-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "parsnip.png"))
+```
+
+]
+
+
+---
+
+class: middle
+
+## Specify a model with `parsnip`
+
+.content-box-blue[
+
+.font130[
+
+1. Pick a **model**
+2. Set the **engine**
+3. Set the **mode** (if needed)
+
+]
+
+]
+
+--
+
+.pull-left[
+
+```{r parsnip-intro-1}
+decision_tree() %>% # model
+  set_engine("rpart") %>% # engine
+  set_mode("classification") # mode
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r parsnip-intro-2}
+nearest_neighbor() %>%
+  set_engine("kknn") %>%
+  set_mode("regression")
+```
+
+]
+
+
+---
+
+class: middle
+
+All available models are listed at <https://tidymodels.github.io/parsnip/articles/articles/Models.html>.
+
+```{r include-url-parsnip-models, echo=FALSE, out.width="100%"}
+knitr::include_url("https://tidymodels.github.io/parsnip/articles/articles/Models.html", height = "450px")
+```
+
+---
+
+class: middle
+
+.left-column[
+
+.content-box-blue[
+
+.font130[
+
+1\. Pick a **model**
+
+.fade[
+
+2\. Set the **engine**
+
+3\. Set the **mode**
+]
+
+
+]
+
+]
+
+]
+
+.right-column[
+
+## `linear_reg()`
+
+Specify a model that uses linear regression:
+
+```{r linear-reg-1, eval=FALSE}
+linear_reg(
+  mode = "regression", # type of model (only "regression" here)
+  penalty = NULL, # amount of regularization
+  mixture = NULL # proportion of L1 regularization
+)
+```
+
+
+]
+
+???
+
+linear_reg() is a way to generate a specification of a model before fitting and allows the model to be created using different packages in R, Stan, keras, or via Spark. The main arguments for the model are:
+
+penalty: The total amount of regularization in the model. Note that this must be zero for some engines.
+
+mixture: The proportion of L1 regularization in the model. Note that this will be ignored for some engines.
+
+---
+
+class: middle
+
+.left-column[
+
+.content-box-blue[
+
+.font130[
+
+.fade[1\. Pick a **model**]
+
+2\. Set the **engine**
+
+.fade[3\. Set the **mode**]
+
+]
+
+]
+
+]
+
+.right-column[
+
+## `set_engine()`
+
+Add an engine to power or implement the model:
+
+```{r linear-reg-2, eval=FALSE}
+linear_reg() %>% 
+  set_engine(engine = "lm", ...)#<<
+```
+
+Available engines for `linear_reg()`:
+
+- R: "lm" (the default) or "glmnet"
+- Stan: "stan"
+- Spark: "spark"
+- keras: "keras"
+
+]
+
+---
+
+class: middle
+
+.left-column[
+
+.content-box-blue[
+
+.font130[
+
+.fade[1\. Pick a **model**
+
+2\. Set the **engine**]
+
+3\. Set the **mode**
+
+]
+
+]
+
+]
+
+.right-column[
+
+## `set_mode()`
+
+Set the model type, either `"regression"` or `"classification"`. 
+Not necessary if mode is set in Step 1.
+
+```{r linear-reg-3, eval=FALSE}
+linear_reg() %>% 
+  set_engine(engine = "lm") %>%
+  set_mode(mode = "regression") #<<
+```
+
+]
+
+
+---
+
+## `fit()`
+
+`fit()`: fit a simple linear regression model to predict _sale price_ based on 
+_above ground living area_.
+
+.pull-left[
+
+```{r linear-reg-4}
+lm_spec <- linear_reg() %>% 
+  set_engine(engine = "lm") %>%
+  set_mode(mode = "regression")
+m <- fit( #<<
+  lm_spec, # parsnip model spec #<< 
+  Sale_Price ~ Gr_Liv_Area, # formula #<<
+  ames # data frame #<<
+) #<<
+m
+```
+
+]
+
+.pull-right[
+
+```{r linear-reg-5, echo = FALSE}
+ggplot(ames, aes(Gr_Liv_Area, Sale_Price)) + 
+  geom_point() +
+  geom_abline(slope = m$fit$coefficients[2],
+              intercept = m$fit$coefficients[1],
+              color = "royalblue3", size = 1.5)
+```
+
+
+]
+
+???
+
+- fit: fit a model using the parsnip model spec, a formula (lhs: target attribute, rhs: predictors) and the training data
+
+---
+
+## `predict()`
+
+`predict()`: use a fitted model to predict new response values from data. Returns a tibble.
+
+.pull-left[
+
+```{r linear-reg-6}
+p <- predict(m, new_data = ames)
+p
+```
+
+]
+
+.pull-right[
+
+```{r linear-reg-7, echo=FALSE}
+set.seed(123)
+ames %>% select(Gr_Liv_Area, Sale_Price) %>%
+  bind_cols(p) %>%
+  mutate(residual = .pred - Sale_Price) %>%
+  sample_frac(0.2) %>%
+  ggplot(aes(Gr_Liv_Area, Sale_Price)) + 
+  geom_point() +
+  geom_segment(aes(xend = Gr_Liv_Area, yend = .pred), color = "red") +
+  geom_abline(slope = m$fit$coefficients[2],
+              intercept = m$fit$coefficients[1],
+              color = "royalblue3", size = 1.5) +
+  labs(caption = "(Only a random sample of 20% is shown.)")
+```
+
+
+]
+
+???
+
+- residuals: difference between observed and predicted values
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+1. Create a simple linear regression model on the ames data to predict _sale 
+price_ (`Sale_Price`) based on _above ground living area_ (`Gr_Liv_Area`). 
+1. Apply the model to the original data.
+1. Use `mutate()` to add a column with the observed sale prices; name it `truth`. 
+
+---
+
+class: center, inverse, middle
+name: yardstick
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+# Measure model performance with yardstick
+
+]
+
+.pull-right30[
+
+```{r yardstick-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "yardstick.png"))
+```
+
+]
+
+---
+
+class: middle
+
+## Measure the model performance with `yardstick::rmse()`
+
+- **Residuals**. The difference between observed and predicted values: $\hat{y}_i-y_i$.
+- **Mean Absolute Error**. $\frac{1}{n}\sum_{i=1}^n|\hat{y}_i-y_i|$.
+- **Root Mean Squared Error**. $\sqrt{\frac{1}{n}\sum_{i=1}^n(\hat{y}_i-y_i)^2}$.
+
+--
+
+Calculate the RMSE based on two columns in a data frame:
+
+- truth $y_i$
+- predicted estimate $\hat{y}$
+
+
+```{r rmse-1}
+lm_spec <- linear_reg() %>% 
+  set_engine(engine = "lm") %>%
+  set_mode(mode = "regression")
+lm_fit <- fit(object = lm_spec, formula = Sale_Price ~ Gr_Liv_Area, data = ames)
+price_pred <- lm_fit %>% 
+  predict(new_data = ames) %>% 
+  mutate(truth = ames$Sale_Price)
+
+rmse(price_pred, truth = truth, estimate = .pred) #<<
+```
+
+---
+
+## Available metrics in yardstick
+
+```{r include-url-yardstick-metrics, echo=FALSE, out.width="100%"}
+knitr::include_url("https://tidymodels.github.io/yardstick/articles/metric-types.html#metrics", height = "450px")
+```
+
+---
+
+class: center, inverse, middle
+name: rsample
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+# Perform resampling with rsample
+
+]
+
+.pull-right30[
+
+```{r rsample-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "rsample.png"))
+```
+
+]
+
+???
+
+- so far, we have evaluated model performance on training data which gives us too optimistic estimates of the true model performance
+- we need to evaluate the model on a test dataset that is independent from the dataset used for model training 
+
+---
+
+class: middle
+
+## `initial_split()`
+
+`initial_split()`: partition data randomly into a 
+single training and a single test set.
+
+```{r data-splitting-1}
+set.seed(123)
+(ames_split <- initial_split(ames, prop = 3/4)) # prop = proportion of training instances
+```
+
+---
+
+## `training()` and `testing()`
+
+Extract training and testing sets from an `rsplit` object:
+
+.pull-left[
+
+```{r data-splitting-2, R.options=list(width = 45)}
+training(ames_split)
+```
+
+]
+
+.pull-right[
+```{r data-splitting-3, R.options=list(width = 45)}
+testing(ames_split)
+```
+
+
+]
+
+---
+
+class: exercise-blue, middle
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 4)`
+
+Use `initial_split()`, `training()`, `testing()`, `lm()` and `rmse()` to:
+
+1. Split ames into training (70%) and test (30%) sets. Save the `rsplit`.
+1. Extract the training data. Fit a linear model to it. Save the model as `lm_fit`.
+1. Measure the RMSE of your linear model with your test set.  
+
+Keep `set.seed(100)` at the start of your code.
+
+<!-- .font70[RMSE=54721]  -->
+
+---
+
+## Stratified sampling
+
+```{r strat-sampling-2, eval=FALSE}
+initial_split(ames, strata = Sale_Price, breaks = 6) #<<
+```
+
+```{r strat-sampling-1, fig.width=25/2.54, fig.height=18/2.54, echo = FALSE}
+set.seed(123)
+dfp <- ames %>%
+  sample_frac(0.2) %>%
+  select(Gr_Liv_Area, Sale_Price) %>%
+  mutate(stratum = factor(cut_number(Sale_Price, n = 6), labels = paste0("Stratum ", 1:6))) %>%
+  group_by(stratum) %>%
+  mutate(in_train = sample(c(FALSE, TRUE), n(), prob = c(0.25,0.75), replace = TRUE)) %>%
+  ungroup() %>%
+  mutate(in_train = factor(in_train, labels = c("test set", "training set")) %>% fct_rev())
+
+ggplot(mapping = aes(Gr_Liv_Area, Sale_Price)) +
+  geom_point(data = select(dfp, -stratum), alpha = 0.15) +
+  geom_point(data = dfp, aes(color = in_train), alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  facet_wrap(~ stratum) +
+  labs(color = NULL) +
+  theme(legend.position = "top")
+```
+
+???
+
+- apply equal-frequency binning on the target variable and draw train/test 
+instances with the specified split percentages from each bin 
+- to ensure that we have (approx.) the same ratio of train/test instances in each bin
+
+General drawback of holdout method:
+
+- If testing set is small, performance metrics may be unreliable
+- If training set is small, model fit may be poor
+
+-> resampling
+
+---
+
+## Cross-validation with `vfold_cv()`
+
+General syntax: 
+
+```{r cv-1, eval = FALSE}
+vfold_cv(data, v = 10, repeats = 1, strata = NULL, breaks = 4, ...)
+```
+
+--
+
+.pull-left60[
+
+Example: 10-fold CV on ames data:
+
+```{r cv-2}
+set.seed(123)
+(folds <- vfold_cv(ames, v = 5))
+```
+
+Check whether mean $y$ is approx. equal in each training fold: 
+
+```{r cv-3, R.options=list(width = 45)}
+map_dbl(folds$splits, ~mean(.x$data$Sale_Price[.x$in_id]))
+```
+
+]
+
+.pull-right40[
+
+```{r cv-4, fig.width = 15/2.54, fig.height = 15/2.54, echo=FALSE}
+df_means <- tibble(id = paste0("Test fold ", seq_along(folds$id))) %>%
+  mutate(mean_sale_price = map_dbl(folds$splits, ~mean(ames$Sale_Price[setdiff(seq_along(ames$Sale_Price), .x$in_id)])))
+
+set.seed(123)
+folds %>% 
+  mutate(test_id = map(splits, ~ setdiff(seq_along(ames$Sale_Price), .x$in_id))) %>%
+  select(id, test_id) %>%
+  unnest(test_id) %>%
+  left_join(ames %>% select(Gr_Liv_Area, Sale_Price) %>% rowid_to_column(), by = c("test_id" = "rowid")) %>%
+  sample_frac(0.3) %>%
+  mutate(id = paste0("Test fold ", str_sub(id, -1))) %>%
+  ggplot(aes(Gr_Liv_Area, Sale_Price, color = id)) +
+  coord_cartesian(ylim = c(0,600000)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(data = df_means, aes(yintercept = mean_sale_price, color = id), alpha = 0.5) +
+  scale_color_brewer(palette = "Set1") +
+  labs(color = NULL)
+```
+
+]
+
+???
+
+- `vfold_cv()` also has a strata argument
+
+---
+
+## Calculate the model performance on multiple resamples with `fit_resamples()`
+
+```{r}
+res <- fit_resamples(lm_spec, Sale_Price ~ Gr_Liv_Area, resamples = folds)
+res
+```
+
+???
+
+- we need fit_resamples because we have more than 1 split
+- returns a tibble with 5 rows (number of resamples)
+- several list columns (add pull, pluck)
+- `splits`: info on training and test set assignment in resample
+- `.metrics`: model performance
+- `.notes`: contains information in case an error has occurred
+
+---
+
+## Collapse performance results across resamples with `collect_metrics()`
+
+```{r collect-metrics}
+res %>% collect_metrics()
+res %>% collect_metrics(summarize = FALSE)
+```
+
+???
+
+- `collect_metrics`: helper function to expand the `.metrics` column
+- if summarize = TRUE (default), it averages across all folds
+- this code is the same as res %>% collect_metrics(summarize = FALSE): 
+unnest(res %>% select(id, .metrics), cols = .metrics)
+
+
+---
+
+## `metric_set()`
+
+`metric_set()`: a helper function for selecting yardstick metric functions.
+
+.pull-left[
+
+```{r metric-set, eval=FALSE}
+fit_resamples(
+  object, 
+  resamples, 
+  ..., 
+  metrics = metric_set(rmse, rsq), #<<
+  control = control_resamples()
+)
+```
+
+]
+
+.pull-right[
+
+.content-box-blue[
+
+If `metrics = NULL`:
+
+- regression: `metric_set(rmse, rsq)`
+- classification: `metric_set(accuracy, roc_auc)`
+
+]
+
+]
+
+???
+
+- rmse and rsq are functions
+
+---
+
+class: exercise-blue, middle
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+Modify the code below to return the **Mean Absolute Error** and **R²**. 
+Visit 
+<https://tidymodels.github.io/yardstick/reference/index.html#section-regression-metrics> 
+to find the right function to use.
+
+```{r yt-3, eval = FALSE}
+set.seed(100)
+
+folds <- vfold_cv(ames, v = 5)
+
+fit_res <- fit_resamples(Sale_Price ~ Gr_Liv_Area,
+                         model = lm_spec,
+                         resamples = folds)
+
+collect_metrics(fit_res, summarize = TRUE)
+```
+
+---
+
+## Other resampling methods
+
+- `loo_cv()`: leave-one-out CV
+- `mc_cv()`: repeated holdout / Monte Carlo (random) CV: test sets sampled 
+without replacement
+- `bootstraps()`: test sets sampled with replacement
+
+```{r rsample-other-resampling, echo = FALSE, fig.width=34/2.54, fig.height=12/2.54}
+tr_te_colors <- c("#fbb4ae", "#ccebc5")
+set.seed(1)
+loo10 <- slice(ames, 1:10) %>% 
+  loo_cv() %>% 
+  tidy() %>% 
+  mutate(Resample = parse_number(Resample)) %>%
+  mutate(Resample = factor(Resample, labels = paste0("Fold", str_pad(1:10, width = 2, pad = "0")))) %>%
+  mutate(Data = factor(Data, labels = c("In train set", "In test set")))
+
+loo <- ggplot(loo10, aes(x = Row, 
+                         y = fct_rev(Resample), #fct_reorder2(Resample, Data, Row), 
+                         fill = Data)) + 
+  geom_tile(color = "white",
+            width = 1,
+            size = 1) + 
+  scale_fill_manual(values = tr_te_colors) +
+  theme(axis.text.x = element_blank()) +
+  theme(legend.position = "top") +
+  theme(panel.grid = element_blank()) +
+  theme(axis.line = element_blank()) +
+  theme(axis.ticks.x = element_blank()) +
+  theme(plot.title.position = "plot") +
+  theme(plot.title = element_text(size = rel(1.2), hjust = 0.5)) +
+  coord_equal() +
+  labs(x = NULL, y = NULL, fill = NULL, title = "loo_cv()") 
+# loo
+
+
+set.seed(1)
+mc10 <- slice(ames, 1:10) %>% 
+  mc_cv(times = 10, prop = 0.7) %>% 
+  tidy() %>%
+  mutate(Data = factor(Data, labels = c("In train set", "In test set")))
+
+mc <- ggplot(mc10, aes(x = Row, 
+                         y = fct_rev(Resample), 
+                         fill = Data)) + 
+  geom_tile(color = "white",
+            width = 1,
+            size = 1) + 
+  scale_fill_manual(values = tr_te_colors) +
+  theme(axis.text.x = element_blank()) +
+  theme(legend.position = "top") +
+  theme(panel.grid = element_blank()) +
+  theme(axis.line = element_blank()) +
+  theme(axis.ticks.x = element_blank()) +
+  theme(plot.title.position = "plot") +
+  theme(plot.title = element_text(size = rel(1.2), hjust = 0.5)) +
+  coord_equal() +
+  labs(x = NULL, y = NULL, fill = NULL,
+       title = "mc_cv() with prop = 0.7") 
+# mc
+
+set.seed(1)
+so_boots <- bootstraps(slice(ames, 1:10), times = 10)
+
+bt_rows <- data.frame(
+  Row = unlist(lapply(so_boots$splits, function(x) sort(x$in_id))),
+  Resample = rep(recipes:::names0(10, "Bootstrap"), 
+                 each = nrow(slice(ames, 1:10)))) %>% 
+  count(Resample, Row, sort = TRUE) %>% 
+  complete(Resample, Row) %>% 
+  mutate(Data = if_else(is.na(n), "In test set", "In train set")) %>%
+  mutate(Resample = factor(Resample)) 
+
+boots <- ggplot(bt_rows , aes(x = Row, y = fct_rev(Resample), fill = fct_rev(Data))) + 
+  geom_tile(color = "white",
+            width = 1,
+            size = 1) + 
+  geom_text(data = bt_rows %>% filter(n > 1), aes(label = paste0("x", n)),
+            size = 10/.pt, family = "Fira Sans") +
+  scale_fill_manual(values = tr_te_colors) +
+  theme(axis.text.x = element_blank()) +
+  theme(legend.position = "top") +
+  theme(panel.grid = element_blank()) +
+  theme(axis.line = element_blank()) +
+  theme(axis.ticks.x = element_blank()) +
+  theme(plot.title.position = "plot") +
+  theme(plot.title = element_text(size = rel(1.2), hjust = 0.5)) +
+  coord_equal() +
+  labs(x = NULL, y = NULL, fill = NULL,
+       title = "bootstraps()") 
+# boots
+
+library(patchwork)
+guide_area() / (loo + mc + boots) + 
+  plot_layout(guides = 'collect', heights = c(0.025, 0.975))
+```
+
+---
+
+class: exercise-blue, middle
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+Compare the performance of a regression tree model with a k-nearest neighbor 
+model on 10 bootstrap samples using RMSE as evaluation measure. 
+
+Set `rpart` as engine for the decision tree model and `kknn` as engine for the 
+k-nearest neighbor model. Leave all model-specific parameters (e.g. `tree_depth` 
+and `neighbors`) at default.
+
+Which of the two methods perform better and why? 
+
+---
+
+## A classification example
+
+```{r load-so}
+stackoverflow <- read_rds(here::here("datasets/stackoverflow.rds"))
+glimpse(stackoverflow)
+```
+
+.font80[Data source: [Stack Overflow Annual Developer Survey](https://insights.stackoverflow.com/survey)]
+
+
+???
+
+- what makes a developer more likely to work remotely? 
+- Developers can work in their company offices or they can work remotely, and it turns out that there are specific characteristics of developers, such as the size of the company that they work for, how much experience they have, or where in the world they live, that affect how likely they are to be a remote developer.
+
+---
+
+class: middle
+
+## Specify a classification model
+
+
+.left-column[
+
+.content-box-blue[
+
+.font130[
+
+1\. Pick a **model**
+
+2\. Set the **engine**
+
+3\. Set the **mode**
+
+]
+
+]
+
+]
+
+--
+
+.right-column[
+
+Specify a decision tree model with default parameter settings:
+
+```{r vanilla-tree}
+vanilla_tree_spec <- decision_tree() %>% 
+  set_engine("rpart") %>% 
+  set_mode("classification") #<<
+```
+
+
+]
+
+---
+
+class: middle
+
+Measure the performance of a vanilla decision tree model using 5-fold CV: 
+
+```{r vanilla-tree-res}
+set.seed(100)
+so_cv <- vfold_cv(stackoverflow, v = 5)
+(fit_van_res <- fit_resamples(vanilla_tree_spec, remote ~ ., resamples = so_cv) %>% 
+  collect_metrics())
+```
+
+--
+
+&#x1F914; _"Can we improve the performance by tuning the algorithm parameters?"_
+
+--
+
+&#x1F914; _"Which parameters can we tune?"_
+
+---
+
+class: middle
+
+## args()
+
+`args()` prints the arguments for a parsnip model specification:
+
+```{r args}
+args(decision_tree)
+```
+
+--
+
+Arguments of `decision_tree()`:
+
+- `cost_complexity`: minimum fit improvement of a split (0 < `cost_complexity` $\leq$ 1)
+- `tree_depth`: maximum number of levels in the tree
+- `min_n`: minimum number of observations in a node in order for a split to be attempted
+
+---
+
+class: middle
+
+```{r set-args-in-specification}
+decision_tree(
+  cost_complexity = 0.01,  # min. fit improvement of a split (0 < cp <=1)
+  tree_depth = 30, # max. number of levels in the tree
+  min_n = 20 # min. number of observations in a node in order for a split to be attempted
+)
+```
+
+--
+
+If the arguments are left to their defaults (`NULL`), the arguments will use the 
+engine's underlying model functions default value.
+
+For example, `rpart` is used as default engine. The default parameters are:
+
+```{r rpart-defaults}
+args(rpart::rpart.control) # cost_complexity -> cp; tree_depth -> maxdepth; min_n -> minsplit
+```
+
+---
+
+class: middle
+
+## `set_args()`
+
+`set_args()`: **change** the arguments for a parsnip model specification:
+
+```{r set-args-outside-of-specification-1}
+dt_spec <- decision_tree()
+
+dt_spec %>% set_args(tree_depth = 3)
+```
+
+--
+
+.pull-left[
+
+... which is equivalent to:
+
+```{r set-args-outside-of-specification-2}
+dt_spec <- decision_tree(tree_depth = 3)
+dt_spec
+```
+
+]
+
+--
+
+.pull-right[
+
+An example spec of model, engine, mode and tree depth:
+
+```{r set-args-outside-of-specification-3}
+decision_tree() %>%
+  set_engine("rpart") %>% 
+  set_mode("classification") %>%
+  set_args(tree_depth = 3)
+```
+
+]
+
+---
+
+class: middle, center
+
+```{r cp-1, echo = FALSE, fig.width=36/2.54, fig.height=20/2.54}
+big_tree_spec <- decision_tree(min_n = 1, cost_complexity = 0) %>% 
+  set_engine("rpart") %>% 
+  set_mode("classification")
+
+set.seed(101)
+so_split <- initial_split(stackoverflow)
+
+big_tree <- fit(big_tree_spec, remote ~ ., data = training(so_split)) 
+
+df <- stackoverflow %>%
+  mutate(in_train = row_number() %in% so_split$in_id) %>%
+  bind_cols(predict(big_tree, new_data = so_split$data))
+
+big_tree_cp <- big_tree$fit$cptable %>% 
+  as_tibble() %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(contains("error"), names_to = "error_type", values_to = "error_val") %>% 
+  mutate(cp_round = round(cp, 4),
+    cp_fct = as_factor(cp_round))
+
+ggplot(big_tree_cp, aes(x = fct_rev(cp_fct), y = error_val, 
+                        group = error_type, color = error_type)) +
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(x = "cost complexity", y = "error", color = NULL) +
+  scale_color_manual(values = tr_te_colors, 
+                     labels = c("Train set", "Test set")
+                     ) +
+  # theme(text = element_text(family = "Fira Sans")) +
+  # scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_y_continuous(breaks = seq(0,1,0.25)) +
+  # coord_cartesian(ylim = c(0, 1.08), expand = TRUE) +
+  theme(legend.position = "top") +
+  theme(legend.key.size = unit(1, "cm"))
+```
+
+???
+
+<!-- parsimonious model -->
+
+---
+
+class: middle, center 
+
+```{r cp-2, echo = FALSE, fig.width=36/2.54, fig.height=20/2.54}
+ggplot(big_tree_cp, aes(x = as.factor(nsplit), y = error_val, 
+                        group = error_type, color = error_type)) +
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(x = "number of splits", y = "error", color = NULL) +
+  scale_color_manual(values = tr_te_colors, 
+                     labels = c("Train set", "Test set")
+                     ) +
+  # scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_y_continuous(breaks = seq(0,1,0.25)) +
+  theme(legend.position = "top") +
+  theme(legend.key.size = unit(1, "cm"))
+```
+
+---
+
+class: middle, center
+
+.pull-left[
+
+Overfitted tree (`cost_complexity`=0.0008):
+
+```{r rpart-overfitted, echo = FALSE, warning = FALSE, message=FALSE, fig.height=12/2.54}
+library(rpart)
+library(rpart.plot)
+overfitted_tree <- rpart(remote ~ ., data = training(so_split), 
+                         control = rpart.control(cp = 0.0008, minbucket = 1))
+# pred <- predict(tree)
+rpart.plot(overfitted_tree, branch.type = 5)
+```
+
+]
+
+.pull-right[
+
+Optimal tree (`cost_complexity`=0.0093):
+
+```{r rpart-ideal-size, echo = FALSE, warning = FALSE, fig.height=12/2.54}
+ideal_tree <- rpart(remote ~ ., data = training(so_split), 
+                         control = rpart.control(maxdepth = 2))
+# pred <- predict(tree)
+rpart.plot(ideal_tree, branch.type = 5)
+```
+
+]
+
+---
+
+class: exercise-blue, middle
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Create a new classification tree model specification; name it `big_tree_spec`. 
+Set the cost complexity to 0, and the minimum number of data points in a node to split to 1.
+
+Compare the metrics of the big tree to the vanilla tree. 
+Which one predicts the test set better?
+
+Vanilla tree performance: 
+
+- accuracy = `r round(fit_van_res$mean[[1]], 2)`
+- ROC AUC = `r round(fit_van_res$mean[[2]], 2)`
+
+---
+
+class: middle
+
+## `workflow()`
+
+Create a workflow with `workflow()`.
+
+???
+
+- to perform hyperparameter tuning, we need to create a workflow object
+- workflow: bundle together preprocessing, modeling and postprocessing
+- easier to see the benefits of workflows with examples...
+
+--
+
+## `add_formula()`
+
+Add a formula to a workflow
+
+`workflow() %>% add_formula(Sale_Price ~ Year)`
+
+--
+
+## `add_model()`
+
+Add a parsnip model spec to a workflow:
+
+`workflow() %>% add_model(lm_spec)`
+
+---
+
+## Example workflow
+
+<!-- # tree <- fit(wf, stackoverflow) %>% pull_workflow_fit() -->
+
+```{r wf-1}
+wf <- workflow() %>%
+  add_formula(remote ~ .) %>%
+  add_model(decision_tree() %>% set_engine("rpart") %>% set_mode("classification")) 
+
+wf %>% fit_resamples(so_cv)
+```
+
+???
+
+- we do not need to specify a formula within the fitting function
+
+---
+
+class: middle 
+
+## `update_formula()`
+
+Replace a workflow formula with a new one:
+
+```{r wf-update-formula}
+workflow() %>% 
+  add_formula(remote ~ .) %>%
+  update_formula(remote ~ salary + open_source) #<<
+```
+
+---
+
+class: middle
+
+## `update_model()`
+
+Replaces a workflow model spec with a new one:
+
+```{r wf-update-model}
+workflow() %>% 
+  add_model(nearest_neighbor()) %>%
+  update_model(decision_tree())
+```
+
+---
+
+class: center, inverse, middle
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+# Tune model hyperparameters with tune
+
+]
+
+.pull-right30[
+
+```{r tune-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "tune.png"))
+```
+
+]
+
+
+---
+
+class: middle
+
+## `tune()`
+
+`tune()` is a placeholder for hyperparameters tat are to be tuned:
+
+```{r dt-tune-1}
+decision_tree(cost_complexity = tune())
+```
+
+---
+
+## `tune_grid()`
+
+A version of `fit_resamples()` that performs a grid search for the best combination of tuned hyper-parameters.
+
+```{r tune-grid-1, eval = FALSE}
+tune_grid(
+  object, # a model workflow, R formula or recipe object. 
+  resamples, # a resampling object, e.g. the output of vfold_cv() 
+  ..., 
+  grid = 10, # the number of tuning iterations or a data frame of tuning operations (tuning grid)
+  metrics = NULL, # yardstick::metric_set() or NULL
+  control = control_grid() # An object used to modify the tuning process
+)
+```
+
+???
+
+recipes will be discussed later
+
+---
+
+class: middle
+
+## `expand_grid()`
+
+`tidyr::expand_grid()`: takes one or more vectors, and returns a data frame 
+holding all combinations of their values.
+
+```{r expand-grid}
+expand_grid(cost_complexity = 10^(0:-5), min_n = seq(4,20,4))
+```
+
+.footnote[`expand_grid()` is a re-implementation of the base `expand.grid()`.]
+
+---
+
+class: middle
+
+```{r dt-tune-2}
+dt_spec <- decision_tree(
+  cost_complexity = tune(), #<<
+  tree_depth = tune() #<<
+) %>% 
+  set_engine("rpart") %>% 
+  set_mode("classification")
+
+dt_wf <- workflow() %>% 
+  add_model(dt_spec) %>%
+  add_formula(remote ~ .)
+
+dt_res <- dt_wf %>%
+    tune_grid(resamples = so_cv, 
+              grid = expand_grid(cost_complexity = 10^-(1:5), tree_depth = 1:6) #<<
+    )
+dt_res
+```
+
+???
+
+1. specify parsnip model
+1. create workflow, add parsnip model and the formula
+1. invoke `tune_grid()` on the workflow and the tuning grid we create with 
+`expand_grid()`
+
+- `dt_res`: performance for each fold stored in list column `.metrics`
+
+---
+
+class: middle
+
+```{r dt-tune-3}
+dt_res %>% 
+  collect_metrics() %>%
+  filter(.metric == "accuracy") %>%
+  arrange(desc(mean))
+```
+
+```{r dt-tune-3-datatable, echo = FALSE, tidy=FALSE, eval=FALSE}
+dt_res %>% 
+  collect_metrics() %>%
+  filter(.metric == "accuracy") %>%
+  arrange(desc(mean)) %>%
+  select(-c(.estimator, n, std_err)) %>%
+  DT::datatable(fillContainer = FALSE, options = list(pageLength = 8)) 
+```
+
+---
+
+class: middle
+
+## `show_best()`
+
+`show_best()`: display the `n` best hyperparameters combinations according to 
+a `metric`:
+
+```{r show-best}
+dt_res %>% 
+  show_best(metric = "accuracy", n = 5)
+```
+
+---
+
+class: middle
+
+## `autoplot()`
+
+`autoplot()`: quickly visualize tuning results
+
+
+```{r dt-tune-4-autoplot, fig.width=22/2.54, fig.height=16/2.54, fig.align='center'}
+dt_res %>% autoplot()
+```
+
+---
+
+class: middle
+
+## `select_best()`
+
+`select_best()` returns the best combination of hyperparameters according to 
+a metric:
+
+```{r select-best}
+so_best <- dt_res %>% select_best(metric = "roc_auc")
+so_best
+```
+
+???
+
+- returns the first combination in case of ties
+
+
+---
+
+class: middle
+
+## `finalize_workflow()`
+
+`finalize_workflow()`: replaces `tune()` placeholders in a model/recipe/workflow 
+with a set of hyper-parameter values.
+
+```{r finalize-workflow, highlight.output=c(12,13)}
+dt_wf_final <- dt_wf %>% finalize_workflow(so_best) 
+dt_wf_final
+```
+
+???
+
+last_fit()
+
+```{r manual-nested-cv, eval = FALSE, echo=FALSE}
+nested_cv_model <- function(resample, split, wf, tuning_grid) {
+  opt_par <- tune_grid(object = wf, resamples = resample, grid = tuning_grid) %>%
+    select_best("accuracy")
+  finalize_workflow(wf, opt_par) %>% 
+    fit(data = training(split)) %>%
+    predict(testing(split)) %>%
+    mutate(truth = testing(split)$remote) %>%
+    accuracy(truth, .pred_class)
+}
+
+tuning_grid <- expand_grid(cost_complexity = 10^-(1:5), tree_depth = 1:6)
+set.seed(123)
+so_nested <- nested_cv(stackoverflow, 
+                       outside = vfold_cv(v = 10), 
+                       inside = vfold_cv(v = 5)) %>%
+  mutate(test_accuracy = map2(inner_resamples, splits, nested_cv_model, 
+                              wf = dt_wf, tuning_grid = tuning_grid))
+
+# avg. accuracy across outer folds
+mean(map_dbl(so_nested$test_accuracy, ".estimate"))
+```
+
+
+vignettes of a package?
+vignette(package="grid")
+
+grid_random(cost_complexity(), tree_depth())
+
+---
+
+class: exercise-blue
+
+## Your Turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 5)`
+
+Create a KNN workflow on the ames houce prices problem that tunes over the 
+number of neighbors in a 5-fold stratified CV scheme. 
+The candidate values of `neighbors` are `1, 11, 21, 31, ..., 101`.
+
+???
+
+```{r yt-6, include = FALSE}
+k_grid <- expand_grid(neighbors = seq(1, 101, 10))
+
+knn_tuner <- nearest_neighbor(neighbors = tune()) %>% 
+  set_engine("kknn") %>% 
+  set_mode("regression")
+
+knn_twf <- workflow() %>% 
+  add_model(knn_tuner) %>%
+  add_formula(Sale_Price ~ Gr_Liv_Area)
+
+set.seed(100)
+cv_folds <- vfold_cv(ames, v = 5, strata = Sale_Price, breaks = 4)
+knn_results <- knn_twf %>% tune_grid(resamples = cv_folds, grid = k_grid) 
+
+knn_rmse <- knn_results %>% 
+  collect_metrics() %>% 
+  filter(.metric == "rmse")
+knn_rmse
+
+```
+
+---
+
+class: center, middle
+
+```{r yt6-sol, fig.width=25/2.54, fig.height=15/2.54, echo = FALSE}
+knn_rmse %>%
+  mutate(is_best = if_else(mean == min(mean), TRUE, FALSE)) %>%
+ggplot(aes(as.factor(neighbors), mean, group = factor(1))) +
+  geom_line(size = 1) +
+  geom_point(aes(color = is_best), size = 4) +
+  scale_color_manual(values = c("black", "blue")) +
+  guides(color = FALSE) +
+  labs(x = "neighbors", y = "RMSE")
+```
+
+---
+
+class: inverse, middle
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+# Preprocessing with recipes
+
+]
+
+.pull-right30[
+
+```{r recipes-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "recipes.png"))
+```
+
+]
+
+
+---
+
+class: middle
+
+.content-box-blue[
+.font130[
+1\. Create a `recipe()`
+
+2\. Define the predictor and outcome variables
+
+3\. Add one or more preprocessing step _specifications_ 
+
+4\. Calculate statistics from the training set
+
+5\. Apply preprocessing to datasets
+]
+]
+
+---
+
+class: middle
+
+.left-column[
+
+&nbsp;
+
+.content-box-blue[
+.font130[
+1\. Create a `recipe()`
+
+2\. Define the predictor and outcome variables
+
+.fade[
+
+3\. Add one or more preprocessing step _specifications_
+
+4\. Calculate statistics from the training set
+
+5\. Apply preprocessing to datasets
+
+]
+]
+]
+]
+
+.right-column[
+
+## recipe()
+
+`recipe()`: create a recipe by specifying predictors, responses and reference (_template_) data frame. 
+
+```{r recipe-1}
+recipe(Sale_Price ~ ., data = ames) #<<
+```
+
+]
+
+
+---
+
+class: middle
+
+.left-column[
+
+&nbsp;
+
+&nbsp;
+
+.content-box-blue[
+.font130[
+.fade[1\. Create a `recipe()`]
+
+.fade[2\. Define the predictor and outcome variables]
+
+3\. Add one or more preprocessing step _specifications_
+
+.fade[
+
+4\. Calculate statistics from the training set
+
+5\. Apply preprocessing to datasets
+
+]
+
+]
+]
+]
+
+.right-column[
+
+## step_*()
+
+`step_*()`: add preprocessing step specifications in the order they will be performed.
+
+```{r recipe-2}
+recipe(Sale_Price ~ ., data = ames) %>%
+  # step_novel(): assign a previously unseen factor level to 
+  # a new value
+  step_novel(all_nominal()) %>% #<<
+  # step_zv(): zero variance filter: remove vars that contain 
+  # only a single value
+  step_zv(all_predictors()) #<<
+```
+
+]
+
+
+
+???
+
+- How does recipes know what is a predictor and what is an outcome? > formula
+- How does recipes know what is numeric and what is nominal? > data argument
+
+
+Preprocessing and Feature Engineering
+
+This part mostly concerns what we can do to our variables to make the models more effective.
+
+This is mostly related to the predictors. Operations that we might use are:
+
+    transformations of individual predictors or groups of variables
+
+    alternate encodings of a variable
+
+    elimination of predictors (unsupervised)
+
+In statistics, this is generally called preprocessing the data. As usual, the computer science side of modeling has a much flashier name: feature engineering. 
+
+Reasons for Modifying the Data
+
+    Some models (K-NN, SVMs, PLS, neural networks) require that the predictor variables have the same units. Centering and scaling the predictors can be used for this purpose.
+
+    Other models are very sensitive to correlations between the predictors and filters or PCA signal extraction can improve the model.
+
+    As we'll see in an example, changing the scale of the predictors using a transformation can lead to a big improvement.
+
+    In other cases, the data can be encoded in a way that maximizes its effect on the model. Representing the date as the day of the week can be very effective for modeling public transportation data.
+
+
+    Many models cannot cope with missing data so imputation strategies might be necessary.
+
+    Development of new features that represent something important to the outcome (e.g. compute distances to public transportation, university buildings, public schools, etc.)
+
+
+---
+
+## step_*()
+
+Complete list at: <https://tidymodels.github.io/recipes/reference/index.html>
+
+```{r include-url-recipe-step-functions, echo=FALSE, out.width="100%"}
+knitr::include_url("https://tidymodels.github.io/recipes/reference/index.html#section-step-functions-imputation", height = "450px")
+```
+
+---
+
+## Selectors
+
+**Selectors**, e.g., `all_nominal()` and `all_predictors()` are helper functions for 
+selecting sets of variables, which behave similar to the select helpers from `dplyr`.
+
+```{r, recipe-3, eval = FALSE}
+rec %>% 
+  step_novel(all_nominal()) %>%
+  step_zv(all_predictors())
+```
+
+--
+
+&nbsp;
+
+.font130[
+
+```{r recipe-4, echo = FALSE}
+# library(gt)
+tribble(
+  ~ selector, ~ description,
+  "`all_predictors()`", "Each x variable  (right side of ~)",
+  "`all_outcomes()`", "Each y variable  (left side of ~)",
+  "`all_numeric()`", "Each numeric variable",
+  "`all_nominal()`", "Each categorical variable (e.g. factor, string)",
+  "`dplyr::select()` helpers", "`starts_with('Lot_')`, etc."
+) %>% knitr::kable(format = "markdown")
+```
+
+
+]
+
+---
+
+class: exercise-blue, middle
+
+## Your Turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+Create a recipe that performs z-score normalization on each numeric 
+variable of the ames data. 
+
+A z-score is calculated by subtracting the variable mean from an individual 
+raw value and then dividing the difference by the variable standard deviation.
+
+Tip: Look up the appropriate `step_*()` functions at 
+<https://tidymodels.github.io/recipes/reference/index.html>.
+
+---
+
+class: middle
+
+.left-column[
+
+&nbsp;
+
+&nbsp;
+
+.content-box-blue[
+.font130[
+.fade[1\. Create a `recipe()`]
+
+.fade[2\. Define the predictor and outcome variables]
+
+.fade[3\. Add one or more preprocessing step _specifications_]
+
+4\. Calculate statistics from the training set
+
+.fade[5\. Apply preprocessing to datasets]
+
+]
+]
+]
+
+.right-column[
+
+## `prep()`
+
+`prep()` "trains" a recipe, i.e., calculates statistics from the training data
+
+```{r recipe-prep}
+recipe(Sale_Price ~ ., data = ames) %>%
+  step_novel(all_nominal()) %>%
+  step_zv(all_predictors()) %>%
+  prep(training = training(ames_split)) #<<
+```
+
+]
+
+---
+
+class: middle
+
+.left-column[
+
+&nbsp;
+
+&nbsp;
+
+.content-box-blue[
+.font130[
+.fade[1\. Create a `recipe()`]
+
+.fade[2\. Define the predictor and outcome variables]
+
+.fade[3\. Add one or more preprocessing step _specifications_]
+
+.fade[4\. Calculate statistics from the training set]
+
+5\. Apply preprocessing to datasets
+
+]
+]
+]
+
+.right-column[
+
+## `bake()`
+
+`bake()` transforms data with the prepped recipe
+
+```{r recipe-bake}
+recipe(Sale_Price ~ ., data = ames) %>%
+  step_novel(all_nominal()) %>%
+  step_zv(all_predictors()) %>%
+  prep(training = training(ames_split)) %>%
+  bake(new_data = testing(ames_split)) # or training(ames_split) #<<
+```
+
+]
+
+???
+
+actually, you don't need to do this! The fit functions do it for you
+
+---
+
+class: bottom, right
+
+background-image: url("figures/05-tidymodels/recipes-workflow.png")
+background-size: contain
+
+.font70[[Source](https://twitter.com/allison_horst/status/1159809527023198209?s=20)]
+
+---
+
+## `juice()`
+
+`juice()` returns the preprocessed training data back from a prepped recipe, 
+without having to rerun the preprocessing steps on the training data. 
+
+```{r}
+rec <- recipe(Sale_Price ~ ., data = ames) %>% 
+    step_center(all_numeric()) %>% 
+    step_scale(all_numeric())
+rec %>% 
+  prep(training = training(ames_split), 
+       retain = TRUE #<<
+  ) %>% 
+  juice() #<<
+```
+
+.font80[
+
+> "As steps are estimated by `prep()`, these operations are applied to the training set. 
+Rather than running `bake()` to duplicate this processing, 
+this function will return variables from the processed training set." &mdash; ?recipes::juice
+
+]
+
+???
+
+There are packages like embed, textrecipes, and themis that extend recipes with new steps.
+
+---
+
+class: exercise-blue, middle
+
+## Your Turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 5)`
+
+Write a recipe for the ames data that:
+
+1. adds a novel level to all factors
+1. converts all factors to dummy variables
+1. catches any zero variance variables
+1. centers all of the predictors
+1. scales all of the predictors
+1. computes the first 3 principal components
+
+Save the result as `pca_rec`.
+
+---
+
+exclude: true
+
+roles
+
+You can also give variables a "role" within a recipe and then select by roles.
+
+```{r recipes-roles, eval=FALSE}
+has_role(match = "privacy")
+add_role(pca_rec, Fence, new_role = "privacy")
+update_role(rec, Fence, new_role = "privacy", old_role = "yard")
+remove_role(rec, Fence, old_role = "yard")
+```
+
+---
+
+## A full workflow
+
+```{r full-workflow-conf-matrix}
+set.seed(123)
+so_cv <- vfold_cv(stackoverflow, v = 5)
+so_rec <- recipe(remote ~ ., data = stackoverflow) %>% 
+  step_dummy(all_nominal(), -all_outcomes()) %>%
+  step_corr(all_predictors(), threshold = 0.5)
+
+tree_spec <- decision_tree() %>%
+  set_engine("rpart") %>%
+  set_mode("classification")
+
+so_wf <- workflow() %>% 
+  add_model(tree_spec) %>% 
+  add_recipe(so_rec) #<<
+
+fit_resamples(so_wf, # note: workflow object instead of model spec #<<
+              resamples = so_cv,
+              metrics = metric_set(accuracy, sens, spec),
+              control = control_resamples(save_pred = TRUE)) %>%
+  # collect_metrics() %>% 
+  collect_predictions() %>%
+  conf_mat(remote, .pred_class)
+```
+
+---
+
+You can tune models **and** recipes!
+
+```{r tune-recipe}
+pca_tuner <- recipe(Sale_Price ~ ., data = ames) %>%
+    step_novel(all_nominal()) %>%
+    step_dummy(all_nominal()) %>%
+    step_zv(all_predictors()) %>%
+    step_center(all_predictors()) %>%
+    step_scale(all_predictors()) %>%
+    step_pca(all_predictors(), num_comp = tune()) #<<
+pca_twf <- workflow() %>% 
+    add_recipe(pca_tuner) %>% 
+    add_model(nearest_neighbor(neighbors = tune()) %>% #<<
+                set_engine("kknn") %>% set_mode("regression"))
+tg <- expand_grid(num_comp = 2:10, neighbors = seq(1, 15, 4)) #<<
+set.seed(100)
+cv_folds <- vfold_cv(ames, v = 5, strata = Sale_Price, breaks = 4)
+set.seed(100)
+pca_results <- pca_twf %>% 
+    tune_grid(resamples = cv_folds, grid = tg)
+pca_results %>% show_best(metric = "rmse")
+```
+
+---
+
+.font70[
+
+```{r session-info, child="session_info.Rmd"}
+```
+
+]
+
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&nbsp;
+
+.courtesy[&#x1F4F7; Photo courtesy of Stefan Berger]
+
+???
+
+- tidymodels version 0.1 on CRAN = early development, no major release yet
+- be aware that code from today may not work with a future version 
+- currently, no comprehensive go-to resource for tidymodels
+- still, it is very likely that tidymodels will at least have caret's functionality by 2021 and then work better together with the tidyverse, and that it will continuosly get better in the near future

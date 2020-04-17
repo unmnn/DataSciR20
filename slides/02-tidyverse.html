@@ -1,0 +1,3164 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>02 - The tidyverse</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Uli Niemann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/countdown/countdown.css" rel="stylesheet" />
+    <script src="libs/countdown/countdown.js"></script>
+    <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+class: title-slide, center, bottom
+
+# 02 - The _tidyverse_
+
+## Data Science with R &amp;#183; Summer 2020
+
+### Uli Niemann &amp;#183; Knowledge Management &amp; Discovery Lab
+
+#### [https://brain.cs.uni-magdeburg.de/kmd/DataSciR/](https://brain.cs.uni-magdeburg.de/kmd/DataSciR/)
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+name: motivation
+
+## Why is (base) `R` hard to learn?
+
+`R` has some idiosyncrasies that make it hard for learners who are used to other programming languages, e.g.:
+
+.pull-left60[
+
+- unhelpful help `?print`
+- too many functions `colnames()`, `names()`
+- inconsistent names `read.csv()`, `load()`, `readRDS()`
+- clumsy console output `print(iris)`
+- high flexibility (_is this bad?_)
+- too many ways to select variables: `df$x`, `df$"x"`, `df[,"x"]`, or `df[[1]]`
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/02-tidyverse//unhelpful_help.png" width="100%" /&gt;
+
+&amp;#x2753; _"invisibly"?_  
+&amp;#x2753; _"generic function"?_  
+&amp;#x2753; _"class"?_ 
+
+]
+
+.footnote[
+
+See a more comprehensive list:  
+Robert A. Muenchen. ["Why R is Hard to Learn"](http://r4stats.com/articles/why-r-is-hard-to-learn/). r4stats.com. Accessed 19.07.2018.
+
+]
+
+---
+
+## Base `R` vs. tidyverse code
+
+.pull-left[
+
+&amp;#x1F914; _"What does this base `R` code?"_
+
+
+```r
+aggregate(iris[, "Sepal.Length"], 
+          list(Species = iris[, "Species"]), 
+          mean)
+```
+
+```
+##      Species     x
+## 1     setosa 5.006
+## 2 versicolor 5.936
+## 3  virginica 6.588
+```
+{{content}}
+
+]
+
+--
+
+&amp;#x2753; _"What are the square brackets [ for?"_ &amp;longrightarrow; They are used for subsetting a data frame.
+{{content}}
+
+--
+
+&amp;#x2753; _"What is list()?"_ &amp;longrightarrow; It's a type of R object.
+{{content}}
+
+--
+
+&amp;#x2753; _"Why is the mean() function seemingly applied without argument?"_ &amp;longrightarrow; It is being passed to the subsets of the data frame.
+{{content}}
+
+--
+
+&amp;#x2753; _"In the second line, why does the first "Species" does not need to be quoted, but the second "Species" does?"_ ...
+
+--
+
+.pull-right[
+
+&amp;#x1F60E; **tidyverse** pendant:
+
+
+```r
+library(dplyr)
+group_by(iris, Species) %&gt;% 
+	summarize(avg_sl = mean(Sepal.Length))
+```
+
+```
+## # A tibble: 3 x 2
+##   Species    avg_sl
+## * &lt;fct&gt;       &lt;dbl&gt;
+## 1 setosa       5.01
+## 2 versicolor   5.94
+## 3 virginica    6.59
+```
+
+]
+
+---
+
+name: tidyverse-packages
+
+## What is the Tidyverse?
+
+From the [Tidyverse website](https://www.tidyverse.org/):
+
+&gt; "**R packages for data science.** The tidyverse is an **opinionated collection of R packages designed for data science**. All packages **share** an underlying **design philosophy, grammar, and data structures**."
+
+&amp;rarr; collection of `R` packages mainly for data wrangling and visualization  
+&amp;rarr; shared conventions and common APIs across all packages
+
+&lt;img src="figures/02-tidyverse//tidyverse_packages_3.png" width="95%" /&gt;
+
+---
+
+## Installation
+
+
+
+
+
+```r
+# Install all Tidyverse packages
+install.packages("tidyverse")
+
+# Attach core packages
+library(tidyverse)
+```
+
+The meta-package [`tidyverse`](https://www.tidyverse.org/packages/) contains 26 packages. 
+When running `library(tidyverse)`, only the **core** tidyverse packages 
+become available in your current `R` session. The core packages are:
+
+.pull-left60[
+
+**Core-Packages**:
+
+- `ggplot2`: creation of graphics
+- `dplyr`: data wrangling
+- `tidyr`: data reshaping
+- `readr`: import of flat data files, e.g. csv
+- `tibble`: enhanced data frames
+- `stringr`: string manipulation
+- `forcats`: factor manipulation
+- `purrr`: functions for working with list columns
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/02-tidyverse//tidyverse_overview.png" width="100%" /&gt;
+
+.footnote[
+.content-box-purple[
+
+Figure source: Joseph Rickert. ["What is the tidyverse?"](https://rviews.rstudio.com/2017/06/08/what-is-the-tidyverse/). R Views. Accessed 13.07.2019.
+
+]
+]
+
+
+]
+
+---
+
+## Case study: customer bookings data
+
+.pull-left60[
+
+&gt; Consider a large travel fare aggregator website which wants to analyze its customer bookings data in order to improve travel experience.
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/02-tidyverse//expedia.png" width="100%" /&gt;
+
+]
+
+
+```r
+library(tidyverse)
+```
+
+```
+## -- Attaching packages ------------------------------------------------------------------ tidyverse 1.3.0 --
+```
+
+```
+## v ggplot2 3.3.0.9000     v purrr   0.3.3     
+## v tibble  3.0.0          v stringr 1.4.0     
+## v tidyr   1.0.2          v forcats 0.5.0     
+## v readr   1.3.1
+```
+
+```
+## -- Conflicts --------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+```
+
+---
+
+## Data import
+
+.pull-left70[
+
+The first step of every data analysis project is to import one or more datasets. 
+The tidyverse provides seven packages for the import of various data formats:
+
+- `readr`: flat files (.csv, .tsv, ...)
+- `DBI`: databases (SQLite, MySQL, PostgreSQL, MonetDB, ...)
+- `haven`: foreign statistical formats (.sas, .sav, .dta)
+- `jsonlite`: json files
+- `readxl`: Excel files (.xls, .xlsx)
+- `rvest`: websites (.html)
+- `xml2`: xml files
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//readr.png" width="100%" /&gt;
+
+]
+
+.content-box-purple[
+
+Function reference: RStudio's [Data import cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+]
+
+---
+
+class: center, middle
+name: readr
+
+&lt;img src="figures/02-tidyverse//readr.png" width="250px" /&gt;
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+We want to import two datasets: `bookings.csv` and `properties.csv`.
+
+
+```r
+# library(readr) # readr is a core package of the tidyverse and... 
+# ... hence doesn't need to be attached separately. 
+bookings &lt;- read_csv("../datasets/bookings.csv")
+```
+
+```
+## Parsed with column specification:
+## cols(
+##   booker_id = col_character(),
+##   property_id = col_double(),
+##   room_nights = col_double(),
+##   price_per_night = col_double(),
+##   checkin_day = col_character(),
+##   for_business = col_logical(),
+##   status = col_character(),
+##   review_score = col_double()
+## )
+```
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+
+```r
+bookings
+```
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 21593401~        2668           4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~        4656           5           107.  tue         FALSE        cance~
+##  3 10f0f138~        4563           6            87.0 wed         FALSE        stayed
+##  4 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  5 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  6 d0358740~        4171           2           110.  fri         FALSE        cance~
+##  7 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  8 95476c2e~        5141           4           111.  wed         FALSE        cance~
+##  9 df235631~        1696           1           106.  wed         FALSE        stayed
+## 10 ff610140~        1901           7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+
+```r
+properties &lt;- read_csv("../datasets/properties.csv")
+properties
+```
+
+```
+## # A tibble: 4,178 x 5
+##    property_id destination property_type nr_rooms facilities                              
+##          &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;                                   
+##  1        2668 Brisbane    Hotel               32 airport shuttle,free wifi,garden,breakf~
+##  2        4656 Brisbane    Hotel               39 on-site restaurant,pool,airport shuttle~
+##  3        4563 Brisbane    Apartment            9 laundry                                 
+##  4        4088 Brisbane    Apartment            9 kitchen,laundry,free wifi               
+##  5        2188 Brisbane    Apartment            4 parking,kitchen,bbq,free wifi,game cons~
+##  6        4171 Brisbane    Apartment            5 kitchen,pool,laundry,parking,free wifi,~
+##  7        2907 Brisbane    Hotel               22 airport shuttle,on-site restaurant,brea~
+##  8        5141 Brisbane    Hotel               20 breakfast,free wifi,on-site restaurant,~
+##  9        1696 Brisbane    Apartment            5 free wifi,laundry,pool,game console,par~
+## 10        1901 Brisbane    Apartment           11 free wifi,bbq,laundry,breakfast,pool,pa~
+## # ... with 4,168 more rows
+```
+
+.footnote[
+
+The files are taken from the Tidyverse workshop at the UseR! conference 2018 by Dr. Simon Jackson. [URL](https://github.com/drsimonj/tidyverse_tutorial-useR2018/tree/master/data).  
+
+]
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+Base `R` already has functions for loading flat files, e.g. `read.csv()`, `read.delim()`.   
+
+Advantages of the Tidyverse implementations include:
+
+- higher speed
+- characters are not coerced to factors by default (see `stringsAsFactors` argument)
+- generates tibbles instead of data frames
+
+---
+
+name: tibble
+class: center, middle
+
+&lt;img src="figures/02-tidyverse//tibble.png" width="250px" /&gt;
+
+---
+
+## [Tibbles](https://tibble.tidyverse.org/) 
+
+.pull-left70[
+
+A tibble is "a modern reimagining" of the data frame.  
+Advantages over traditional data frames include:
+
+- improved print method that shows...
+  - ...only the first 10 rows
+  - ...all the columns that fit on screen + names of the remaining ones
+  - ...column types
+- more consistent subsetting
+- less type coercion
+- prohibits partial matching
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//tibble.png" width="100%" /&gt;
+
+]
+
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 21593401~        2668           4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~        4656           5           107.  tue         FALSE        cance~
+##  3 10f0f138~        4563           6            87.0 wed         FALSE        stayed
+##  4 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  5 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  6 d0358740~        4171           2           110.  fri         FALSE        cance~
+##  7 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  8 95476c2e~        5141           4           111.  wed         FALSE        cance~
+##  9 df235631~        1696           1           106.  wed         FALSE        stayed
+## 10 ff610140~        1901           7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+.font70[
+
+.content-box-green[
+
+Use `as_tibble()` to convert a data frame to a tibble.
+
+]
+
+]
+
+???
+
+- iris[, c(1,2)] returns data frame, but iris[, 1] returns a vector
+
+---
+
+## Tibble vs. data frame
+
+
+```r
+class(iris)
+```
+
+```
+## [1] "data.frame"
+```
+
+```r
+iris
+```
+
+```
+##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1            5.1         3.5          1.4         0.2     setosa
+## 2            4.9         3.0          1.4         0.2     setosa
+## 3            4.7         3.2          1.3         0.2     setosa
+## 4            4.6         3.1          1.5         0.2     setosa
+## 5            5.0         3.6          1.4         0.2     setosa
+## 6            5.4         3.9          1.7         0.4     setosa
+## 7            4.6         3.4          1.4         0.3     setosa
+## 8            5.0         3.4          1.5         0.2     setosa
+## 9            4.4         2.9          1.4         0.2     setosa
+## 10           4.9         3.1          1.5         0.1     setosa
+## 11           5.4         3.7          1.5         0.2     setosa
+## 12           4.8         3.4          1.6         0.2     setosa
+## 13           4.8         3.0          1.4         0.1     setosa
+## 14           4.3         3.0          1.1         0.1     setosa
+## 15           5.8         4.0          1.2         0.2     setosa
+## 16           5.7         4.4          1.5         0.4     setosa
+## 17           5.4         3.9          1.3         0.4     setosa
+## 18           5.1         3.5          1.4         0.3     setosa
+## 19           5.7         3.8          1.7         0.3     setosa
+## 20           5.1         3.8          1.5         0.3     setosa
+## 21           5.4         3.4          1.7         0.2     setosa
+## 22           5.1         3.7          1.5         0.4     setosa
+## 23           4.6         3.6          1.0         0.2     setosa
+## 24           5.1         3.3          1.7         0.5     setosa
+## 25           4.8         3.4          1.9         0.2     setosa
+## 26           5.0         3.0          1.6         0.2     setosa
+## 27           5.0         3.4          1.6         0.4     setosa
+## 28           5.2         3.5          1.5         0.2     setosa
+## 29           5.2         3.4          1.4         0.2     setosa
+## 30           4.7         3.2          1.6         0.2     setosa
+## 31           4.8         3.1          1.6         0.2     setosa
+## 32           5.4         3.4          1.5         0.4     setosa
+## 33           5.2         4.1          1.5         0.1     setosa
+## 34           5.5         4.2          1.4         0.2     setosa
+## 35           4.9         3.1          1.5         0.2     setosa
+## 36           5.0         3.2          1.2         0.2     setosa
+## 37           5.5         3.5          1.3         0.2     setosa
+## 38           4.9         3.6          1.4         0.1     setosa
+## 39           4.4         3.0          1.3         0.2     setosa
+## 40           5.1         3.4          1.5         0.2     setosa
+## 41           5.0         3.5          1.3         0.3     setosa
+## 42           4.5         2.3          1.3         0.3     setosa
+## 43           4.4         3.2          1.3         0.2     setosa
+## 44           5.0         3.5          1.6         0.6     setosa
+## 45           5.1         3.8          1.9         0.4     setosa
+## 46           4.8         3.0          1.4         0.3     setosa
+## 47           5.1         3.8          1.6         0.2     setosa
+## 48           4.6         3.2          1.4         0.2     setosa
+## 49           5.3         3.7          1.5         0.2     setosa
+## 50           5.0         3.3          1.4         0.2     setosa
+## 51           7.0         3.2          4.7         1.4 versicolor
+## 52           6.4         3.2          4.5         1.5 versicolor
+## 53           6.9         3.1          4.9         1.5 versicolor
+## 54           5.5         2.3          4.0         1.3 versicolor
+## 55           6.5         2.8          4.6         1.5 versicolor
+## 56           5.7         2.8          4.5         1.3 versicolor
+## 57           6.3         3.3          4.7         1.6 versicolor
+## 58           4.9         2.4          3.3         1.0 versicolor
+## 59           6.6         2.9          4.6         1.3 versicolor
+## 60           5.2         2.7          3.9         1.4 versicolor
+## 61           5.0         2.0          3.5         1.0 versicolor
+## 62           5.9         3.0          4.2         1.5 versicolor
+## 63           6.0         2.2          4.0         1.0 versicolor
+## 64           6.1         2.9          4.7         1.4 versicolor
+## 65           5.6         2.9          3.6         1.3 versicolor
+## 66           6.7         3.1          4.4         1.4 versicolor
+## 67           5.6         3.0          4.5         1.5 versicolor
+## 68           5.8         2.7          4.1         1.0 versicolor
+## 69           6.2         2.2          4.5         1.5 versicolor
+## 70           5.6         2.5          3.9         1.1 versicolor
+## 71           5.9         3.2          4.8         1.8 versicolor
+## 72           6.1         2.8          4.0         1.3 versicolor
+## 73           6.3         2.5          4.9         1.5 versicolor
+## 74           6.1         2.8          4.7         1.2 versicolor
+## 75           6.4         2.9          4.3         1.3 versicolor
+## 76           6.6         3.0          4.4         1.4 versicolor
+## 77           6.8         2.8          4.8         1.4 versicolor
+## 78           6.7         3.0          5.0         1.7 versicolor
+## 79           6.0         2.9          4.5         1.5 versicolor
+## 80           5.7         2.6          3.5         1.0 versicolor
+## 81           5.5         2.4          3.8         1.1 versicolor
+## 82           5.5         2.4          3.7         1.0 versicolor
+## 83           5.8         2.7          3.9         1.2 versicolor
+## 84           6.0         2.7          5.1         1.6 versicolor
+## 85           5.4         3.0          4.5         1.5 versicolor
+## 86           6.0         3.4          4.5         1.6 versicolor
+## 87           6.7         3.1          4.7         1.5 versicolor
+## 88           6.3         2.3          4.4         1.3 versicolor
+## 89           5.6         3.0          4.1         1.3 versicolor
+## 90           5.5         2.5          4.0         1.3 versicolor
+## 91           5.5         2.6          4.4         1.2 versicolor
+## 92           6.1         3.0          4.6         1.4 versicolor
+## 93           5.8         2.6          4.0         1.2 versicolor
+## 94           5.0         2.3          3.3         1.0 versicolor
+## 95           5.6         2.7          4.2         1.3 versicolor
+## 96           5.7         3.0          4.2         1.2 versicolor
+## 97           5.7         2.9          4.2         1.3 versicolor
+## 98           6.2         2.9          4.3         1.3 versicolor
+## 99           5.1         2.5          3.0         1.1 versicolor
+## 100          5.7         2.8          4.1         1.3 versicolor
+## 101          6.3         3.3          6.0         2.5  virginica
+## 102          5.8         2.7          5.1         1.9  virginica
+## 103          7.1         3.0          5.9         2.1  virginica
+## 104          6.3         2.9          5.6         1.8  virginica
+## 105          6.5         3.0          5.8         2.2  virginica
+## 106          7.6         3.0          6.6         2.1  virginica
+## 107          4.9         2.5          4.5         1.7  virginica
+## 108          7.3         2.9          6.3         1.8  virginica
+## 109          6.7         2.5          5.8         1.8  virginica
+## 110          7.2         3.6          6.1         2.5  virginica
+## 111          6.5         3.2          5.1         2.0  virginica
+## 112          6.4         2.7          5.3         1.9  virginica
+## 113          6.8         3.0          5.5         2.1  virginica
+## 114          5.7         2.5          5.0         2.0  virginica
+## 115          5.8         2.8          5.1         2.4  virginica
+## 116          6.4         3.2          5.3         2.3  virginica
+## 117          6.5         3.0          5.5         1.8  virginica
+## 118          7.7         3.8          6.7         2.2  virginica
+## 119          7.7         2.6          6.9         2.3  virginica
+## 120          6.0         2.2          5.0         1.5  virginica
+## 121          6.9         3.2          5.7         2.3  virginica
+## 122          5.6         2.8          4.9         2.0  virginica
+## 123          7.7         2.8          6.7         2.0  virginica
+## 124          6.3         2.7          4.9         1.8  virginica
+## 125          6.7         3.3          5.7         2.1  virginica
+## 126          7.2         3.2          6.0         1.8  virginica
+## 127          6.2         2.8          4.8         1.8  virginica
+## 128          6.1         3.0          4.9         1.8  virginica
+## 129          6.4         2.8          5.6         2.1  virginica
+## 130          7.2         3.0          5.8         1.6  virginica
+## 131          7.4         2.8          6.1         1.9  virginica
+## 132          7.9         3.8          6.4         2.0  virginica
+## 133          6.4         2.8          5.6         2.2  virginica
+## 134          6.3         2.8          5.1         1.5  virginica
+## 135          6.1         2.6          5.6         1.4  virginica
+## 136          7.7         3.0          6.1         2.3  virginica
+## 137          6.3         3.4          5.6         2.4  virginica
+## 138          6.4         3.1          5.5         1.8  virginica
+## 139          6.0         3.0          4.8         1.8  virginica
+## 140          6.9         3.1          5.4         2.1  virginica
+## 141          6.7         3.1          5.6         2.4  virginica
+## 142          6.9         3.1          5.1         2.3  virginica
+## 143          5.8         2.7          5.1         1.9  virginica
+## 144          6.8         3.2          5.9         2.3  virginica
+## 145          6.7         3.3          5.7         2.5  virginica
+## 146          6.7         3.0          5.2         2.3  virginica
+## 147          6.3         2.5          5.0         1.9  virginica
+## 148          6.5         3.0          5.2         2.0  virginica
+## 149          6.2         3.4          5.4         2.3  virginica
+## 150          5.9         3.0          5.1         1.8  virginica
+```
+
+---
+
+## Tibble vs. data frame
+
+
+```r
+as_tibble(iris)
+```
+
+```
+## # A tibble: 150 x 5
+##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+##           &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;fct&gt;  
+##  1          5.1         3.5          1.4         0.2 setosa 
+##  2          4.9         3            1.4         0.2 setosa 
+##  3          4.7         3.2          1.3         0.2 setosa 
+##  4          4.6         3.1          1.5         0.2 setosa 
+##  5          5           3.6          1.4         0.2 setosa 
+##  6          5.4         3.9          1.7         0.4 setosa 
+##  7          4.6         3.4          1.4         0.3 setosa 
+##  8          5           3.4          1.5         0.2 setosa 
+##  9          4.4         2.9          1.4         0.2 setosa 
+## 10          4.9         3.1          1.5         0.1 setosa 
+## # ... with 140 more rows
+```
+
+---
+
+## Tibble vs. data frame
+
+Tibbles adjust to the available line width!
+
+
+
+
+```r
+as_tibble(iris)
+```
+
+```
+## # A tibble: 150 x 5
+##    Sepal.Length Sepal.Width Petal.Length
+##           &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;
+##  1          5.1         3.5          1.4
+##  2          4.9         3            1.4
+##  3          4.7         3.2          1.3
+##  4          4.6         3.1          1.5
+##  5          5           3.6          1.4
+##  6          5.4         3.9          1.7
+##  7          4.6         3.4          1.4
+##  8          5           3.4          1.5
+##  9          4.4         2.9          1.4
+## 10          4.9         3.1          1.5
+## # ... with 140 more rows, and 2 more variables:
+## #   Petal.Width &lt;dbl&gt;, Species &lt;fct&gt;
+```
+
+
+
+---
+
+## Tibble vs. data frame
+
+
+```r
+df &lt;- data.frame(
+  `bad name` = 1:3, # syntactically invalid name because of SPACE
+  x = rep(letters[1:2], length.out = 3) # will get coerced to a factor variable
+)
+str(df)
+```
+
+```
+## 'data.frame':	3 obs. of  2 variables:
+##  $ bad.name: int  1 2 3
+##  $ x       : Factor w/ 2 levels "a","b": 1 2 1
+```
+
+--
+
+Tibbles don't coerce character vectors to factors.
+
+
+```r
+ti &lt;- tibble(
+  `bad name` = 1:3, # no "auto repair" of invalid column name
+  x = rep(letters[1:2], length.out = 3) # yields character variable
+)
+str(ti)
+```
+
+```
+## tibble [3 x 2] (S3: tbl_df/tbl/data.frame)
+##  $ bad name: int [1:3] 1 2 3
+##  $ x       : chr [1:3] "a" "b" "a"
+```
+
+
+---
+
+## `tribble()`
+
+- spreadsheet-like creation of tibbles (by row)
+- formula notation (`~`) to define column names
+
+
+```r
+tribble(
+  ~x, ~y,
+  1, "b",
+  2, "a"
+)
+```
+
+```
+## # A tibble: 2 x 2
+##       x y    
+##   &lt;dbl&gt; &lt;chr&gt;
+## 1     1 b    
+## 2     2 a
+```
+
+???
+
+- tilde
+
+---
+
+name: dplyr
+class: center, middle
+
+&lt;img src="figures/02-tidyverse//dplyr.png" width="250px" /&gt;
+
+---
+
+## Data wrangling with `dplyr` &amp;#x1F6E0;&amp;#xFE0F;
+
+.pull-left70[
+
+Consistent API design:
+
+- first argument is a data frame
+- subsequent arguments reference columns in _non-standard evaluation_ notation (no quotation marks)
+- output is (usually) also a data frame
+
+&amp;#x1F914; _"What can I do with `dplyr`?"_
+
+- inspect a tibble with `glimpse()`
+- select specific columns with `select()`
+- filter a subset of rows with `filter()`
+- add new or change existing columns with `mutate()`
+- group rows by a grouping column with `group_by()`
+- calculate a summary (per group) with `summarize()`
+- join two distinct tibbles by a common column with `*join()`
+
+]
+
+.pull-right30[
+
+
+&lt;img src="figures/02-tidyverse//dplyr.png" width="100%" /&gt;
+
+]
+
+---
+
+## Select columns with `select()` &amp;#x1F446;
+
+.pull-left70[
+
+Select the column `review_score`.
+
+
+```r
+select(bookings, review_score)
+```
+
+```
+## # A tibble: 10,000 x 1
+##    review_score
+##           &lt;dbl&gt;
+##  1        NA   
+##  2        NA   
+##  3         6.26
+##  4         5.95
+##  5         6.43
+##  6        NA   
+##  7         7.60
+##  8        NA   
+##  9         6.97
+## 10        NA   
+## # ... with 9,990 more rows
+```
+
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//dplyr_select.png" width="100%" /&gt;
+
+]
+
+.content-box-yellow[
+
+The output is **always** a `data.frame` or `tibble`, regardless of whether a single 
+or multiple columns are selected. 
+
+]
+
+---
+
+## Select columns with `select()` &amp;#x1F446;
+
+.pull-left70[
+
+Select multiple columns by specifying column names as further arguments.
+
+
+```r
+select(bookings, review_score, status)
+```
+
+```
+## # A tibble: 10,000 x 2
+##    review_score status   
+##           &lt;dbl&gt; &lt;chr&gt;    
+##  1        NA    cancelled
+##  2        NA    cancelled
+##  3         6.26 stayed   
+##  4         5.95 stayed   
+##  5         6.43 stayed   
+##  6        NA    cancelled
+##  7         7.60 stayed   
+##  8        NA    cancelled
+##  9         6.97 stayed   
+## 10        NA    cancelled
+## # ... with 9,990 more rows
+```
+
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//dplyr_select.png" width="100%" /&gt;
+
+]
+
+---
+
+## Select columns with `select()` &amp;#x1F446;
+
+.pull-left70[
+
+Negative selection: select all but specific columns using `-`.
+
+
+```r
+select(bookings, -booker_id)
+```
+
+```
+## # A tibble: 10,000 x 7
+##    property_id room_nights price_per_night checkin_day for_business status    review_score
+##          &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt;            &lt;dbl&gt;
+##  1        2668           4            91.5 mon         FALSE        cancelled        NA   
+##  2        4656           5           107.  tue         FALSE        cancelled        NA   
+##  3        4563           6            87.0 wed         FALSE        stayed            6.26
+##  4        4088           7            92.4 fri         FALSE        stayed            5.95
+##  5        2188           4           105.  tue         FALSE        stayed            6.43
+##  6        4171           2           110.  fri         FALSE        cancelled        NA   
+##  7        2907           4           116.  fri         FALSE        stayed            7.60
+##  8        5141           4           111.  wed         FALSE        cancelled        NA   
+##  9        1696           1           106.  wed         FALSE        stayed            6.97
+## 10        1901           7            82.3 sat         FALSE        cancelled        NA   
+## # ... with 9,990 more rows
+```
+
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//dplyr_select.png" width="100%" /&gt;
+
+]
+
+---
+
+## Select columns with `select()` &amp;#x1F446;
+
+**Helper functions** facilitate selecting multiple columns whose names satisfy a specific criterion. 
+
+helper function           | description
+:------------------------- | :----------------------------
+`contains("abc")`          | names containing `"abc"`
+`starts_with("abc")`       | names starting with `"abc"`
+`ends_with("abc")`         | names ending with `"abc"`
+`num_range("a", 1:3)`      | names matching the numerical range `a1`, `a2`, `a3`
+`any_of(c("ab", "c"))`     | names (given as character vector)
+`matches(".id")`           | names matching the regular expr. `".id"`
+`everything()`             | all (remaining) names
+`last_col()`               | last column
+
+--
+
+
+```r
+select(bookings, contains("id"), ends_with("night"))
+```
+
+```
+## # A tibble: 10,000 x 3
+##    booker_id                                property_id price_per_night
+##    &lt;chr&gt;                                          &lt;dbl&gt;           &lt;dbl&gt;
+##  1 215934017ba98c09f30dedd29237b43dad5c7b5f        2668            91.5
+##  2 7f590fd6d318248a48665f7f7db529aca40c84f5        4656           107. 
+##  3 10f0f138e8bb1015d3928f2b7d828cbb50cd0804        4563            87.0
+##  4 7b55021a4160dde65e31963fa55a096535bcad17        4088            92.4
+##  5 6694a79d158c7818cd63831b71bac91286db5aff        2188           105. 
+##  6 d0358740d5f15e85523f94ab8219f25d8c017347        4171           110. 
+##  7 944e568a0b511b9140bcc7c7c80c68c3edd3a86f        2907           116. 
+##  8 95476c2ef6bb9e3c227b46f1283310737fa13b7a        5141           111. 
+##  9 df235631a4c281c01e007b6a4c364e07f5843994        1696           106. 
+## 10 ff610140227d40d27daa01f0dcd5d64ea82e833d        1901            82.3
+## # ... with 9,990 more rows
+```
+
+---
+
+## Filter rows with `filter()`
+
+.pull-left70[
+
+Filter bookings which stayed, i.e., didn't cancel.
+
+
+```r
+filter(bookings, status == "stayed")
+```
+
+```
+## # A tibble: 7,775 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 10f0f138~        4563           6            87.0 wed         FALSE        stayed
+##  2 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  3 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  4 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  5 df235631~        1696           1           106.  wed         FALSE        stayed
+##  6 aeff2e2d~        2188           1           109.  wed         FALSE        stayed
+##  7 5a1442f4~        2307           9            84.2 sat         FALSE        stayed
+##  8 39804a2e~        2907           6           112.  sun         FALSE        stayed
+##  9 e150e559~        2870           4           127.  sat         FALSE        stayed
+## 10 4e9c7c21~        1674           5           102.  sun         FALSE        stayed
+## # ... with 7,765 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+
+```r
+# identical with 
+filter(bookings, !status == "cancelled")
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//dplyr_filter.png" width="100%" /&gt;
+
+]
+
+---
+
+## Filter rows with `filter()`
+
+.pull-left70[
+
+Combine multiple conditions with `&amp;`.
+
+
+```r
+filter(bookings, status == "stayed" &amp; 
+         !is.na(review_score) &amp; 
+         between(price_per_night, 90, 120))
+```
+
+```
+## # A tibble: 3,032 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  2 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  3 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  4 df235631~        1696           1           106.  wed         FALSE        stayed
+##  5 39804a2e~        2907           6           112.  sun         FALSE        stayed
+##  6 4e9c7c21~        1674           5           102.  sun         FALSE        stayed
+##  7 8537874d~        4420           2           106.  sat         FALSE        stayed
+##  8 0fcce2f5~        1951           3           110.  wed         FALSE        stayed
+##  9 9864af3a~        1981           3            96.9 sun         FALSE        stayed
+## 10 ccd24f99~        2307           3           115.  fri         FALSE        stayed
+## # ... with 3,022 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//dplyr_filter.png" width="100%" /&gt;
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 1
+
+Create a new tibble `x` that 
+
+- only contains the columns `room_nights` and `review_score`, and 
+- only contains the bookings with a price per night of less than 80.
+
+1. _...using base `R` functions only._
+2. _...using the `dplyr` functions `select()` and `filter()`._
+
+<div class="countdown" id="timer_5e981574" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+---
+
+## Sort rows with `arrange()`
+
+
+```r
+arrange(bookings, price_per_night) # default: sort in ascending order
+```
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 028c395e~        3096           1            39.4 tue         FALSE        stayed
+##  2 037bec01~        3619           1            45.8 wed         TRUE         stayed
+##  3 7341b69d~        3983           1            47.7 thu         TRUE         stayed
+##  4 cbedb290~        1172           2            53.2 thu         TRUE         stayed
+##  5 dff92642~        4354           6            54.2 fri         FALSE        stayed
+##  6 b28ca9bd~        3118           2            54.8 sun         TRUE         stayed
+##  7 e2aff0e6~        4116           5            55.7 tue         FALSE        stayed
+##  8 28421366~        4391           4            56.6 fri         FALSE        stayed
+##  9 a07a0a8a~        4150           2            57.7 sat         FALSE        cance~
+## 10 97a4a1dc~        1172           2            61.0 tue         TRUE         stayed
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+
+
+```r
+arrange(bookings, desc(price_per_night))
+```
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 3d62487f~        4931           1            273. tue         TRUE         cance~
+##  2 dc6add0d~        2305           1            272. fri         TRUE         stayed
+##  3 c57c799c~        5034           1            263. tue         TRUE         stayed
+##  4 0dbc70d9~        1819           1            259. fri         TRUE         cance~
+##  5 1d0d33cc~        2306           1            257. fri         FALSE        cance~
+##  6 6b70130a~        3916           1            256. tue         TRUE         stayed
+##  7 c478924b~        2464           1            255. sun         FALSE        stayed
+##  8 52779fc4~        3832           1            255. tue         TRUE         stayed
+##  9 23a1258e~        1971           1            254. tue         TRUE         stayed
+## 10 58a1a0de~        2888           1            252. sun         FALSE        stayed
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+---
+
+## Select rows by position with `slice()`
+
+
+```r
+x &lt;- arrange(bookings, desc(review_score))
+slice(x, 1:10)
+```
+
+```
+## # A tibble: 10 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 51c3e2e8~        1970           3           126.  fri         FALSE        stayed
+##  2 99f91abc~        2175           1           189.  wed         FALSE        stayed
+##  3 1d7930a9~        3089           6            77.4 thu         FALSE        stayed
+##  4 58c94e94~        3089           5            91.5 sat         FALSE        stayed
+##  5 164c4797~        3890           1           232.  sat         TRUE         stayed
+##  6 3119d16c~        3089           6            93.4 fri         FALSE        stayed
+##  7 10f0f138~        3089           1           175.  sun         FALSE        stayed
+##  8 714d7f95~        1855           2           129.  thu         FALSE        stayed
+##  9 b4d77fe4~        3089           2            83.3 sat         FALSE        stayed
+## 10 68686391~        3089           5           106.  fri         FALSE        stayed
+## # ... with 1 more variable: review_score &lt;dbl&gt;
+```
+
+---
+
+## Chaining multiple operations &amp;#x26D3;&amp;#xFE0F;
+
+`dplyr` code is very intutive and expressive, but also quite verbose. 
+
+&amp;#x1F914; _"How to organize the code so that it remains readable even for a high number of operations?"_
+
+--
+
+&gt; Example: For all bookers who didn't cancel their trip and checked in on a friday, we are interested in the 5 highest review scores. Only the columns `price_per_night` and `review_score` should be included in a new tibble which is sorted by `review_score` in descending order. 
+
+---
+
+## Chaining multiple operations &amp;#x26D3;&amp;#xFE0F;
+
+Solution 1 (nesting): 
+
+
+```r
+select(
+  slice(
+    arrange(
+      filter(bookings, !status == "cancelled" &amp; checkin_day == "fri"),
+      desc(review_score)
+    ),
+    1:5
+  ), 
+  price_per_night, review_score
+)
+```
+
+```
+## # A tibble: 5 x 2
+##   price_per_night review_score
+##             &lt;dbl&gt;        &lt;dbl&gt;
+## 1           126.         10   
+## 2            93.4         9.80
+## 3           106.          9.77
+## 4           148.          9.64
+## 5           225.          9.49
+```
+
+???
+
+- could you easily read the code after half a year from now?
+- arrange is the last operation but is read first
+
+---
+
+class: center, middle
+
+&lt;img src="figures/02-tidyverse//Russian-Matroshka2.jpg" width="500px" /&gt;
+
+---
+
+## Chaining multiple operations &amp;#x26D3;&amp;#xFE0F;
+
+Solution 2 (save and overwrite intermediate results): 
+
+
+```r
+x &lt;- filter(bookings, !status == "cancelled" &amp; checkin_day == "fri")
+x &lt;- arrange(x, review_score)
+x &lt;- slice(x, 1:5)
+x &lt;- select(x, price_per_night, review_score)
+x
+```
+
+```
+## # A tibble: 5 x 2
+##   price_per_night review_score
+##             &lt;dbl&gt;        &lt;dbl&gt;
+## 1           123.          2.79
+## 2           109.          3.31
+## 3           127.          3.75
+## 4           111.          4.09
+## 5            79.1         4.15
+```
+
+???
+
+- very hard to spot mistakes you introduced in one of the earlier steps
+
+---
+
+## Chaining multiple operations &amp;#x26D3;&amp;#xFE0F;
+
+Solution 2 (save and overwrite intermediate results): 
+
+
+```r
+x &lt;- filter(bookings, !status == "cancelled" &amp; checkin_day == "fri")
+*x &lt;- arrange(x, desc(review_score))
+x &lt;- slice(x, 1:5)
+x &lt;- select(x, price_per_night, review_score)
+x
+```
+
+```
+## # A tibble: 5 x 2
+##   price_per_night review_score
+##             &lt;dbl&gt;        &lt;dbl&gt;
+## 1           126.         10   
+## 2            93.4         9.80
+## 3           106.          9.77
+## 4           148.          9.64
+## 5           225.          9.49
+```
+
+---
+
+## Chaining multiple operations &amp;#x26D3;&amp;#xFE0F;
+
+Solution 3 (save each intermediate results as new object):  
+
+
+```r
+x1 &lt;- filter(bookings, !status == "cancelled" &amp; checkin_day == "fri")
+x2 &lt;- arrange(x1, desc(review_score))
+x3 &lt;- slice(x2, 1:5)
+x4 &lt;- select(x2, price_per_night, review_score)
+x4
+```
+
+--
+
+_There is a mistake in the above code. Can you spot it?_
+
+???
+
+- copy-and-paste problems: even if you know you make these mistakes you still will make the mistakes
+- naming is difficult: what happens if I want to insert another operations later between x1 and x2?
+
+---
+
+## Chaining multiple operations &amp;#x26D3;&amp;#xFE0F;
+
+Solution 3 (save each intermediate results as new object):  
+
+
+```r
+x1 &lt;- filter(bookings, !status == "cancelled" &amp; checkin_day == "fri")
+x2 &lt;- arrange(x1, desc(review_score))
+x3 &lt;- slice(x2, 1:5)
+*x4 &lt;- select(x3, price_per_night, review_score)
+x4
+```
+
+???
+
+- copy-and-paste problems: even if you know you make these mistakes you still will make the mistakes
+- naming is difficult: what happens if I want to insert another operations later between x1 and x2?
+
+---
+
+name: pipe
+class: center, middle
+
+&lt;img src="figures/02-tidyverse//magrittr.png" width="250px" /&gt;
+
+---
+
+## The pipe operator `%&gt;%`
+
+.pull-left70[
+
+- The **pipe operator** `%&gt;%` helps to write **code that is easy to read and understand**.
+- Its main purpose is to **express a sequence of multiple operations in a single step**.
+- The value of the first argument of a function is the output of the last function before the pipe operator.
+
+
+```r
+bookings %&gt;%
+  filter(!status == "cancelled" &amp; checkin_day == "fri") %&gt;%
+  arrange(desc(review_score)) %&gt;%
+  slice(1:5) %&gt;%
+  select(price_per_night, review_score)
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//magrittr.png" width="90%" /&gt;
+
+]
+
+.footnote[
+
+In RStudio, the shortcut for `%&gt;%` is **Ctrl+⇧Shift+M**. 
+
+]
+
+--
+
+&gt; "From table `bookings`, filter all non-canceled bookings with check-in on a Friday  
+&gt; THEN sort by review score in descending order  
+&gt; THEN take the top-5 bookings  
+&gt; THEN return price per night and review score."
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 2
+
+<div class="countdown" id="timer_5e9816e1" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+Use `%&gt;%` to write a pipeline which extracts all bookings with Friday as check-in 
+day while only returning the columns `property_id` and `status`. 
+
+---
+
+## Adding &amp; replacing columns &amp;#x2795;
+
+We would like to create a new column for the **total price** of a booking, which 
+is the product of `price_per_night` and `room_nights`. 
+
+
+```r
+bookings %&gt;%
+  mutate(total_price = price_per_night * room_nights)
+```
+
+```
+## # A tibble: 10,000 x 9
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 21593401~        2668           4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~        4656           5           107.  tue         FALSE        cance~
+##  3 10f0f138~        4563           6            87.0 wed         FALSE        stayed
+##  4 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  5 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  6 d0358740~        4171           2           110.  fri         FALSE        cance~
+##  7 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  8 95476c2e~        5141           4           111.  wed         FALSE        cance~
+##  9 df235631~        1696           1           106.  wed         FALSE        stayed
+## 10 ff610140~        1901           7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 2 more variables: review_score &lt;dbl&gt;, total_price &lt;dbl&gt;
+```
+
+(The new variable is appended to `bookings` as last column.)
+
+???
+
+mutate(name of new variable = equation)
+
+---
+
+## Adding &amp; replacing columns &amp;#x2795;
+
+We would like to create a new column for the **total price** of a booking, which 
+is the product of `price_per_night` and `room_nights`. 
+
+(Only show `price_per_night`, `room_nights`, `total_price`)
+
+
+```r
+bookings %&gt;%
+  mutate(total_price = price_per_night * room_nights) %&gt;%
+  select(price_per_night, room_nights, total_price) 
+```
+
+```
+## # A tibble: 10,000 x 3
+##    price_per_night room_nights total_price
+##              &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+##  1            91.5           4        366.
+##  2           107.            5        533.
+##  3            87.0           6        522.
+##  4            92.4           7        647.
+##  5           105.            4        419.
+##  6           110.            2        220.
+##  7           116.            4        465.
+##  8           111.            4        446.
+##  9           106.            1        106.
+## 10            82.3           7        576.
+## # ... with 9,990 more rows
+```
+
+---
+
+## Adding &amp; replacing columns &amp;#x2795;
+
+Replace the existing column `property_id` by transforming the original column 
+from `character` into `factor`. 
+
+
+```r
+bookings %&gt;%
+  mutate(property_id = as.factor(property_id))
+```
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;     &lt;fct&gt;             &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 21593401~ 2668                  4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~ 4656                  5           107.  tue         FALSE        cance~
+##  3 10f0f138~ 4563                  6            87.0 wed         FALSE        stayed
+##  4 7b55021a~ 4088                  7            92.4 fri         FALSE        stayed
+##  5 6694a79d~ 2188                  4           105.  tue         FALSE        stayed
+##  6 d0358740~ 4171                  2           110.  fri         FALSE        cance~
+##  7 944e568a~ 2907                  4           116.  fri         FALSE        stayed
+##  8 95476c2e~ 5141                  4           111.  wed         FALSE        cance~
+##  9 df235631~ 1696                  1           106.  wed         FALSE        stayed
+## 10 ff610140~ 1901                  7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 3
+
+<div class="countdown" id="timer_5e98171f" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+Write a pipeline which calculates the mean-centered `price_per_night` as new column 
+names `centered_ppn`. The returned data frame should only contain this new column.
+
+_You need `mutate()` and `select()`._
+
+---
+
+## `mutate_at/if/all()`
+
+- `mutate_at()`: select one or more columns to apply a function on with `vars()` helper function
+- `mutate_if()`: apply a function to columns that fullfill a condition
+- `mutate_all()`: apply a function to all columns
+
+--
+
+
+```r
+# Overwrite existing colums whose names end with 'id'
+bookings %&gt;%
+  mutate_at(vars(ends_with("id")), list(as.character))
+```
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;     &lt;chr&gt;             &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 21593401~ 2668                  4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~ 4656                  5           107.  tue         FALSE        cance~
+##  3 10f0f138~ 4563                  6            87.0 wed         FALSE        stayed
+##  4 7b55021a~ 4088                  7            92.4 fri         FALSE        stayed
+##  5 6694a79d~ 2188                  4           105.  tue         FALSE        stayed
+##  6 d0358740~ 4171                  2           110.  fri         FALSE        cance~
+##  7 944e568a~ 2907                  4           116.  fri         FALSE        stayed
+##  8 95476c2e~ 5141                  4           111.  wed         FALSE        cance~
+##  9 df235631~ 1696                  1           106.  wed         FALSE        stayed
+## 10 ff610140~ 1901                  7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+---
+
+## `mutate_at/if/all()`
+
+
+```r
+# Create new columns with suffix '_chr'
+bookings %&gt;%
+  mutate_at(vars(ends_with("id")), list(chr = as.character)) # applies to booker_id and property_id
+```
+
+```
+## # A tibble: 10,000 x 10
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;chr&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;       &lt;lgl&gt;        &lt;chr&gt; 
+##  1 21593401~        2668           4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~        4656           5           107.  tue         FALSE        cance~
+##  3 10f0f138~        4563           6            87.0 wed         FALSE        stayed
+##  4 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  5 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  6 d0358740~        4171           2           110.  fri         FALSE        cance~
+##  7 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  8 95476c2e~        5141           4           111.  wed         FALSE        cance~
+##  9 df235631~        1696           1           106.  wed         FALSE        stayed
+## 10 ff610140~        1901           7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 3 more variables: review_score &lt;dbl&gt;,
+## #   booker_id_chr &lt;chr&gt;, property_id_chr &lt;chr&gt;
+```
+
+---
+
+## `mutate_at/if/all()`
+
+
+```r
+# Convert all character variables to factors
+bookings %&gt;%
+  mutate_if(is.character, as.factor) # applies to booker_id, checkin_day and status
+```
+
+```
+## # A tibble: 10,000 x 8
+##    booker_id property_id room_nights price_per_night checkin_day for_business status
+##    &lt;fct&gt;           &lt;dbl&gt;       &lt;dbl&gt;           &lt;dbl&gt; &lt;fct&gt;       &lt;lgl&gt;        &lt;fct&gt; 
+##  1 21593401~        2668           4            91.5 mon         FALSE        cance~
+##  2 7f590fd6~        4656           5           107.  tue         FALSE        cance~
+##  3 10f0f138~        4563           6            87.0 wed         FALSE        stayed
+##  4 7b55021a~        4088           7            92.4 fri         FALSE        stayed
+##  5 6694a79d~        2188           4           105.  tue         FALSE        stayed
+##  6 d0358740~        4171           2           110.  fri         FALSE        cance~
+##  7 944e568a~        2907           4           116.  fri         FALSE        stayed
+##  8 95476c2e~        5141           4           111.  wed         FALSE        cance~
+##  9 df235631~        1696           1           106.  wed         FALSE        stayed
+## 10 ff610140~        1901           7            82.3 sat         FALSE        cance~
+## # ... with 9,990 more rows, and 1 more variable: review_score &lt;dbl&gt;
+```
+
+???
+
+- place holder: the placeholder `.` is the dynamic variable when using `mutate_at()` 
+ and other functions in the tidyverse.
+
+---
+
+## Summarize many rows with `summarize()` &amp;#x1F5DC;
+
+.pull-left70[
+
+`summarize()` (or `summarise()`) takes a tibble as input, and returns a tibble with one row. 
+
+
+```r
+# Avg. review score
+bookings %&gt;%
+  summarize(review_score = mean(review_score, na.rm = TRUE))
+```
+
+```
+## # A tibble: 1 x 1
+##   review_score
+##          &lt;dbl&gt;
+## 1         7.22
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//dplyr_summarize.png" width="100%" /&gt;
+
+]
+
+---
+
+## Summarize many rows with `summarize()` &amp;#x1F5DC;
+
+
+```r
+bookings %&gt;%
+  summarize(n = n(), # Total no. of bookings
+            n_miss = sum(is.na(review_score)), # No. of bookings w/o review score
+            review_score = mean(review_score, na.rm = TRUE)) # Avg. review score
+```
+
+```
+## # A tibble: 1 x 3
+##       n n_miss review_score
+##   &lt;int&gt;  &lt;int&gt;        &lt;dbl&gt;
+## 1 10000   3817         7.22
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 4
+
+<div class="countdown" id="timer_5e9817f6" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">08</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+Obtain a one-row summary tibble of the bookings data containing the following statistics:
+
+- The number of rows (Hint: use the function `n()`)
+- The number of `"stayed"` bookings
+- The mean of the _total price_ (Hint: you have to compute the total price first)
+
+The output tibble should contain three columns and just one row.
+
+---
+
+## Grouping with `group_by()` &amp;#x1F465;
+
+&lt;img src="figures/02-tidyverse//dplyr_group_by.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+`group_by()` _groups_ tibbles so that `dplyr` functions can execute operations on each group seperately.
+
+--
+
+
+```r
+class(bookings)
+```
+
+```
+## [1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
+```
+
+
+--
+
+
+```r
+# Group bookings into (non-)business travels
+bookings_by_type &lt;- bookings %&gt;% group_by(for_business)
+class(bookings_by_type)
+```
+
+```
+## [1] "grouped_df" "tbl_df"     "tbl"        "data.frame"
+```
+
+
+.footnote[
+
+Use `ungroup()` to remove the grouping if you need to transform the tibble in a different context. 
+
+]
+
+---
+
+## Grouped summaries
+
+
+```r
+bookings %&gt;%
+  group_by(for_business) %&gt;%
+  summarize(
+    n = n(),
+    review_mean = mean(review_score, na.rm = TRUE)
+  )
+```
+
+```
+## # A tibble: 2 x 3
+##   for_business     n review_mean
+## * &lt;lgl&gt;        &lt;int&gt;       &lt;dbl&gt;
+## 1 FALSE         6285        7.50
+## 2 TRUE          3715        6.85
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 5
+
+<div class="countdown" id="timer_5e9817b4" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">10</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+Write a pipeline that yields a tibble containing only the most expensive booking 
+of each property. Return only the property id and the price of the most expensive booking.
+
+You should get as many rows as there are unique properties:
+
+
+```r
+n_distinct(bookings$property_id) # convenience function for `length(unique(bookings$property_id))`
+```
+
+```
+## [1] 4178
+```
+
+--
+
+1. Calculate `price_total` using `mutate()`.
+1. Group by `property_id` using `group_by()`.
+1. Filter rows where the total price is equal to the maximum of the total price 
+(for that property using `filter()`).
+1. Select the columns `property_id` and `price_total` using `select()`.
+
+---
+
+## Group by multiple columns
+
+
+```r
+# Average score by travel type and check-in day of the week
+bookings %&gt;%
+  group_by(for_business, checkin_day) %&gt;%
+  summarize(mean_review = mean(review_score, na.rm = TRUE))
+```
+
+```
+## # A tibble: 14 x 3
+## # Groups:   for_business [2]
+##    for_business checkin_day mean_review
+##    &lt;lgl&gt;        &lt;chr&gt;             &lt;dbl&gt;
+##  1 FALSE        fri                7.60
+##  2 FALSE        mon                7.34
+##  3 FALSE        sat                7.57
+##  4 FALSE        sun                7.57
+##  5 FALSE        thu                7.42
+##  6 FALSE        tue                7.32
+##  7 FALSE        wed                7.43
+##  8 TRUE         fri                7.04
+##  9 TRUE         mon                6.87
+## 10 TRUE         sat                7.05
+## 11 TRUE         sun                6.93
+## 12 TRUE         thu                6.79
+## 13 TRUE         tue                6.75
+## 14 TRUE         wed                6.84
+```
+
+---
+
+## Count the number of rows per group with `count()`
+
+Syntax: 
+
+
+```r
+bookings %&gt;%
+  count(x, y, ...)
+```
+
+...is a shortcut for...
+
+
+```r
+bookings %&gt;%
+  group_by(x, y, ...) %&gt;%
+  summarize(n = n())
+```
+
+--
+
+
+```r
+bookings %&gt;%
+  count(for_business, status)
+```
+
+```
+## # A tibble: 4 x 3
+##   for_business status        n
+## * &lt;lgl&gt;        &lt;chr&gt;     &lt;int&gt;
+## 1 FALSE        cancelled  1762
+## 2 FALSE        stayed     4523
+## 3 TRUE         cancelled   463
+## 4 TRUE         stayed     3252
+```
+
+---
+
+## Joining tibbles
+
+&gt; A mutating join allows you to combine variables from two tables. 
+&gt; It first matches observations by their keys, then copies across variables 
+&gt; from one table to the other. -- [R for Data Science: Mutating joins](http://r4ds.had.co.nz/relational-data.html#mutating-joins)
+
+.pull-left60[
+
+
+```r
+(x &lt;- tibble(id = c(1L, 2L, 3L), x = c("x1", "x2", "x3")))
+```
+
+```
+## # A tibble: 3 x 2
+##      id x    
+##   &lt;int&gt; &lt;chr&gt;
+## 1     1 x1   
+## 2     2 x2   
+## 3     3 x3
+```
+
+```r
+(y &lt;- tibble(id = c(1L, 2L, 4L), y = c("y1", "y2", "y4")))
+```
+
+```
+## # A tibble: 3 x 2
+##      id y    
+##   &lt;int&gt; &lt;chr&gt;
+## 1     1 y1   
+## 2     2 y2   
+## 3     4 y4
+```
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Inner join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows from `x` with matching values in 
+`y` for column `id` and all columns from `x` and `y`.
+
+
+```r
+inner_join(x, y, by = "id")
+```
+
+```
+## # A tibble: 2 x 3
+##      id x     y    
+## * &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+## 1     1 x1    y1   
+## 2     2 x2    y2
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//inner-join.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.footnote[Source of the animations on this and the following slides: https://github.com/gadenbuie/tidyexplain. ]
+
+---
+
+## Left join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows from `x` and all columns from `x` and `y`. 
+In rows where there are no matching values in `y` for column `id`, the values of the 
+columns that are present only in `y` are set to `NA`.
+
+
+```r
+left_join(x, y, by = "id")
+```
+
+```
+## # A tibble: 3 x 3
+##      id x     y    
+## * &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+## 1     1 x1    y1   
+## 2     2 x2    y2   
+## 3     3 x3    &lt;NA&gt;
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//left-join.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Left join with multiple matches
+
+.pull-left70[
+
+... **all** combinations of the matches are returned:
+
+
+```r
+(y_extra &lt;- bind_rows(y, tibble(id = 2L, y = "y5")))
+```
+
+```
+## # A tibble: 4 x 2
+##      id y    
+## * &lt;int&gt; &lt;chr&gt;
+## 1     1 y1   
+## 2     2 y2   
+## 3     4 y4   
+## 4     2 y5
+```
+
+
+
+```r
+left_join(x, y_extra, by = "id")
+```
+
+```
+## # A tibble: 4 x 3
+##      id x     y    
+## * &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+## 1     1 x1    y1   
+## 2     2 x2    y2   
+## 3     2 x2    y5   
+## 4     3 x3    &lt;NA&gt;
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//left-join-extra.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Right join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows from `y` and all columns from `x` and `y`. 
+In rows where there are no matching values in `x` for column `id`, the values of the 
+columns that are present only in `x` are set to `NA`.
+
+
+```r
+right_join(x, y, by = "id")
+```
+
+```
+## # A tibble: 3 x 3
+##      id x     y    
+## * &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+## 1     1 x1    y1   
+## 2     2 x2    y2   
+## 3     4 &lt;NA&gt;  y4
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//right-join.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Full join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows and all columns from `x` and `y`. 
+In rows where there are no matching values for column `id`, the values of the 
+columns from the other tibble are set to `NA`.
+
+
+```r
+full_join(x, y, by = "id")
+```
+
+```
+## # A tibble: 4 x 3
+##      id x     y    
+## * &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+## 1     1 x1    y1   
+## 2     2 x2    y2   
+## 3     3 x3    &lt;NA&gt; 
+## 4     4 &lt;NA&gt;  y4
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//full-join.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 6
+
+<div class="countdown" id="timer_5e9817f8" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+Calculate the number of bookings per city. 
+
+Hint: Join the tibbles `bookings` and `properties` and _count_ the number of rows per city.  
+
+---
+
+## Filtering joins
+
+&gt; Filtering joins match observations in the same way as mutating joins, 
+but affect the observations, not the variables. (...) 
+Semi-joins are useful for matching filtered summary tables back to the original 
+rows. (...) Anti-joins are useful for diagnosing join mismatches -- [R for Data Science: Filtering Joins](http://r4ds.had.co.nz/relational-data.html#filtering-joins)
+
+---
+
+## Semi join
+
+.pull-left70[
+
+Return all rows and columns from `x` with matching rows in `y`. 
+
+
+```r
+semi_join(x, y, by = "id")
+```
+
+```
+## # A tibble: 2 x 2
+##      id x    
+##   &lt;int&gt; &lt;chr&gt;
+## 1     1 x1   
+## 2     2 x2
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//semi-join.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Anti join
+
+.pull-left70[
+
+Return all rows and columns from `x` **without** matching rows in `y`. 
+
+
+```r
+anti_join(x, y, by = "id")
+```
+
+```
+## # A tibble: 1 x 2
+##      id x    
+##   &lt;int&gt; &lt;chr&gt;
+## 1     3 x3
+```
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//join_x.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="figures/02-tidyverse//anti-join.gif" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Joining tibbles
+
+&lt;img src="figures/02-tidyverse//dplyr_combine.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+name: tidyr
+class: center, middle
+
+&lt;img src="figures/02-tidyverse//tidyr.png" width="250px" /&gt;
+
+---
+
+## Reshape tibbles with [`tidyr`](https://tidyr.tidyverse.org/)
+
+.pull-left[
+
+The `tidyverse` inherits its name from the term **tidy data**. Tidy data refers to a specific standardized dataset structure.
+
+Characteristics of tidy data:
+
+1. Each **variable** must have its own column.
+1. Each **observation** must have its own row.
+1. Each **value** must have its own cell.
+
+Many of the tidyverse functions require a _tidy_ data frame input. 
+The `tidyr` package contains functions to reshape "messy" into tidy data frames. 
+
+]
+
+.pull-right[
+
+
+&lt;img src="figures/02-tidyverse//tidyr_long_wide.png" width="100%" /&gt;
+
+]
+
+.footnote[
+
+Further reading:
+
+- [R for Data Science: Tidy data](https://r4ds.had.co.nz/tidy-data.html)
+- Funktionsübersicht: RStudio's [Data import cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+]
+
+---
+
+## `pivot_longer()` and `pivot_wider()`
+
+`tidyr`'s two main functions are `pivot_longer()` and `pivot_wider()`. 
+
+- `pivot_longer()` takes multiple columns and collapses them into **key-value pairs**.
+- `pivot_wider()` takes two (or more) columns (a key-value pair) and spreads them into **multiple columns**. 
+
+
+&lt;img src="figures/02-tidyverse//tidyr_pivot.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Toy example of "untidy" data
+
+
+```r
+messy &lt;- tibble(
+  name = c("Alex", "Ben", "Cedric"),
+  DataSciR = c(2.0, 1.7, 1.0),
+  VisAnalytics = c(3.3, 1.3, 2.0)
+)
+messy
+```
+
+```
+## # A tibble: 3 x 3
+##   name   DataSciR VisAnalytics
+##   &lt;chr&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+## 1 Alex        2            3.3
+## 2 Ben         1.7          1.3
+## 3 Cedric      1            2
+```
+
+**Problem:** here are 3 variables (name, course, grade), but only name has its own column.
+
+---
+
+## `pivot_longer()` and `pivot_wider()`
+
+.pull-left[
+
+Use `pivot_longer()` to collapse the two course columns into key-value pairs `course` and `grade`.
+
+
+```r
+tidy &lt;- messy %&gt;%
+  pivot_longer(cols = -name, 
+               names_to = "course", 
+               values_to = "grade")
+tidy
+```
+
+```
+## # A tibble: 6 x 3
+##   name   course       grade
+##   &lt;chr&gt;  &lt;chr&gt;        &lt;dbl&gt;
+## 1 Alex   DataSciR       2  
+## 2 Alex   VisAnalytics   3.3
+## 3 Ben    DataSciR       1.7
+## 4 Ben    VisAnalytics   1.3
+## 5 Cedric DataSciR       1  
+## 6 Cedric VisAnalytics   2
+```
+
+]
+
+--
+
+.pull-right[
+
+Use `pivot_wider()` to "unpivot" a tibble. It is useful when there are variables that form rows instead of columns.
+
+
+```r
+tidy %&gt;%
+  pivot_wider(names_from = course, 
+              values_from = grade)
+```
+
+```
+## # A tibble: 3 x 3
+##   name   DataSciR VisAnalytics
+##   &lt;chr&gt;     &lt;dbl&gt;        &lt;dbl&gt;
+## 1 Alex        2            3.3
+## 2 Ben         1.7          1.3
+## 3 Cedric      1            2
+```
+
+]
+
+???
+
+- quotes for new / non-existing columns; no quotes when referring to existing colums
+
+---
+
+## Reshaping from "long" to "wide"
+
+
+```r
+day_order &lt;- c("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+df &lt;- bookings %&gt;% inner_join(properties, by = "property_id")
+checkin_count &lt;- df %&gt;%
+  count(destination, checkin_day) %&gt;%
+  mutate(checkin_day = factor(checkin_day, levels = day_order))
+checkin_count
+```
+
+&amp;#x1F914; _"What is the result of this code?"_
+
+???
+
+- join bookings and properties
+- count the number of bookings per city and check-in day of the week
+- convert checkin_day from character to factor variable
+
+--
+
+
+```
+## # A tibble: 21 x 3
+##    destination checkin_day     n
+##  * &lt;chr&gt;       &lt;fct&gt;       &lt;int&gt;
+##  1 Amsterdam   fri          1074
+##  2 Amsterdam   mon           517
+##  3 Amsterdam   sat           889
+##  4 Amsterdam   sun           813
+##  5 Amsterdam   thu           667
+##  6 Amsterdam   tue           498
+##  7 Amsterdam   wed           542
+##  8 Brisbane    fri           162
+##  9 Brisbane    mon           133
+## 10 Brisbane    sat           114
+## # ... with 11 more rows
+```
+
+---
+
+## `pivot_wider()`
+
+&amp;#x1F914; _"How can we create the following table from `checkin_count`?"_
+
+
+```
+## # A tibble: 3 x 8
+##   destination   mon   tue   wed   thu   fri   sat   sun
+##   &lt;chr&gt;       &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1 Amsterdam     517   498   542   667  1074   889   813
+## 2 Brisbane      133   148   128   162   162   114   153
+## 3 Tokyo         718   655   560   718   451   322   576
+```
+
+--
+
+
+```r
+checkin_count %&gt;%
+  pivot_wider(names_from = checkin_day, values_from = n)
+```
+
+```
+## # A tibble: 3 x 8
+##   destination   fri   mon   sat   sun   thu   tue   wed
+##   &lt;chr&gt;       &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1 Amsterdam    1074   517   889   813   667   498   542
+## 2 Brisbane      162   133   114   153   162   148   128
+## 3 Tokyo         451   718   322   576   718   655   560
+```
+
+--
+
+`pivot_wider()` creates the new columns in the order the keys appear in the data. 
+Hence, we can sort the rows by `checkin_day` to receive a tibble with the day-of-week columns in the correct order:
+
+---
+
+class: middle
+
+
+```r
+checkin_count %&gt;%
+* arrange(checkin_day) %&gt;%
+  pivot_wider(names_from = checkin_day, values_from = n)
+```
+
+```
+## # A tibble: 3 x 8
+##   destination   mon   tue   wed   thu   fri   sat   sun
+##   &lt;chr&gt;       &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1 Amsterdam     517   498   542   667  1074   889   813
+## 2 Brisbane      133   148   128   162   162   114   153
+## 3 Tokyo         718   655   560   718   451   322   576
+```
+
+---
+
+## `pivot_longer()`
+
+.pull-left[
+
+
+```r
+checkin_count %&gt;%
+  pivot_wider(names_from = checkin_day, 
+              values_from = n) %&gt;%
+* pivot_longer(cols = c(mon, tue, wed, thu,
+*                       fri, sat, sun),
+               names_to = "checkin_day",
+               values_to = "n")
+```
+
+```
+## # A tibble: 21 x 3
+##    destination checkin_day     n
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;int&gt;
+##  1 Amsterdam   mon           517
+##  2 Amsterdam   tue           498
+##  3 Amsterdam   wed           542
+##  4 Amsterdam   thu           667
+##  5 Amsterdam   fri          1074
+##  6 Amsterdam   sat           889
+##  7 Amsterdam   sun           813
+##  8 Brisbane    mon           133
+##  9 Brisbane    tue           148
+## 10 Brisbane    wed           128
+## # ... with 11 more rows
+```
+
+]
+
+--
+
+.pull-right[
+
+
+```r
+checkin_count %&gt;%
+  pivot_wider(names_from = checkin_day, 
+              values_from = n) %&gt;%
+* pivot_longer(cols = -destination,
+               names_to = "checkin_day",
+               values_to = "n")
+```
+
+```
+## # A tibble: 21 x 3
+##    destination checkin_day     n
+##    &lt;chr&gt;       &lt;chr&gt;       &lt;int&gt;
+##  1 Amsterdam   fri          1074
+##  2 Amsterdam   mon           517
+##  3 Amsterdam   sat           889
+##  4 Amsterdam   sun           813
+##  5 Amsterdam   thu           667
+##  6 Amsterdam   tue           498
+##  7 Amsterdam   wed           542
+##  8 Brisbane    fri           162
+##  9 Brisbane    mon           133
+## 10 Brisbane    sat           114
+## # ... with 11 more rows
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 7
+
+<div class="countdown" id="timer_5e98179c" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">10</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+### Do properties appeal to business travellers and tourists alike?
+
+- Convert the column `for_business` to a factor with the levels `"business"` and `"tourist"`.
+- For each property, calculate the average review score given by business travelers and tourists.
+- Then, calculate the average review score difference between business travelers and tourists. 
+
+---
+
+## separate()
+
+`separate()` splits up two or more variables that are clumped together in one column.
+
+
+```r
+properties %&gt;% head()
+```
+
+```
+## # A tibble: 6 x 5
+##   property_id destination property_type nr_rooms facilities                               
+##         &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;                                    
+## 1        2668 Brisbane    Hotel               32 airport shuttle,free wifi,garden,breakfa~
+## 2        4656 Brisbane    Hotel               39 on-site restaurant,pool,airport shuttle,~
+## 3        4563 Brisbane    Apartment            9 laundry                                  
+## 4        4088 Brisbane    Apartment            9 kitchen,laundry,free wifi                
+## 5        2188 Brisbane    Apartment            4 parking,kitchen,bbq,free wifi,game conso~
+## 6        4171 Brisbane    Apartment            5 kitchen,pool,laundry,parking,free wifi,g~
+```
+
+---
+
+## separate()
+
+Split up `facilities` by `,` into multiple columns.
+
+
+```r
+properties %&gt;%
+  separate(facilities, into = paste0("facility_", 1:9), sep = ",")
+```
+
+```
+## Warning: Expected 9 pieces. Missing pieces filled with `NA` in 4091 rows [1, 2, 3, 4, 5,
+## 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...].
+```
+
+```
+## # A tibble: 4,178 x 13
+##    property_id destination property_type nr_rooms facility_1 facility_2 facility_3
+##          &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;     
+##  1        2668 Brisbane    Hotel               32 airport s~ free wifi  garden    
+##  2        4656 Brisbane    Hotel               39 on-site r~ pool       airport s~
+##  3        4563 Brisbane    Apartment            9 laundry    &lt;NA&gt;       &lt;NA&gt;      
+##  4        4088 Brisbane    Apartment            9 kitchen    laundry    free wifi 
+##  5        2188 Brisbane    Apartment            4 parking    kitchen    bbq       
+##  6        4171 Brisbane    Apartment            5 kitchen    pool       laundry   
+##  7        2907 Brisbane    Hotel               22 airport s~ on-site r~ breakfast 
+##  8        5141 Brisbane    Hotel               20 breakfast  free wifi  on-site r~
+##  9        1696 Brisbane    Apartment            5 free wifi  laundry    pool      
+## 10        1901 Brisbane    Apartment           11 free wifi  bbq        laundry   
+## # ... with 4,168 more rows, and 6 more variables: facility_4 &lt;chr&gt;, facility_5 &lt;chr&gt;,
+## #   facility_6 &lt;chr&gt;, facility_7 &lt;chr&gt;, facility_8 &lt;chr&gt;, facility_9 &lt;chr&gt;
+```
+
+.footnote[
+
+`unite()` is the inverse function of `separate()` and combines multiple variables into one. 
+For example, this operation could be useful for combining day, month and year columns into one date column. 
+
+]
+
+---
+
+## Nesting tables
+
+Common data structures are **hierarchical**, e.g. patient-centric with repeat observations.
+
+**Nesting** allows to store collapsed tibbles and simplifies data management.
+
+--
+
+Arrange `properties` to tidy format:
+
+
+```r
+tp &lt;- properties %&gt;%
+  separate(facilities, into = paste0("facility_", 1:9), sep = ",") %&gt;%
+  pivot_longer(cols = facility_1:facility_9, names_to = "facility_nr", values_to = "facility")
+```
+
+```
+## Warning: Expected 9 pieces. Missing pieces filled with `NA` in 4091 rows [1, 2, 3, 4, 5,
+## 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...].
+```
+
+```r
+head(tp)
+```
+
+```
+## # A tibble: 6 x 6
+##   property_id destination property_type nr_rooms facility_nr facility          
+##         &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;             
+## 1        2668 Brisbane    Hotel               32 facility_1  airport shuttle   
+## 2        2668 Brisbane    Hotel               32 facility_2  free wifi         
+## 3        2668 Brisbane    Hotel               32 facility_3  garden            
+## 4        2668 Brisbane    Hotel               32 facility_4  breakfast         
+## 5        2668 Brisbane    Hotel               32 facility_5  pool              
+## 6        2668 Brisbane    Hotel               32 facility_6  on-site restaurant
+```
+
+--
+
+Now, the tibble contains a lot of duplicate information: 9x destination, property type and number of rooms for each property id.
+
+---
+
+## Nesting tables
+
+Use `nest()` to create a nested tibble. The nested tibble contains a column `facilities` which is a **list of tibbles**:
+
+
+```r
+nested_tp &lt;- tp %&gt;%
+  nest(facilities = c(facility_nr, facility))
+nested_tp
+```
+
+```
+## # A tibble: 4,178 x 5
+##    property_id destination property_type nr_rooms facilities      
+##          &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;dbl&gt; &lt;list&gt;          
+##  1        2668 Brisbane    Hotel               32 &lt;tibble [9 x 2]&gt;
+##  2        4656 Brisbane    Hotel               39 &lt;tibble [9 x 2]&gt;
+##  3        4563 Brisbane    Apartment            9 &lt;tibble [9 x 2]&gt;
+##  4        4088 Brisbane    Apartment            9 &lt;tibble [9 x 2]&gt;
+##  5        2188 Brisbane    Apartment            4 &lt;tibble [9 x 2]&gt;
+##  6        4171 Brisbane    Apartment            5 &lt;tibble [9 x 2]&gt;
+##  7        2907 Brisbane    Hotel               22 &lt;tibble [9 x 2]&gt;
+##  8        5141 Brisbane    Hotel               20 &lt;tibble [9 x 2]&gt;
+##  9        1696 Brisbane    Apartment            5 &lt;tibble [9 x 2]&gt;
+## 10        1901 Brisbane    Apartment           11 &lt;tibble [9 x 2]&gt;
+## # ... with 4,168 more rows
+```
+
+.footnote[
+
+Use `unnest()` to expand a list column, such that each element of the list becomes a row. 
+
+]
+
+---
+
+## Bonus: `drop_na()`
+
+Some of the rows in the nested `facilities` column contain `NA`'s. How can we remove them?
+
+.pull-left[
+
+
+```r
+nested_tp$facilities[1]
+```
+
+```
+## [[1]]
+## # A tibble: 9 x 2
+##   facility_nr facility          
+##   &lt;chr&gt;       &lt;chr&gt;             
+## 1 facility_1  airport shuttle   
+## 2 facility_2  free wifi         
+## 3 facility_3  garden            
+## 4 facility_4  breakfast         
+## 5 facility_5  pool              
+## 6 facility_6  on-site restaurant
+## 7 facility_7  &lt;NA&gt;              
+## 8 facility_8  &lt;NA&gt;              
+## 9 facility_9  &lt;NA&gt;
+```
+
+]
+
+--
+
+.pull-right[
+
+`remove_na()` drops rows containing missing values.
+
+
+```r
+nested_tp_wo_na &lt;- nested_tp %&gt;% 
+  drop_na(facilities)
+# Did it work?
+nested_tp_wo_na$facilities[1]
+```
+
+```
+## [[1]]
+## # A tibble: 9 x 2
+##   facility_nr facility          
+##   &lt;chr&gt;       &lt;chr&gt;             
+## 1 facility_1  airport shuttle   
+## 2 facility_2  free wifi         
+## 3 facility_3  garden            
+## 4 facility_4  breakfast         
+## 5 facility_5  pool              
+## 6 facility_6  on-site restaurant
+## 7 facility_7  &lt;NA&gt;              
+## 8 facility_8  &lt;NA&gt;              
+## 9 facility_9  &lt;NA&gt;
+```
+
+
+]
+
+---
+
+## Bonus: `drop_na()`
+
+Be aware that most `dplyr`/`tidyr` functions cannot deal with list columns. However, we can leverage the `map()` function from  the `purrr` package to apply the `drop_na()` function on each element of `facilities`.
+
+
+```r
+nested_tp_wo_na &lt;- nested_tp %&gt;%
+  mutate(facilities = map(facilities, drop_na))
+nested_tp_wo_na$facilities[1]
+```
+
+```
+## [[1]]
+## # A tibble: 6 x 2
+##   facility_nr facility          
+##   &lt;chr&gt;       &lt;chr&gt;             
+## 1 facility_1  airport shuttle   
+## 2 facility_2  free wifi         
+## 3 facility_3  garden            
+## 4 facility_4  breakfast         
+## 5 facility_5  pool              
+## 6 facility_6  on-site restaurant
+```
+
+---
+
+name: purrr
+
+## The `purrr` package &amp;#x1F63B;
+
+The `purrr` package provides a family of functions for applying some function to each element of a vector and saving the result.
+
+.pull-left70[
+
+`map*()` takes as arguments 1) an atomic vector or a list and 2) a function. 
+It return a new vector of the **same length** as the input. The **type** of the vector is specified by the **suffix** of the `map*()` function. 
+
+- `map()` returns a list
+- `map_lgl()` returns a logical vector
+- `map_int()` returns an integer vector
+- `map_dbl()` returns a double vector
+- `map_chr()` returns a character vector
+
+Function reference: RStudio's [`purrr` cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf)
+
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/02-tidyverse//purrr.png" width="100%" /&gt;
+
+]
+
+
+.footnote[
+
+The `*apply()` functions in base `R` (e.g. `apply()`, `lapply()`, `sapply()`, ...) have similar purposes, however they are inconsistent in their output and hence not recommended.
+
+]
+
+???
+
+- problem with loops: you iterate over something, but it doesnt clearly convey a high level goal
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 8
+
+<div class="countdown" id="timer_5e98157a" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+Actually, we don't need to store the property facilities as tibble, since the column `facility_nr` is redundant.
+
+We change the `facilities` column to a list column, such that each element is a character vector of property facilities.
+
+
+```r
+properties_l &lt;- properties %&gt;% 
+  mutate(facilities = strsplit(facilities, ","))
+head(properties_l, 3)
+```
+
+```
+## # A tibble: 3 x 5
+##   property_id destination property_type nr_rooms facilities
+##         &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;dbl&gt; &lt;list&gt;    
+## 1        2668 Brisbane    Hotel               32 &lt;chr [6]&gt; 
+## 2        4656 Brisbane    Hotel               39 &lt;chr [7]&gt; 
+## 3        4563 Brisbane    Apartment            9 &lt;chr [1]&gt;
+```
+
+--
+
+Example:
+
+
+```r
+properties_l$facilities[[1]]
+```
+
+```
+## [1] "airport shuttle"    "free wifi"          "garden"             "breakfast"         
+## [5] "pool"               "on-site restaurant"
+```
+
+--
+
+Add a column `n_features` to `properties` that contains the number of facilities.
+
+Hint: Use the `map_*()` function that returns an integer vector. 
+
+---
+
+## Iteration over list columns
+
+Perform a statistical test for each day of the week: _is there a difference 
+in ratings between business travelers vs. non-business travelers?_
+
+
+```r
+bookings %&gt;% 
+  group_by(checkin_day) %&gt;% 
+  summarise(t_test = t.test(review_score ~ for_business))
+```
+
+```
+## Error: `summarise()` argument `t_test` must be a vector.
+## i `t_test` is `t.test(review_score ~ for_business)`.
+## i The error occured in group 1: checkin_day = "fri".
+## x `t_test` must be a vector, not a `htest` object.
+```
+
+&amp;#x1F914; _"Why does this code throw an error?"_
+
+--
+
+The return value of `t.test()` is of type `list`. When using `dplyr` operations 
+like `mutate()`, 
+we must explicitly declare that we want a list column.
+
+
+```r
+bookings %&gt;% 
+  group_by(checkin_day) %&gt;% 
+* summarize(t_test = list(t.test(review_score ~ for_business)))
+```
+
+```
+## # A tibble: 7 x 2
+##   checkin_day t_test 
+## * &lt;chr&gt;       &lt;list&gt; 
+## 1 fri         &lt;htest&gt;
+## 2 mon         &lt;htest&gt;
+## 3 sat         &lt;htest&gt;
+## 4 sun         &lt;htest&gt;
+## 5 thu         &lt;htest&gt;
+## 6 tue         &lt;htest&gt;
+## 7 wed         &lt;htest&gt;
+```
+
+--
+
+Extract the `\(p\)`-value from the `t_test` list column. 
+Since we want a numeric column, we use `map_dbl()` to extract a double from 
+a list.
+
+
+```r
+bookings %&gt;% 
+  group_by(checkin_day) %&gt;% 
+  summarize(t_test = list(t.test(review_score ~ for_business))) %&gt;% 
+  mutate(p_value = map_dbl(t_test, "p.value"))
+```
+
+```
+## # A tibble: 7 x 3
+##   checkin_day t_test   p_value
+## * &lt;chr&gt;       &lt;list&gt;     &lt;dbl&gt;
+## 1 fri         &lt;htest&gt; 1.27e-10
+## 2 mon         &lt;htest&gt; 3.93e- 9
+## 3 sat         &lt;htest&gt; 5.01e- 4
+## 4 sun         &lt;htest&gt; 3.25e-16
+## 5 thu         &lt;htest&gt; 1.42e-18
+## 6 tue         &lt;htest&gt; 6.44e-14
+## 7 wed         &lt;htest&gt; 1.65e-15
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn 9
+
+<div class="countdown" id="timer_5e9816ab" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">10</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+### _Which factors contribute to the average property review score?_
+
+For **each city**, fit a **linear regression** model&lt;sup&gt;1&lt;/sup&gt; to predict a property's **average review score** based on average price per night, number of bookings (stayed or cancelled), and property type. Compare the quality of the three models using `\(R^2\)`.
+
+Strategy:
+
+1. Compute the summary statistics `avg_review` (average review score), 
+`n_bookings` (number of bookings) and `avg_price` (average price per night) 
+for each property and city.
+2. For each city, fit a linear regression model (?`lm`) using the formula 
+`avg_review ~ property_type + n_bookings + avg_price`. Save these models as new 
+column `fit`.
+3. Extract the `\(R^2\)` value (`r.squared`) from `fit` using the appropriate `map_*` function.
+
+.footnote[
+
+[1] Remove properties with less than 2 non-missing review scores.
+
+]
+
+---
+
+## Further materials
+
+- Hadley Wickham and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017. Chapter:
+  - [Data transformation](http://r4ds.had.co.nz/transform.html)
+  - [Tibbles](http://r4ds.had.co.nz/tibbles.html)
+  - [Data import](http://r4ds.had.co.nz/data-import.html)
+  - [Tidy data](http://r4ds.had.co.nz/tidy-data.html)
+  - [Relational data](http://r4ds.had.co.nz/relational-data.html)
+  - [Iteration](http://r4ds.had.co.nz/iteration.html)
+- RStudio's cheat sheets (see next slides):
+  - [Data Import (`readr + tidyr`)](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+  - [`dplyr`](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+  - [`purrr`](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf)
+
+---
+
+background-image: url("figures/02-tidyverse/readr-tidyr-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/readr-tidyr-cheatsheet_2.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/dplyr-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/dplyr-cheatsheet_2.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/purrr-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/purrr-cheatsheet_2.png")
+background-size: contain
+
+---
+
+class: middle
+
+## Very useful tidyverse packages we did not cover today
+
+&lt;img src="figures/02-tidyverse//stringr_forcats_lubridate.png" width="80%" /&gt;
+
+For an introduction, see the following chapters from  
+Hadley Wickham and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017.
+
+- [Strings with stringr](https://r4ds.had.co.nz/strings.html)
+- [Factors with forcats](https://r4ds.had.co.nz/factors.html)
+- [Dates and Times with lubridate](https://r4ds.had.co.nz/dates-and-times.html)
+
+---
+
+
+## Session info
+
+
+```
+##  setting  value                       
+##  version  R version 3.6.3 (2020-02-29)
+##  os       Windows 10 x64              
+##  system   x86_64, mingw32             
+##  ui       RTerm                       
+##  language (EN)                        
+##  collate  English_United States.1252  
+##  ctype    English_United States.1252  
+##  tz       Europe/Berlin               
+##  date     2020-04-16
+```
+
+&lt;div style="font-size:80%;"&gt;
+
+.pull-left[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; package &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; version &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; date &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; source &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; countdown &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.3.5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-20 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (gadenbuie/countdown@a544fa4) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; dplyr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.8.99.9002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-29 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/dplyr@c7f2936) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; forcats &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.5.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-01 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ggplot2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.3.0.9000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/ggplot2@53815f8) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; purrr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.3.3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-10-18 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+.pull-right[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; package &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; version &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; date &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; source &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; readr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.3.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2018-12-21 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; stringr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.4.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-02-10 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; tibble &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.0.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; tidyr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-01-24 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; tidyverse &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.3.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-21 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+&lt;/div&gt;
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&amp;nbsp;
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

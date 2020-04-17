@@ -1,0 +1,1926 @@
+---
+title: "02 - The _tidyverse_"
+subtitle: "Data Science with R &#183; Summer 2020"
+author: "Uli Niemann"
+session: 02
+institute: "Knowledge Management & Discovery Lab"
+# date: "2016/12/12 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    css: ["default", "assets/css/my-theme.css", "assets/css/my-fonts.css"]
+    seal: false # custom title slide
+    lib_dir: libs
+    nature:
+      # highlightStyle: solarized-light
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: true
+      ratio: "16:9"
+params:
+  url: "https://brain.cs.uni-magdeburg.de/kmd/DataSciR/"
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale("LC_ALL","English")
+Sys.setenv(LANG = "en_US.UTF-8")
+Sys.setlocale("LC_TIME", "English")
+
+# The version number in the directory name of an HTML dependency can be
+# suppressed by setting options(htmltools.dir.version = FALSE) when the
+# dependency is copied via `copyDependencyToDir()`. 
+options(htmltools.dir.version = FALSE)
+options(width = 90) # width of console output
+# load fonts (mainly Fira Sans)
+# extrafont::font_import()
+extrafont::loadfonts("win", quiet = TRUE)
+
+yt_counter <- 0
+
+# set default knitr options
+knitr::opts_chunk$set(fig.width = 5, fig.height = 4, fig.retina = 4)
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE, warning = TRUE, 
+                      message = FALSE, cache = FALSE)
+# directory of generated figures
+knitr::opts_chunk$set(fig.path = "figures/_gen/02-tidyverse/")
+# directory of included figures
+fig_path <- "figures/02-tidyverse/"
+
+library(countdown)
+```
+
+class: title-slide, center, bottom
+
+# `r rmarkdown::metadata$title`
+
+## `r rmarkdown::metadata$subtitle`
+
+### `r rmarkdown::metadata$author` &#183; `r rmarkdown::metadata$institute`
+
+#### [`r params$url`](`r params$url`)
+
+.courtesy[&#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+name: motivation
+
+## Why is (base) `R` hard to learn?
+
+`R` has some idiosyncrasies that make it hard for learners who are used to other programming languages, e.g.:
+
+.pull-left60[
+
+- unhelpful help `?print`
+- too many functions `colnames()`, `names()`
+- inconsistent names `read.csv()`, `load()`, `readRDS()`
+- clumsy console output `print(iris)`
+- high flexibility (_is this bad?_)
+- too many ways to select variables: `df$x`, `df$"x"`, `df[,"x"]`, or `df[[1]]`
+
+]
+
+.pull-right40[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "unhelpful_help.png"))
+```
+
+&#x2753; _"invisibly"?_  
+&#x2753; _"generic function"?_  
+&#x2753; _"class"?_ 
+
+]
+
+.footnote[
+
+See a more comprehensive list:  
+Robert A. Muenchen. ["Why R is Hard to Learn"](http://r4stats.com/articles/why-r-is-hard-to-learn/). r4stats.com. Accessed 19.07.2018.
+
+]
+
+---
+
+## Base `R` vs. tidyverse code
+
+.pull-left[
+
+&#x1F914; _"What does this base `R` code?"_
+
+```{r}
+aggregate(iris[, "Sepal.Length"], 
+          list(Species = iris[, "Species"]), 
+          mean)
+```
+{{content}}
+
+]
+
+--
+
+&#x2753; _"What are the square brackets [ for?"_ &longrightarrow; They are used for subsetting a data frame.
+{{content}}
+
+--
+
+&#x2753; _"What is list()?"_ &longrightarrow; It's a type of R object.
+{{content}}
+
+--
+
+&#x2753; _"Why is the mean() function seemingly applied without argument?"_ &longrightarrow; It is being passed to the subsets of the data frame.
+{{content}}
+
+--
+
+&#x2753; _"In the second line, why does the first "Species" does not need to be quoted, but the second "Species" does?"_ ...
+
+--
+
+.pull-right[
+
+&#x1F60E; **tidyverse** pendant:
+
+```{r, message=FALSE}
+library(dplyr)
+group_by(iris, Species) %>% 
+	summarize(avg_sl = mean(Sepal.Length))
+```
+
+]
+
+---
+
+name: tidyverse-packages
+
+## What is the Tidyverse?
+
+From the [Tidyverse website](https://www.tidyverse.org/):
+
+> "**R packages for data science.** The tidyverse is an **opinionated collection of R packages designed for data science**. All packages **share** an underlying **design philosophy, grammar, and data structures**."
+
+&rarr; collection of `R` packages mainly for data wrangling and visualization  
+&rarr; shared conventions and common APIs across all packages
+
+```{r, echo=FALSE, out.width="95%"}
+knitr::include_graphics(file.path(fig_path, "tidyverse_packages_3.png"))
+```
+
+---
+
+## Installation
+
+```{r, echo = FALSE}
+# detach(package:dplyr, unload = TRUE)
+# unloadNamespace("dplyr")
+```
+
+
+```{r, eval = FALSE}
+# Install all Tidyverse packages
+install.packages("tidyverse")
+
+# Attach core packages
+library(tidyverse)
+```
+
+The meta-package [`tidyverse`](https://www.tidyverse.org/packages/) contains `r length(tidyverse::tidyverse_packages(include_self = FALSE))` packages. 
+When running `library(tidyverse)`, only the **core** tidyverse packages 
+become available in your current `R` session. The core packages are:
+
+.pull-left60[
+
+**Core-Packages**:
+
+- `ggplot2`: creation of graphics
+- `dplyr`: data wrangling
+- `tidyr`: data reshaping
+- `readr`: import of flat data files, e.g. csv
+- `tibble`: enhanced data frames
+- `stringr`: string manipulation
+- `forcats`: factor manipulation
+- `purrr`: functions for working with list columns
+
+]
+
+.pull-right40[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "tidyverse_overview.png"))
+```
+
+.footnote[
+.content-box-purple[
+
+Figure source: Joseph Rickert. ["What is the tidyverse?"](https://rviews.rstudio.com/2017/06/08/what-is-the-tidyverse/). R Views. Accessed 13.07.2019.
+
+]
+]
+
+
+]
+
+---
+
+## Case study: customer bookings data
+
+.pull-left60[
+
+> Consider a large travel fare aggregator website which wants to analyze its customer bookings data in order to improve travel experience.
+
+]
+
+.pull-right40[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "expedia.png"))
+```
+
+]
+
+```{r, message = TRUE}
+library(tidyverse)
+```
+
+---
+
+## Data import
+
+.pull-left70[
+
+The first step of every data analysis project is to import one or more datasets. 
+The tidyverse provides seven packages for the import of various data formats:
+
+- `readr`: flat files (.csv, .tsv, ...)
+- `DBI`: databases (SQLite, MySQL, PostgreSQL, MonetDB, ...)
+- `haven`: foreign statistical formats (.sas, .sav, .dta)
+- `jsonlite`: json files
+- `readxl`: Excel files (.xls, .xlsx)
+- `rvest`: websites (.html)
+- `xml2`: xml files
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "readr.png"))
+```
+
+]
+
+.content-box-purple[
+
+Function reference: RStudio's [Data import cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+]
+
+---
+
+class: center, middle
+name: readr
+
+```{r, echo=FALSE, out.width="250px"}
+knitr::include_graphics(file.path(fig_path, "readr.png"))
+```
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+We want to import two datasets: `bookings.csv` and `properties.csv`.
+
+```{r, message = TRUE}
+# library(readr) # readr is a core package of the tidyverse and... 
+# ... hence doesn't need to be attached separately. 
+bookings <- read_csv("../datasets/bookings.csv")
+```
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+```{r}
+bookings
+```
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+```{r}
+properties <- read_csv("../datasets/properties.csv")
+properties
+```
+
+.footnote[
+
+The files are taken from the Tidyverse workshop at the UseR! conference 2018 by Dr. Simon Jackson. [URL](https://github.com/drsimonj/tidyverse_tutorial-useR2018/tree/master/data).  
+
+]
+
+---
+
+## Data import with [`readr`](https://readr.tidyverse.org/)
+
+Base `R` already has functions for loading flat files, e.g. `read.csv()`, `read.delim()`.   
+
+Advantages of the Tidyverse implementations include:
+
+- higher speed
+- characters are not coerced to factors by default (see `stringsAsFactors` argument)
+- generates tibbles instead of data frames
+
+---
+
+name: tibble
+class: center, middle
+
+```{r, echo=FALSE, out.width="250px"}
+knitr::include_graphics(file.path(fig_path, "tibble.png"))
+```
+
+---
+
+## [Tibbles](https://tibble.tidyverse.org/) 
+
+.pull-left70[
+
+A tibble is "a modern reimagining" of the data frame.  
+Advantages over traditional data frames include:
+
+- improved print method that shows...
+  - ...only the first 10 rows
+  - ...all the columns that fit on screen + names of the remaining ones
+  - ...column types
+- more consistent subsetting
+- less type coercion
+- prohibits partial matching
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "tibble.png"))
+```
+
+]
+
+```{r, echo = FALSE}
+bookings
+```
+
+.font70[
+
+.content-box-green[
+
+Use `as_tibble()` to convert a data frame to a tibble.
+
+]
+
+]
+
+???
+
+- iris[, c(1,2)] returns data frame, but iris[, 1] returns a vector
+
+---
+
+## Tibble vs. data frame
+
+```{r}
+class(iris)
+iris
+```
+
+---
+
+## Tibble vs. data frame
+
+```{r}
+as_tibble(iris)
+```
+
+---
+
+## Tibble vs. data frame
+
+Tibbles adjust to the available line width!
+
+```{r, echo=FALSE}
+o <- getOption("width")
+options(width = 50)
+```
+
+```{r}
+as_tibble(iris)
+```
+
+```{r, echo=FALSE}
+options(width = o)
+```
+
+---
+
+## Tibble vs. data frame
+
+```{r}
+df <- data.frame(
+  `bad name` = 1:3, # syntactically invalid name because of SPACE
+  x = rep(letters[1:2], length.out = 3) # will get coerced to a factor variable
+)
+str(df)
+```
+
+--
+
+Tibbles don't coerce character vectors to factors.
+
+```{r}
+ti <- tibble(
+  `bad name` = 1:3, # no "auto repair" of invalid column name
+  x = rep(letters[1:2], length.out = 3) # yields character variable
+)
+str(ti)
+```
+
+
+---
+
+## `tribble()`
+
+- spreadsheet-like creation of tibbles (by row)
+- formula notation (`~`) to define column names
+
+```{r}
+tribble(
+  ~x, ~y,
+  1, "b",
+  2, "a"
+)
+```
+
+???
+
+- tilde
+
+---
+
+name: dplyr
+class: center, middle
+
+```{r, echo=FALSE, out.width="250px"}
+knitr::include_graphics(file.path(fig_path, "dplyr.png"))
+```
+
+---
+
+## Data wrangling with `dplyr` &#x1F6E0;&#xFE0F;
+
+.pull-left70[
+
+Consistent API design:
+
+- first argument is a data frame
+- subsequent arguments reference columns in _non-standard evaluation_ notation (no quotation marks)
+- output is (usually) also a data frame
+
+&#x1F914; _"What can I do with `dplyr`?"_
+
+- inspect a tibble with `glimpse()`
+- select specific columns with `select()`
+- filter a subset of rows with `filter()`
+- add new or change existing columns with `mutate()`
+- group rows by a grouping column with `group_by()`
+- calculate a summary (per group) with `summarize()`
+- join two distinct tibbles by a common column with `*join()`
+
+]
+
+.pull-right30[
+
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr.png"))
+```
+
+]
+
+---
+
+## Select columns with `select()` &#x1F446;
+
+.pull-left70[
+
+Select the column `review_score`.
+
+```{r}
+select(bookings, review_score)
+```
+
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr_select.png"))
+```
+
+]
+
+.content-box-yellow[
+
+The output is **always** a `data.frame` or `tibble`, regardless of whether a single 
+or multiple columns are selected. 
+
+]
+
+---
+
+## Select columns with `select()` &#x1F446;
+
+.pull-left70[
+
+Select multiple columns by specifying column names as further arguments.
+
+```{r}
+select(bookings, review_score, status)
+```
+
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr_select.png"))
+```
+
+]
+
+---
+
+## Select columns with `select()` &#x1F446;
+
+.pull-left70[
+
+Negative selection: select all but specific columns using `-`.
+
+```{r}
+select(bookings, -booker_id)
+```
+
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr_select.png"))
+```
+
+]
+
+---
+
+## Select columns with `select()` &#x1F446;
+
+**Helper functions** facilitate selecting multiple columns whose names satisfy a specific criterion. 
+
+helper function           | description
+:------------------------- | :----------------------------
+`contains("abc")`          | names containing `"abc"`
+`starts_with("abc")`       | names starting with `"abc"`
+`ends_with("abc")`         | names ending with `"abc"`
+`num_range("a", 1:3)`      | names matching the numerical range `a1`, `a2`, `a3`
+`any_of(c("ab", "c"))`     | names (given as character vector)
+`matches(".id")`           | names matching the regular expr. `".id"`
+`everything()`             | all (remaining) names
+`last_col()`               | last column
+
+--
+
+```{r}
+select(bookings, contains("id"), ends_with("night"))
+```
+
+---
+
+## Filter rows with `filter()`
+
+.pull-left70[
+
+Filter bookings which stayed, i.e., didn't cancel.
+
+```{r}
+filter(bookings, status == "stayed")
+```
+
+```{r, eval=FALSE}
+# identical with 
+filter(bookings, !status == "cancelled")
+```
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr_filter.png"))
+```
+
+]
+
+---
+
+## Filter rows with `filter()`
+
+.pull-left70[
+
+Combine multiple conditions with `&`.
+
+```{r}
+filter(bookings, status == "stayed" & 
+         !is.na(review_score) & 
+         between(price_per_night, 90, 120))
+```
+
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr_filter.png"))
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+Create a new tibble `x` that 
+
+- only contains the columns `room_nights` and `review_score`, and 
+- only contains the bookings with a price per night of less than 80.
+
+1. _...using base `R` functions only._
+2. _...using the `dplyr` functions `select()` and `filter()`._
+
+`r countdown::countdown(minutes = 3)`
+
+---
+
+## Sort rows with `arrange()`
+
+```{r}
+arrange(bookings, price_per_night) # default: sort in ascending order
+```
+
+
+```{r}
+arrange(bookings, desc(price_per_night))
+```
+
+---
+
+## Select rows by position with `slice()`
+
+```{r}
+x <- arrange(bookings, desc(review_score))
+slice(x, 1:10)
+```
+
+---
+
+## Chaining multiple operations &#x26D3;&#xFE0F;
+
+`dplyr` code is very intutive and expressive, but also quite verbose. 
+
+&#x1F914; _"How to organize the code so that it remains readable even for a high number of operations?"_
+
+--
+
+> Example: For all bookers who didn't cancel their trip and checked in on a friday, we are interested in the 5 highest review scores. Only the columns `price_per_night` and `review_score` should be included in a new tibble which is sorted by `review_score` in descending order. 
+
+---
+
+## Chaining multiple operations &#x26D3;&#xFE0F;
+
+Solution 1 (nesting): 
+
+```{r}
+select(
+  slice(
+    arrange(
+      filter(bookings, !status == "cancelled" & checkin_day == "fri"),
+      desc(review_score)
+    ),
+    1:5
+  ), 
+  price_per_night, review_score
+)
+```
+
+???
+
+- could you easily read the code after half a year from now?
+- arrange is the last operation but is read first
+
+---
+
+class: center, middle
+
+```{r, echo=FALSE, out.width="500px"}
+knitr::include_graphics(file.path(fig_path, "Russian-Matroshka2.jpg")) 
+```
+
+---
+
+## Chaining multiple operations &#x26D3;&#xFE0F;
+
+Solution 2 (save and overwrite intermediate results): 
+
+```{r}
+x <- filter(bookings, !status == "cancelled" & checkin_day == "fri")
+x <- arrange(x, review_score)
+x <- slice(x, 1:5)
+x <- select(x, price_per_night, review_score)
+x
+```
+
+???
+
+- very hard to spot mistakes you introduced in one of the earlier steps
+
+---
+
+## Chaining multiple operations &#x26D3;&#xFE0F;
+
+Solution 2 (save and overwrite intermediate results): 
+
+```{r}
+x <- filter(bookings, !status == "cancelled" & checkin_day == "fri")
+x <- arrange(x, desc(review_score)) #<<
+x <- slice(x, 1:5)
+x <- select(x, price_per_night, review_score)
+x
+```
+
+---
+
+## Chaining multiple operations &#x26D3;&#xFE0F;
+
+Solution 3 (save each intermediate results as new object):  
+
+```{r, eval=FALSE}
+x1 <- filter(bookings, !status == "cancelled" & checkin_day == "fri")
+x2 <- arrange(x1, desc(review_score))
+x3 <- slice(x2, 1:5)
+x4 <- select(x2, price_per_night, review_score)
+x4
+```
+
+--
+
+_There is a mistake in the above code. Can you spot it?_
+
+???
+
+- copy-and-paste problems: even if you know you make these mistakes you still will make the mistakes
+- naming is difficult: what happens if I want to insert another operations later between x1 and x2?
+
+---
+
+## Chaining multiple operations &#x26D3;&#xFE0F;
+
+Solution 3 (save each intermediate results as new object):  
+
+```{r, eval=FALSE}
+x1 <- filter(bookings, !status == "cancelled" & checkin_day == "fri")
+x2 <- arrange(x1, desc(review_score))
+x3 <- slice(x2, 1:5)
+x4 <- select(x3, price_per_night, review_score) #<<
+x4
+```
+
+???
+
+- copy-and-paste problems: even if you know you make these mistakes you still will make the mistakes
+- naming is difficult: what happens if I want to insert another operations later between x1 and x2?
+
+---
+
+name: pipe
+class: center, middle
+
+```{r, echo=FALSE, out.width="250px"}
+knitr::include_graphics(file.path(fig_path, "magrittr.png"))
+```
+
+---
+
+## The pipe operator `%>%`
+
+.pull-left70[
+
+- The **pipe operator** `%>%` helps to write **code that is easy to read and understand**.
+- Its main purpose is to **express a sequence of multiple operations in a single step**.
+- The value of the first argument of a function is the output of the last function before the pipe operator.
+
+```{r, eval=FALSE}
+bookings %>%
+  filter(!status == "cancelled" & checkin_day == "fri") %>%
+  arrange(desc(review_score)) %>%
+  slice(1:5) %>%
+  select(price_per_night, review_score)
+```
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "magrittr.png"))
+```
+
+]
+
+.footnote[
+
+In RStudio, the shortcut for `%>%` is **Ctrl+⇧Shift+M**. 
+
+]
+
+--
+
+> "From table `bookings`, filter all non-canceled bookings with check-in on a Friday  
+> THEN sort by review score in descending order  
+> THEN take the top-5 bookings  
+> THEN return price per night and review score."
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 5)`
+
+Use `%>%` to write a pipeline which extracts all bookings with Friday as check-in 
+day while only returning the columns `property_id` and `status`. 
+
+---
+
+## Adding & replacing columns &#x2795;
+
+We would like to create a new column for the **total price** of a booking, which 
+is the product of `price_per_night` and `room_nights`. 
+
+```{r}
+bookings %>%
+  mutate(total_price = price_per_night * room_nights)
+```
+
+(The new variable is appended to `bookings` as last column.)
+
+???
+
+mutate(name of new variable = equation)
+
+---
+
+## Adding & replacing columns &#x2795;
+
+We would like to create a new column for the **total price** of a booking, which 
+is the product of `price_per_night` and `room_nights`. 
+
+(Only show `price_per_night`, `room_nights`, `total_price`)
+
+```{r}
+bookings %>%
+  mutate(total_price = price_per_night * room_nights) %>%
+  select(price_per_night, room_nights, total_price) 
+```
+
+---
+
+## Adding & replacing columns &#x2795;
+
+Replace the existing column `property_id` by transforming the original column 
+from `character` into `factor`. 
+
+```{r}
+bookings %>%
+  mutate(property_id = as.factor(property_id))
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+Write a pipeline which calculates the mean-centered `price_per_night` as new column 
+names `centered_ppn`. The returned data frame should only contain this new column.
+
+_You need `mutate()` and `select()`._
+
+---
+
+## `mutate_at/if/all()`
+
+- `mutate_at()`: select one or more columns to apply a function on with `vars()` helper function
+- `mutate_if()`: apply a function to columns that fullfill a condition
+- `mutate_all()`: apply a function to all columns
+
+--
+
+```{r}
+# Overwrite existing colums whose names end with 'id'
+bookings %>%
+  mutate_at(vars(ends_with("id")), list(as.character))
+```
+
+---
+
+## `mutate_at/if/all()`
+
+```{r}
+# Create new columns with suffix '_chr'
+bookings %>%
+  mutate_at(vars(ends_with("id")), list(chr = as.character)) # applies to booker_id and property_id
+```
+
+---
+
+## `mutate_at/if/all()`
+
+```{r}
+# Convert all character variables to factors
+bookings %>%
+  mutate_if(is.character, as.factor) # applies to booker_id, checkin_day and status
+```
+
+???
+
+- place holder: the placeholder `.` is the dynamic variable when using `mutate_at()` 
+ and other functions in the tidyverse.
+
+---
+
+## Summarize many rows with `summarize()` &#x1F5DC;
+
+.pull-left70[
+
+`summarize()` (or `summarise()`) takes a tibble as input, and returns a tibble with one row. 
+
+```{r}
+# Avg. review score
+bookings %>%
+  summarize(review_score = mean(review_score, na.rm = TRUE))
+```
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dplyr_summarize.png"))
+```
+
+]
+
+---
+
+## Summarize many rows with `summarize()` &#x1F5DC;
+
+```{r}
+bookings %>%
+  summarize(n = n(), # Total no. of bookings
+            n_miss = sum(is.na(review_score)), # No. of bookings w/o review score
+            review_score = mean(review_score, na.rm = TRUE)) # Avg. review score
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 8)`
+
+Obtain a one-row summary tibble of the bookings data containing the following statistics:
+
+- The number of rows (Hint: use the function `n()`)
+- The number of `"stayed"` bookings
+- The mean of the _total price_ (Hint: you have to compute the total price first)
+
+The output tibble should contain three columns and just one row.
+
+---
+
+## Grouping with `group_by()` &#x1F465;
+
+```{r, echo=FALSE, out.width="75%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "dplyr_group_by.png"))
+```
+
+`group_by()` _groups_ tibbles so that `dplyr` functions can execute operations on each group seperately.
+
+--
+
+```{r}
+class(bookings)
+```
+
+
+--
+
+```{r}
+# Group bookings into (non-)business travels
+bookings_by_type <- bookings %>% group_by(for_business)
+class(bookings_by_type)
+```
+
+
+.footnote[
+
+Use `ungroup()` to remove the grouping if you need to transform the tibble in a different context. 
+
+]
+
+---
+
+## Grouped summaries
+
+```{r}
+bookings %>%
+  group_by(for_business) %>%
+  summarize(
+    n = n(),
+    review_mean = mean(review_score, na.rm = TRUE)
+  )
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 10)`
+
+Write a pipeline that yields a tibble containing only the most expensive booking 
+of each property. Return only the property id and the price of the most expensive booking.
+
+You should get as many rows as there are unique properties:
+
+```{r}
+n_distinct(bookings$property_id) # convenience function for `length(unique(bookings$property_id))`
+```
+
+--
+
+1. Calculate `price_total` using `mutate()`.
+1. Group by `property_id` using `group_by()`.
+1. Filter rows where the total price is equal to the maximum of the total price 
+(for that property using `filter()`).
+1. Select the columns `property_id` and `price_total` using `select()`.
+
+---
+
+## Group by multiple columns
+
+```{r}
+# Average score by travel type and check-in day of the week
+bookings %>%
+  group_by(for_business, checkin_day) %>%
+  summarize(mean_review = mean(review_score, na.rm = TRUE))
+```
+
+---
+
+## Count the number of rows per group with `count()`
+
+Syntax: 
+
+```{r, eval = FALSE}
+bookings %>%
+  count(x, y, ...)
+```
+
+...is a shortcut for...
+
+```{r, eval = FALSE}
+bookings %>%
+  group_by(x, y, ...) %>%
+  summarize(n = n())
+```
+
+--
+
+```{r}
+bookings %>%
+  count(for_business, status)
+```
+
+---
+
+## Joining tibbles
+
+> A mutating join allows you to combine variables from two tables. 
+> It first matches observations by their keys, then copies across variables 
+> from one table to the other. -- [R for Data Science: Mutating joins](http://r4ds.had.co.nz/relational-data.html#mutating-joins)
+
+.pull-left60[
+
+```{r}
+(x <- tibble(id = c(1L, 2L, 3L), x = c("x1", "x2", "x3")))
+(y <- tibble(id = c(1L, 2L, 4L), y = c("y1", "y2", "y4")))
+```
+
+]
+
+.pull-right40[
+
+```{r join, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "join_x.png"))
+```
+
+]
+
+---
+
+## Inner join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows from `x` with matching values in 
+`y` for column `id` and all columns from `x` and `y`.
+
+```{r}
+inner_join(x, y, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "inner-join.gif"))
+```
+
+]
+
+.footnote[Source of the animations on this and the following slides: https://github.com/gadenbuie/tidyexplain. ]
+
+---
+
+## Left join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows from `x` and all columns from `x` and `y`. 
+In rows where there are no matching values in `y` for column `id`, the values of the 
+columns that are present only in `y` are set to `NA`.
+
+```{r}
+left_join(x, y, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "left-join.gif"))
+```
+
+]
+
+---
+
+## Left join with multiple matches
+
+.pull-left70[
+
+... **all** combinations of the matches are returned:
+
+```{r}
+(y_extra <- bind_rows(y, tibble(id = 2L, y = "y5")))
+```
+
+
+```{r}
+left_join(x, y_extra, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "left-join-extra.gif"))
+```
+
+]
+
+---
+
+## Right join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows from `y` and all columns from `x` and `y`. 
+In rows where there are no matching values in `x` for column `id`, the values of the 
+columns that are present only in `x` are set to `NA`.
+
+```{r}
+right_join(x, y, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "right-join.gif"))
+```
+
+]
+
+---
+
+## Full join
+
+.pull-left70[
+
+Join two tibbles `x` and `y`. 
+The result is a tibble containing all rows and all columns from `x` and `y`. 
+In rows where there are no matching values for column `id`, the values of the 
+columns from the other tibble are set to `NA`.
+
+```{r}
+full_join(x, y, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "full-join.gif"))
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+Calculate the number of bookings per city. 
+
+Hint: Join the tibbles `bookings` and `properties` and _count_ the number of rows per city.  
+
+---
+
+## Filtering joins
+
+> Filtering joins match observations in the same way as mutating joins, 
+but affect the observations, not the variables. (...) 
+Semi-joins are useful for matching filtered summary tables back to the original 
+rows. (...) Anti-joins are useful for diagnosing join mismatches -- [R for Data Science: Filtering Joins](http://r4ds.had.co.nz/relational-data.html#filtering-joins)
+
+---
+
+## Semi join
+
+.pull-left70[
+
+Return all rows and columns from `x` with matching rows in `y`. 
+
+```{r}
+semi_join(x, y, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "semi-join.gif"))
+```
+
+]
+
+---
+
+## Anti join
+
+.pull-left70[
+
+Return all rows and columns from `x` **without** matching rows in `y`. 
+
+```{r}
+anti_join(x, y, by = "id")
+```
+
+]
+
+.pull-right30[
+
+```{r ref.label="join", echo=FALSE, out.width="100%", fig.align="center"}
+```
+
+```{r, echo=FALSE, out.width="100%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "anti-join.gif"))
+```
+
+]
+
+---
+
+## Joining tibbles
+
+```{r, echo=FALSE, out.width="60%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "dplyr_combine.png"))
+```
+
+---
+
+name: tidyr
+class: center, middle
+
+```{r, echo=FALSE, out.width="250px"}
+knitr::include_graphics(file.path(fig_path, "tidyr.png"))
+```
+
+---
+
+## Reshape tibbles with [`tidyr`](https://tidyr.tidyverse.org/)
+
+.pull-left[
+
+The `tidyverse` inherits its name from the term **tidy data**. Tidy data refers to a specific standardized dataset structure.
+
+Characteristics of tidy data:
+
+1. Each **variable** must have its own column.
+1. Each **observation** must have its own row.
+1. Each **value** must have its own cell.
+
+Many of the tidyverse functions require a _tidy_ data frame input. 
+The `tidyr` package contains functions to reshape "messy" into tidy data frames. 
+
+]
+
+.pull-right[
+
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "tidyr_long_wide.png"))
+```
+
+]
+
+.footnote[
+
+Further reading:
+
+- [R for Data Science: Tidy data](https://r4ds.had.co.nz/tidy-data.html)
+- Funktionsübersicht: RStudio's [Data import cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+]
+
+---
+
+## `pivot_longer()` and `pivot_wider()`
+
+`tidyr`'s two main functions are `pivot_longer()` and `pivot_wider()`. 
+
+- `pivot_longer()` takes multiple columns and collapses them into **key-value pairs**.
+- `pivot_wider()` takes two (or more) columns (a key-value pair) and spreads them into **multiple columns**. 
+
+
+```{r, echo=FALSE, out.width="50%", fig.align="center"}
+knitr::include_graphics(file.path(fig_path, "tidyr_pivot.png"))
+```
+
+---
+
+## Toy example of "untidy" data
+
+```{r}
+messy <- tibble(
+  name = c("Alex", "Ben", "Cedric"),
+  DataSciR = c(2.0, 1.7, 1.0),
+  VisAnalytics = c(3.3, 1.3, 2.0)
+)
+messy
+```
+
+**Problem:** here are 3 variables (name, course, grade), but only name has its own column.
+
+---
+
+## `pivot_longer()` and `pivot_wider()`
+
+.pull-left[
+
+Use `pivot_longer()` to collapse the two course columns into key-value pairs `course` and `grade`.
+
+```{r tidy}
+tidy <- messy %>%
+  pivot_longer(cols = -name, 
+               names_to = "course", 
+               values_to = "grade")
+tidy
+```
+
+]
+
+--
+
+.pull-right[
+
+Use `pivot_wider()` to "unpivot" a tibble. It is useful when there are variables that form rows instead of columns.
+
+```{r}
+tidy %>%
+  pivot_wider(names_from = course, 
+              values_from = grade)
+```
+
+]
+
+???
+
+- quotes for new / non-existing columns; no quotes when referring to existing colums
+
+---
+
+## Reshaping from "long" to "wide"
+
+```{r long-wide, eval=FALSE}
+day_order <- c("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+df <- bookings %>% inner_join(properties, by = "property_id")
+checkin_count <- df %>%
+  count(destination, checkin_day) %>%
+  mutate(checkin_day = factor(checkin_day, levels = day_order))
+checkin_count
+```
+
+&#x1F914; _"What is the result of this code?"_
+
+???
+
+- join bookings and properties
+- count the number of bookings per city and check-in day of the week
+- convert checkin_day from character to factor variable
+
+--
+
+```{r ref.label='long-wide', echo=FALSE}
+```
+
+---
+
+## `pivot_wider()`
+
+&#x1F914; _"How can we create the following table from `checkin_count`?"_
+
+```{r spread, echo=FALSE}
+checkin_count %>%
+  arrange(checkin_day) %>% #<<
+  pivot_wider(names_from = checkin_day, values_from = n)
+```
+
+--
+
+```{r}
+checkin_count %>%
+  pivot_wider(names_from = checkin_day, values_from = n)
+```
+
+--
+
+`pivot_wider()` creates the new columns in the order the keys appear in the data. 
+Hence, we can sort the rows by `checkin_day` to receive a tibble with the day-of-week columns in the correct order:
+
+---
+
+class: middle
+
+```{r ref.label='spread'}
+```
+
+---
+
+## `pivot_longer()`
+
+.pull-left[
+
+```{r}
+checkin_count %>%
+  pivot_wider(names_from = checkin_day, 
+              values_from = n) %>%
+  pivot_longer(cols = c(mon, tue, wed, thu, #<<
+                        fri, sat, sun), #<<
+               names_to = "checkin_day",
+               values_to = "n")
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r}
+checkin_count %>%
+  pivot_wider(names_from = checkin_day, 
+              values_from = n) %>%
+  pivot_longer(cols = -destination, #<<
+               names_to = "checkin_day",
+               values_to = "n")
+```
+
+]
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 10)`
+
+### Do properties appeal to business travellers and tourists alike?
+
+- Convert the column `for_business` to a factor with the levels `"business"` and `"tourist"`.
+- For each property, calculate the average review score given by business travelers and tourists.
+- Then, calculate the average review score difference between business travelers and tourists. 
+
+---
+
+## separate()
+
+`separate()` splits up two or more variables that are clumped together in one column.
+
+```{r}
+properties %>% head()
+```
+
+---
+
+## separate()
+
+Split up `facilities` by `,` into multiple columns.
+
+```{r, warning = TRUE}
+properties %>%
+  separate(facilities, into = paste0("facility_", 1:9), sep = ",")
+```
+
+.footnote[
+
+`unite()` is the inverse function of `separate()` and combines multiple variables into one. 
+For example, this operation could be useful for combining day, month and year columns into one date column. 
+
+]
+
+---
+
+## Nesting tables
+
+Common data structures are **hierarchical**, e.g. patient-centric with repeat observations.
+
+**Nesting** allows to store collapsed tibbles and simplifies data management.
+
+--
+
+Arrange `properties` to tidy format:
+
+```{r}
+tp <- properties %>%
+  separate(facilities, into = paste0("facility_", 1:9), sep = ",") %>%
+  pivot_longer(cols = facility_1:facility_9, names_to = "facility_nr", values_to = "facility")
+head(tp)
+```
+
+--
+
+Now, the tibble contains a lot of duplicate information: 9x destination, property type and number of rooms for each property id.
+
+---
+
+## Nesting tables
+
+Use `nest()` to create a nested tibble. The nested tibble contains a column `facilities` which is a **list of tibbles**:
+
+```{r}
+nested_tp <- tp %>%
+  nest(facilities = c(facility_nr, facility))
+nested_tp
+```
+
+.footnote[
+
+Use `unnest()` to expand a list column, such that each element of the list becomes a row. 
+
+]
+
+---
+
+## Bonus: `drop_na()`
+
+Some of the rows in the nested `facilities` column contain `NA`'s. How can we remove them?
+
+.pull-left[
+
+```{r}
+nested_tp$facilities[1]
+```
+
+]
+
+--
+
+.pull-right[
+
+`remove_na()` drops rows containing missing values.
+
+```{r}
+nested_tp_wo_na <- nested_tp %>% 
+  drop_na(facilities)
+# Did it work?
+nested_tp_wo_na$facilities[1]
+```
+
+
+]
+
+---
+
+## Bonus: `drop_na()`
+
+Be aware that most `dplyr`/`tidyr` functions cannot deal with list columns. However, we can leverage the `map()` function from  the `purrr` package to apply the `drop_na()` function on each element of `facilities`.
+
+```{r}
+nested_tp_wo_na <- nested_tp %>%
+  mutate(facilities = map(facilities, drop_na))
+nested_tp_wo_na$facilities[1]
+```
+
+---
+
+name: purrr
+
+## The `purrr` package &#x1F63B;
+
+The `purrr` package provides a family of functions for applying some function to each element of a vector and saving the result.
+
+.pull-left70[
+
+`map*()` takes as arguments 1) an atomic vector or a list and 2) a function. 
+It return a new vector of the **same length** as the input. The **type** of the vector is specified by the **suffix** of the `map*()` function. 
+
+- `map()` returns a list
+- `map_lgl()` returns a logical vector
+- `map_int()` returns an integer vector
+- `map_dbl()` returns a double vector
+- `map_chr()` returns a character vector
+
+Function reference: RStudio's [`purrr` cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf)
+
+
+]
+
+.pull-right30[
+
+```{r, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "purrr.png"))
+```
+
+]
+
+
+.footnote[
+
+The `*apply()` functions in base `R` (e.g. `apply()`, `lapply()`, `sapply()`, ...) have similar purposes, however they are inconsistent in their output and hence not recommended.
+
+]
+
+???
+
+- problem with loops: you iterate over something, but it doesnt clearly convey a high level goal
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 3)`
+
+Actually, we don't need to store the property facilities as tibble, since the column `facility_nr` is redundant.
+
+We change the `facilities` column to a list column, such that each element is a character vector of property facilities.
+
+```{r}
+properties_l <- properties %>% 
+  mutate(facilities = strsplit(facilities, ","))
+head(properties_l, 3)
+```
+
+--
+
+Example:
+
+```{r}
+properties_l$facilities[[1]]
+```
+
+--
+
+Add a column `n_features` to `properties` that contains the number of facilities.
+
+Hint: Use the `map_*()` function that returns an integer vector. 
+
+---
+
+## Iteration over list columns
+
+Perform a statistical test for each day of the week: _is there a difference 
+in ratings between business travelers vs. non-business travelers?_
+
+```{r, error=TRUE}
+bookings %>% 
+  group_by(checkin_day) %>% 
+  summarise(t_test = t.test(review_score ~ for_business))
+```
+
+&#x1F914; _"Why does this code throw an error?"_
+
+--
+
+The return value of `t.test()` is of type `list`. When using `dplyr` operations 
+like `mutate()`, 
+we must explicitly declare that we want a list column.
+
+```{r}
+bookings %>% 
+  group_by(checkin_day) %>% 
+  summarize(t_test = list(t.test(review_score ~ for_business))) #<<
+```
+
+--
+
+Extract the $p$-value from the `t_test` list column. 
+Since we want a numeric column, we use `map_dbl()` to extract a double from 
+a list.
+
+```{r}
+bookings %>% 
+  group_by(checkin_day) %>% 
+  summarize(t_test = list(t.test(review_score ~ for_business))) %>% 
+  mutate(p_value = map_dbl(t_test, "p.value"))
+```
+
+---
+
+class: middle, exercise-blue
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(minutes = 10)`
+
+### _Which factors contribute to the average property review score?_
+
+For **each city**, fit a **linear regression** model<sup>1</sup> to predict a property's **average review score** based on average price per night, number of bookings (stayed or cancelled), and property type. Compare the quality of the three models using $R^2$.
+
+Strategy:
+
+1. Compute the summary statistics `avg_review` (average review score), 
+`n_bookings` (number of bookings) and `avg_price` (average price per night) 
+for each property and city.
+2. For each city, fit a linear regression model (?`lm`) using the formula 
+`avg_review ~ property_type + n_bookings + avg_price`. Save these models as new 
+column `fit`.
+3. Extract the $R^2$ value (`r.squared`) from `fit` using the appropriate `map_*` function.
+
+.footnote[
+
+[1] Remove properties with less than 2 non-missing review scores.
+
+]
+
+---
+
+## Further materials
+
+- Hadley Wickham and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017. Chapter:
+  - [Data transformation](http://r4ds.had.co.nz/transform.html)
+  - [Tibbles](http://r4ds.had.co.nz/tibbles.html)
+  - [Data import](http://r4ds.had.co.nz/data-import.html)
+  - [Tidy data](http://r4ds.had.co.nz/tidy-data.html)
+  - [Relational data](http://r4ds.had.co.nz/relational-data.html)
+  - [Iteration](http://r4ds.had.co.nz/iteration.html)
+- RStudio's cheat sheets (see next slides):
+  - [Data Import (`readr + tidyr`)](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+  - [`dplyr`](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+  - [`purrr`](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf)
+
+---
+
+background-image: url("figures/02-tidyverse/readr-tidyr-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/readr-tidyr-cheatsheet_2.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/dplyr-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/dplyr-cheatsheet_2.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/purrr-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/02-tidyverse/purrr-cheatsheet_2.png")
+background-size: contain
+
+---
+
+class: middle
+
+## Very useful tidyverse packages we did not cover today
+
+```{r, echo=FALSE, out.width="80%"}
+knitr::include_graphics(file.path(fig_path, "stringr_forcats_lubridate.png"))
+```
+
+For an introduction, see the following chapters from  
+Hadley Wickham and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017.
+
+- [Strings with stringr](https://r4ds.had.co.nz/strings.html)
+- [Factors with forcats](https://r4ds.had.co.nz/factors.html)
+- [Dates and Times with lubridate](https://r4ds.had.co.nz/dates-and-times.html)
+
+---
+
+```{r session-info, child="session_info.Rmd"}
+```
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&nbsp;
+
+.courtesy[&#x1F4F7; Photo courtesy of Stefan Berger]

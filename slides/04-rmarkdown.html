@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>R Markdown</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Uli Niemann" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+class: title-slide, center, bottom
+
+# 04 - R Markdown
+
+## Data Science with R &amp;#183; Summer 2020
+
+### Uli Niemann &amp;#183; Knowledge Management &amp; Discovery Lab
+
+#### [https://brain.cs.uni-magdeburg.de/kmd/DataSciR/](https://brain.cs.uni-magdeburg.de/kmd/DataSciR/)
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: middle, center
+
+&lt;iframe src="https://player.vimeo.com/video/178485416?color=428bca&amp;title=0&amp;byline=0&amp;portrait=0" width="800" height="450" frameborder="0" allow="autoplay; fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;p&gt;&lt;a href="https://vimeo.com/178485416"&gt;What is R Markdown?&lt;/a&gt; from &lt;a href="https://vimeo.com/rstudioinc"&gt;RStudio, Inc.&lt;/a&gt; on &lt;a href="https://vimeo.com"&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;
+
+---
+
+class: middle, center
+
+&lt;iframe src="https://rmarkdown.rstudio.com/gallery.html" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+???
+
+- blogdown
+- xaringan
+
+---
+
+class: middle, center
+
+&lt;iframe src="https://www.youtube.com/embed/s3JldKoA0zw?rel=0" width="800px" height="450px"&gt;&lt;/iframe&gt;
+
+&lt;!-- &lt;iframe width="800" height="450" src="https://www.youtube.com/embed/s3JldKoA0zw?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen&gt;&lt;/iframe&gt; --&gt;
+
+---
+
+## R Markdown
+
+- [Introduction](#intro)
+- [Output formats](#output)
+- [Structure of an `.Rmd` file](#structure): Markdown, Code, YAML
+- [`knitr` and `pandoc`](#how-it-works)
+- Basic [chunk options](#chunk-options)
+- Embedding [graphics &amp; tables](#tables)
+- [Caching](#caching)
+- [Parametrized documents](#params)
+- [R Markdown extensions](#extensions)
+
+---
+
+name: intro
+
+## Introduction
+
+.pull-left80[
+
+**R Markdown** is a file format to combine **code**, the associated **results** 
+and **narrative text** in a simple text file, to create **reproducible reports** 
+which can be **flexibly distributed in [multiple ways](https://rmarkdown.rstudio.com/gallery.html)**.  
+
+An R Markdown document is saved as `.Rmd` file. It contains both the (`R`) code 
+and a prose description of a data analysis task. The R Markdown document can be 
+rendered as HTML, PDF, Word and various other output formats.
+
+]
+
+.pull-right20[
+
+&lt;img src="figures/04-rmarkdown/rmarkdown-logo.png" width="100%" /&gt;
+
+]
+
+**Benefits** of using R Markdown:
+
+- **reproducibility** (reduce **copy&amp;paste**)
+- a **single source document** that can be rendered for different 
+target audiences / purposes
+- **simple, future-proof file format** that can be managed by a version control 
+system
+- **simple syntax**
+
+&lt;img src="figures/04-rmarkdown/three_outputs.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+???
+
+- R package that is similar to Jupyter notebooks in Python
+Three major target audiences of R Markdown documents:
+
+1. **Yourself**: use an Rmd file as lab notebook which captures code, conclusions and reasoning behind your analysis 
+1. **Decision makers**: focus on conclusions
+1. **Fellow data scientists** (including yourself in the future): focus both on conclusions and analysis code to facilitate collaborating
+
+
+---
+
+name: output
+class: center, middle
+
+&lt;img src="figures/04-rmarkdown/rmarkdown_sketch.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+???
+
+- code: can be R but there are other languages supported, such as python, javascript, sql, ruby
+- narration makes code easy to understand
+- if something changes (e.g. data source), you can simply rerun the Rmd and the report gets updated 
+- website and slides were made with markdown
+
+---
+
+class: middle
+
+&lt;img src="figures/04-rmarkdown/rmd_first_example_1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+name: structure
+
+## Structure of an `.Rmd` file
+
+.pull-left[
+
+&lt;img src="figures/04-rmarkdown/rmd_first_example.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+- **YAML header** (metadata)
+  - enclosed by lines with three dashes
+  - collection of key-value pairs separated by colons
+- narrative text as **Markdown markup**
+- **`R` code**
+  - as code chunks surrounded by &lt;code&gt;&amp;#96;&lt;/code&gt;&lt;code&gt;&amp;#96;&lt;/code&gt;&lt;code&gt;&amp;#96;{r}&lt;/code&gt; and &lt;code&gt;&amp;#96;&lt;/code&gt;&lt;code&gt;&amp;#96;&lt;/code&gt;&lt;code&gt;&amp;#96;&lt;/code&gt;
+  - as inline code surrounded by &lt;code&gt;&amp;#96;r &lt;/code&gt; and &lt;code&gt;&amp;#96;&lt;/code&gt;
+]
+
+---
+
+## Rendered HTML output
+
+&lt;iframe src="04-rmd-intro.html" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+
+
+---
+
+class: exercise-blue, middle
+
+## Your turn 1
+
+Make yourself familiar with R Markdown documents.
+
+- In RStudio, create a new RMarkdown document with HTML as output format.
+- Click on the **Knit** button to render a HTML file. Locate the folder of 
+the HTML file in the "Files" tab. Try to knit the rmd file with the Keyboard
+shortcut **Ctrl**+**⇧Shift**+**K**.
+- Click on the small downwards arrow right to the **Knit** button and try to 
+render the document as Word and PDF output, respectively.
+- Click on the _cog_ button right to the **Knit** button 
+to explore the R Markdown format options.
+
+
+What happens when you click on the green arrow at the right of the third code 
+chunk? (You can accomplish the same by moving the cursor into the code chunk and 
+then pressing **Ctrl**+**⇧Shift**+**Enter↵**.) 
+(&amp;xrarr; [**Notebook mode**](https://bookdown.org/yihui/rmarkdown/notebook.html))
+
+---
+
+## Markdown
+
+**Markdown** is a **simplified, plain text formatting system** used to 
+structure text using **markup tags**. 
+In contrast to other markup languages like **HTML** and **XML**, Markdown markup is easier to read and write due to its simpler tags, e.g. `#` instead of `&lt;h1&gt;&lt;/h1&gt;` for headers of level 1.
+
+.pull-left[
+
+&lt;img src="figures/04-rmarkdown/html_example.png" width="85%" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+**Markdown Quick Reference** in RStudio:  
+**Help** `\(\rightarrow\)` **Markdown Quick Reference**
+
+&lt;img src="figures/04-rmarkdown/rstudio-markdown-quick-ref-1.png" width="100%" /&gt;
+
+]
+
+---
+
+class: middle
+
+Learn Markdown basics interactively on &lt;https://www.markdowntutorial.com&gt; in ~10 minutes.
+
+
+&lt;iframe src="https://www.markdowntutorial.com" width="100%" height="500px"&gt;&lt;/iframe&gt;
+
+---
+
+class: middle
+
+.pull-left[
+
+### Syntax
+
+\*italic\* and \*\*bold\*\*
+
+&lt;span&gt;&amp;#96;&lt;/span&gt;inline code&amp;#96;
+
+subscript~2~/superscript^2^
+
+\~\~strikethrough\~\~
+
+escaped: \\* \\_ \\\
+
+en-dash: --
+em-dash: ---
+
+\# Header level 1
+
+\#\# Header level 2
+
+Manual line break:  
+(2+ space characters at the line end):
+
+Backe, backe, Kuchen,  
+der Bäcker hat gerufen!
+
+Backe, backe, Kuchen,**SPACE** **SPACE**  
+der Bäcker hat gerufen!
+
+]
+
+.pull-right[
+
+### Result
+
+*italic* and **bold**
+
+`inline code`
+
+subscript&lt;sub&gt;2&lt;/sub&gt;/superscript&lt;sup&gt;2&lt;/sup&gt;
+
+~~strikethrough~~
+
+escaped: \* \_ \\
+
+en-dash: &amp;ndash;
+em-dash: &amp;mdash;
+
+# Header level 1
+
+## Header level 2
+
+Backe, backe, Kuchen,
+der Bäcker hat gerufen!
+
+Backe, backe, Kuchen,  
+der Bäcker hat gerufen!
+
+]
+
+---
+
+class: middle
+
+.pull-left[
+
+### Syntax
+
+\- unordered list  
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;\- subitem 1 (4 **SPACE**)  
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;\- subitem 2  
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;\- subsubitem (8 **SPACE**)  
+
+&lt;span&gt;1.&lt;/span&gt; ordered list  
+&lt;span&gt;1.&lt;/span&gt; item 2  
+&amp;nbsp;&amp;nbsp;1. subitem 2.1  
+&amp;nbsp;&amp;nbsp;1. subitem 2.2  
+
+inline equation: &amp;#36;A = \pi\cdot r^{2}&amp;#36;
+
+math block: &lt;span&gt;&amp;#36;&lt;/span&gt;&amp;#36;A = \pi\cdot r^{2}&amp;#36;&amp;#36;
+
+&amp;nbsp;
+  
+\[linked text\](https://www.ovgu.de/)
+  
+Footnote[^1]
+  
+[^1]: This text belongs to the footnote.
+  
+&lt;span&gt;&lt;!-&lt;/span&gt;- This is a comment that will not be displayed.-&lt;span&gt;-&gt;&lt;/span&gt;
+
+]
+
+.pull-right[
+
+### Result
+
+- unordered list
+    - subitem 1
+    - subitem 2
+      - subsubitem  
+
+1. ordered list
+1. item 2
+    1. subitem 2.1
+    1. subitem 2.2
+
+inline equation: `\(A = \pi\cdot r^{2}\)`
+
+math block: `$$A = \pi\cdot r^{2}$$`
+  
+[linked text](https://www.ovgu.de/)
+  
+Footnote&lt;sup&gt;1&lt;/sup&gt;
+  
+.footnote[[1] This text belongs to the footnote.]
+
+]
+
+---
+
+class: exercise-blue, middle
+
+## Your turn 2
+
+In the Rmd document you create, locate the words/phrases that are written 
+
+- in bold face,
+- in italics,
+- as headers of level 2,
+- as inline code.
+
+--
+
+Consult the _Markdown Quick Reference_ to find out a way how to include an image 
+using Markdown only. 
+
+Then, include a photo of the Magdeburg 
+Cathedral using the following URL: &lt;https://t1p.de/lu81&gt;.
+
+(shortened version of &lt;https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Magdeburg%2C_domtsjerke.jpg/512px-Magdeburg%2C_domtsjerke.jpg&gt;)
+
+---
+
+name: how-it-works
+
+## `knitr`
+
+The `knitr` package is responsible for evaluating the `R` code within an `.Rmd` file and combining the results, figures, code and the Markdown text into a `.md` file.
+
+.pull-left70[
+
+`R` code can be embeded within an `.Rmd` file in two ways: 
+
+A) as **inline code** within markdown text delimited by single backticks tags to run a single command: &lt;code&gt;&amp;#96;r&amp;#96; &lt;/code&gt;  
+B) as separate **code chunk** delimited by triple backticks tags to run multiple commands:
+
+````markdown
+```{r}
+some code
+```
+````
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/04-rmarkdown/knitr.png" width="100%" /&gt;
+
+]
+
+Code chunks can be inserted with the &lt;img src="figures/04-rmarkdown/insert.png" width="88" /&gt; button in the toolbar or using the keyboard shortcut **Ctrl + Alt + I**.
+
+
+???
+
+- knitr doesnt need to be attached at the start of an R Markdown document
+- knitr removes backticks, runs the code and returns the code, and the output
+- engine option to switch between languages: not limited to R, can handle also python, bash, css, sql
+- backtick-backtick-backtick is minimum to define a starting R chunk
+- include options in curly brackets
+
+
+---
+
+class: center, middle
+
+&lt;img src="figures/04-rmarkdown/chunk.png" width="100%" /&gt;
+
+---
+
+name: chunk-options
+
+## Chunk options
+
+`knitr` allows to customize each code chunk in the report by providing 
+**optional arguments**:
+
+The most important options include: 
+
+- whether to show or hide the source code in the rendered document
+- whether to evaluate the code
+- whether warnings and messages should be shown or suppressed in the rendered document
+- figure dimension
+
+Chunk options are specified comma-separated inside the curly brackets after `r`.
+
+---
+
+## Chunk options
+
+By default, R Markdown includes **messages**, **warnings** and **error messages**.
+
+
+````markdown
+```{r}
+c(1,2,3) + c(4,5)
+```
+````
+
+
+```
+## Warning in c(1, 2, 3) + c(4, 5): longer object length is not a multiple of shorter object
+## length
+```
+
+```
+## [1] 5 7 7
+```
+
+--
+
+We can override this default behavior by setting `warning = FALSE` inside the code chunk header.
+
+````markdown
+```{r, warning = FALSE}
+c(1,2,3) + c(4,5)
+```
+````
+
+
+```
+## [1] 5 7 7
+```
+
+???
+
+- optional arguments after the r in backtick-backtick-backtick-curvedopenbrackets-r
+- message = FALSE: dont show messages (e.g. when attaching libraries)
+- error = TRUE: causes the render to continue even if code returns an error. This is rarely something you'll want to include in the final version of your report, but can be very useful if you need to debug exactly what is going on insie your rmd. ...also useful for teching R and want to deliberately include an error. The default, error = FALSE, causes knitting to fail if there is a single error in the document.
+
+---
+
+## Popular chunk options
+
+&amp;nbsp;
+
+Option | Description | Default
+:----- | :---------- | :---------------------------
+`echo` | Should the code be displayed? | `TRUE`
+`eval` | Should the code be run? | `TRUE`
+`include` | Should the code and the code results (figures, console output) be displayed? | `TRUE`
+`fig.width` | Figure width in inch | `7L`
+`fig.height` | Figure height in inch | `7L`
+`fig.align` | Figure alignment | `"default"`
+
+--
+
+.footnote[
+
+.content-box-green[
+
+Run `knitr::opts_chunk$get()` to see the current default values for all chunk options and package options.
+
+]
+
+.content-box-green[
+
+Run `knitr::opts_chunk$get()` to see the current default values for all chunk options and package options.
+
+]
+
+]
+
+???
+
+- eval= FALSE prevents code from being evaluated. useful for displaying example code, or for disabling a large block of code without commentating each line
+- include = FALSE runs the code, but doesn't show the code or the results in the final document
+- echo = FALSE prevents code, but not the results from appearing in the rendered file. useful for sending the document for your boss who is only interested in the results and not the code
+- results = 'hide': hides printed output
+
+---
+
+class: middle
+
+A list of all chunk options is available at &lt;https://yihui.org/knitr/options/#chunk-options&gt;.
+
+&lt;iframe src="https://yihui.org/knitr/options/#chunk-options" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+---
+
+class: exercise-blue, middle
+
+## Quiz
+
+Consider the code chunk below. Answer the following questions:
+
+- Will the code be displayed in the final document?
+- Will the code be run?
+- Will the plot be shown in the final document?
+
+.font120[
+
+````markdown
+```{r, echo=FALSE}
+library(ggplot2)
+ggplot(iris, aes(x = Species, y = Sepal.Length)) +
+  geom_boxplot()
+```
+````
+
+]
+
+---
+
+class: exercise-blue, middle
+
+&lt;img src="figures/_gen/04-rmarkdown/ex-1-1.png" width="576" /&gt;
+
+- Will the code be displayed in the final document? &amp;#10008;
+- Will the code be run? &amp;#10004;
+- Will the plot be shown in the final document? &amp;#10004;
+
+---
+
+## Setup chunk
+
+````markdown
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+```
+````
+
+&amp;nbsp;
+
+.content-box-green[
+
+The setup chunk at the beginning of the document is useful to:
+
+- set global options for the whole document
+- load required packages
+- load all required datasets
+
+]
+
+.content-box-green[
+
+Default values can be changed for the whole document using `knitr::opts_chunk$set()`.  
+Example: `knitr::opts_chunk$set(fig.width = 8)` changes the default width of a figure 
+to 8 inch.
+]
+
+???
+
+- This chunk is executed, but neither code nor output are shown
+
+---
+
+class: exercise-blue, middle
+
+## Your turn 3
+
+Add the following code chunk to your R Markdown document. Name it "faithful".
+
+
+```r
+library(tidyverse)
+ggplot() + 
+  geom_contour_filled(data = faithfuld, aes(eruptions, waiting, z = density), bins = 10) + 
+  geom_point(data = faithful, aes(eruptions, waiting), color = "white", alpha = 0.75) +
+  guides(fill = FALSE) + 
+  theme_minimal()
+```
+
+- Render the Rmd file and inspect the output HTML document.
+- Find a way to get rid of the console _message_ when the `tidyverse` package is loaded. 
+- Run the "faithful" code chunk separately in Notebook mode.
+- Change the figure width to 30 cm. Rerender the document and inspect the result.
+- Replace `library(tidyverse)` with `library(ggplot2)`.
+- Restart the session. Cut `library(ggplot2)` from the code chunk and place it 
+into the setup chunk. Try to run the "faithful" code chunk. Does it still work?
+- Restart the session. Cut `library(ggplot2)` from the setup chunk and place it 
+into a new unnamed chunk (shortcut **Ctrl+Alt+I**) beneath the "faithful" chunk. 
+Try to run the "faithful" code chunk. Does it (still) work?
+- Restart the session. Place the unnamed code chunk right above the "faithful" 
+chunk. Try to run the "faithful" code chunk. Does it (still) work?
+
+
+???
+
+- the order of execution matters
+- setup chunk is treated in a special way
+
+---
+
+## External graphics
+
+.pull-left70[
+
+````markdown
+```{r, fig.cap="R Markdown Logo"}
+knitr::include_graphics("figures/rmarkdown-logo.png")
+```
+````
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/04-rmarkdown/rmarkdown-logo.png" width="100%" /&gt;
+
+&lt;center&gt;
+.caption[
+R Markdown Logo
+]
+&lt;/center&gt;
+]
+
+---
+
+name: tables
+
+## Tables: kable
+
+````markdown
+```{r}
+knitr::kable(head(iris), caption = "A knitr kable table")
+```
+````
+
+&lt;table&gt;
+&lt;caption&gt;A knitr kable table&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Sepal.Length &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Sepal.Width &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Petal.Length &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Petal.Width &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Species &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+R Markdown Cookbook: &lt;https://bookdown.org/yihui/rmarkdown-cookbook/kable.html&gt;
+
+&lt;iframe src="https://bookdown.org/yihui/rmarkdown-cookbook/kable.html" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+---
+
+`kableExtra` package: .font90[&lt;https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html&gt;]
+
+&lt;iframe src="https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+---
+
+## Tables: DT datatable
+
+`DT` is an R interface to the DataTables JavaScript library.
+
+````markdown
+```{r}
+DT::datatable(iris)
+```
+````
+
+.font70[
+
+
+
+&lt;iframe src="figures/04-rmarkdown/dt-iris.html" width="70%" height="400px"&gt;&lt;/iframe&gt;
+]
+
+
+
+
+
+???
+
+, fillContainer = FALSE
+
+---
+
+DT package: &lt;https://rstudio.github.io/DT/&gt;
+
+&lt;iframe src="https://rstudio.github.io/DT/" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+---
+
+## Tables: gt
+
+````markdown
+```{r}
+gt::gt(head(iris))
+```
+````
+
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#mxqectykto .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#mxqectykto .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mxqectykto .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#mxqectykto .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#mxqectykto .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mxqectykto .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mxqectykto .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#mxqectykto .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#mxqectykto .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#mxqectykto .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#mxqectykto .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#mxqectykto .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#mxqectykto .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#mxqectykto .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#mxqectykto .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#mxqectykto .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#mxqectykto .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#mxqectykto .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#mxqectykto .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mxqectykto .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#mxqectykto .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mxqectykto .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#mxqectykto .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mxqectykto .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mxqectykto .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#mxqectykto .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mxqectykto .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#mxqectykto .gt_left {
+  text-align: left;
+}
+
+#mxqectykto .gt_center {
+  text-align: center;
+}
+
+#mxqectykto .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#mxqectykto .gt_font_normal {
+  font-weight: normal;
+}
+
+#mxqectykto .gt_font_bold {
+  font-weight: bold;
+}
+
+#mxqectykto .gt_font_italic {
+  font-style: italic;
+}
+
+#mxqectykto .gt_super {
+  font-size: 65%;
+}
+
+#mxqectykto .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="mxqectykto" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Sepal.Length</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Sepal.Width</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Petal.Length</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Petal.Width</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">Species</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_right">5.1</td>
+      <td class="gt_row gt_right">3.5</td>
+      <td class="gt_row gt_right">1.4</td>
+      <td class="gt_row gt_right">0.2</td>
+      <td class="gt_row gt_center">setosa</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">4.9</td>
+      <td class="gt_row gt_right">3.0</td>
+      <td class="gt_row gt_right">1.4</td>
+      <td class="gt_row gt_right">0.2</td>
+      <td class="gt_row gt_center">setosa</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">4.7</td>
+      <td class="gt_row gt_right">3.2</td>
+      <td class="gt_row gt_right">1.3</td>
+      <td class="gt_row gt_right">0.2</td>
+      <td class="gt_row gt_center">setosa</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">4.6</td>
+      <td class="gt_row gt_right">3.1</td>
+      <td class="gt_row gt_right">1.5</td>
+      <td class="gt_row gt_right">0.2</td>
+      <td class="gt_row gt_center">setosa</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">5.0</td>
+      <td class="gt_row gt_right">3.6</td>
+      <td class="gt_row gt_right">1.4</td>
+      <td class="gt_row gt_right">0.2</td>
+      <td class="gt_row gt_center">setosa</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">5.4</td>
+      <td class="gt_row gt_right">3.9</td>
+      <td class="gt_row gt_right">1.7</td>
+      <td class="gt_row gt_right">0.4</td>
+      <td class="gt_row gt_center">setosa</td>
+    </tr>
+  </tbody>
+  
+  
+</table></div>
+
+&amp;nbsp;
+
+.content-box-purple[
+
+&amp;#x1F913; [Easily generate information-rich, publication-quality tables from R](https://gt.rstudio.com/)
+
+]
+
+---
+
+`gt`: "Easily generate information-rich, publication-quality tables from R" &lt;https://gt.rstudio.com/&gt;
+
+&lt;iframe src="https://gt.rstudio.com/" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+---
+
+name: caching
+
+## Caching
+
+By default, all code chunks are **recomputed every time** you knit the file. 
+For code chunks that contain **time-demanding operations**, you can use the `cache = TRUE` option. 
+During the **first knit run**, the code is executed and the results are stored in a **local cache**. 
+When the document is knitted again, the results are loaded from cache if the code chunk has not been edited since the first run. 
+If the **code or data changes**, the code will be rerun and the **old cache will be overwritten**. 
+
+````markdown
+```{r, cache=TRUE}
+...time-consuming computations...
+```
+````
+
+---
+
+class: exercise-blue, middle
+
+## Your turn 4
+
+Add the following code chunk to your R Markdown document. Name it "heavy-computing".
+
+
+```r
+tic &lt;- Sys.time()
+mean(1:1000000000)
+toc &lt;- Sys.time()
+time_spent &lt;- difftime(toc, tic, units = "secs")
+```
+
+Below the chunk, add an inline code chunk that prints `time_spent`.
+
+1. Knit the document. What is the value of `time_spent`?
+1. Knit the document again. What is the value of `time_spent`?
+1. Add result caching as code chunk option to "heavy-computing". 
+Knit the document again. What is the value of `time_spent`?
+1. Knit the document again. What is the value of `time_spent`?
+
+---
+
+## Labeling and reusing code chunks
+
+Code chunks can be given a **label**. The label is specified directly after &lt;code&gt;&amp;#96;&amp;#96;&amp;#96;{r&lt;/code&gt;. Code chunk labels can be useful to **avoid code duplication**. By using the argument `ref.label` in a later code chunk, the code from the referenced code chunk is copied over to and run in the current code chunk.
+
+Example:
+
+````markdown
+```{r iris_plot, echo=FALSE, eval=FALSE}
+library(ggplot2)
+ggplot(iris, aes(Species, Sepal.Length)) + 
+  geom_boxplot()
+```
+````
+
+
+
+
+--
+
+.pull-left[
+
+````markdown
+```{r, ref.label='iris_plot', echo = FALSE}
+```
+````
+
+]
+
+--
+
+.pull-right[
+
+&lt;img src="figures/_gen/04-rmarkdown/unnamed-chunk-1-1.png" width="425.196850393701" /&gt;
+
+
+]
+
+---
+
+## Inline `R` code
+
+You can embed `R` code into the text of your document with the &lt;code&gt;&amp;#96;r &amp;#96;&lt;/code&gt; syntax. 
+R Markdown will run the code and replace it with its result, which should be a piece of text, such as a character string or a number.
+
+--
+
+For example, the line below uses embedded R code to create a complete sentence:
+
+&lt;pre&gt;
+A random sample of 5 numbers from the set of numbers between &lt;br /&gt;1 and 10 is &amp;#96;r sample(1:10, 5)&amp;#96;. 
+&lt;/pre&gt;
+
+--
+
+When you render the document the result will appear as:
+
+&lt;pre&gt;
+A random sample of 5 numbers from the set of numbers between &lt;br /&gt;1 and 10 is 6, 1, 7, 9, 2.
+&lt;/pre&gt;
+
+Inline code provides a useful way to make your reports completely automatable.
+
+---
+
+## Pandoc
+
+.pull-left0[
+
+R Markdown uses the document conversion application [Pandoc](https://pandoc.org/) to convert a `.md` file to a variety of output formats. 
+
+- using RStudio via the &lt;img src="figures/04-rmarkdown/knit.png" width="79" /&gt; button
+- in the console via `rmarkdown::render()`
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/04-rmarkdown/pandoc.png" width="100%" /&gt;
+
+]
+
+---
+
+## YAML
+
+.pull-left80[
+
+Properties of the whole document can be set via the **YAML** (_Yet Another Markup Language_) header.
+
+The YAML header consists of a collection of **key-value pairs** separated by colons.
+
+The YAML header itself is demarked by lines with three dashes.
+
+]
+
+.pull-right20[
+
+&lt;img src="figures/04-rmarkdown/yaml.jpg" width="100%" /&gt;
+
+]
+
+--
+
+Mandatory YAML specification:
+
+`output: html_document`
+
+Other output formats:
+
+- pdf_document
+- word_document
+- beamer_presentation
+- slidy_presentation
+- ioslides_presentation
+- md_document
+- and [many more...](https://rmarkdown.rstudio.com/gallery.html)
+
+---
+
+## Customize  output layout
+
+Each R Markdown output template is a collection of knitr and pandoc options. You can customize your output by overwriting the default options that come with the template.
+
+For example, the YAML header below causes `knitr` to include a table of contents  in the pdf output document:
+
+    ---
+    title: "My R Markdown Document"
+    output:
+      pdf_document:
+        toc: true
+    ---
+
+
+???
+
+Move the html_document header element to its own line, and indent it to be a subelement of output.
+    Add a colon, : after html_document.
+    Add toc (for a table of contents) and number_sections subelements to html_document, setting both to true (lower case).
+    Re-render the document.
+
+---
+
+&lt;img src="figures/04-rmarkdown/yaml-options.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+.footnote[.font70[From the RStudio R Markdown Cheat Sheet]]
+
+---
+
+class: exercise-blue, middle
+
+## Your turn 5
+
+1. In the YAML header, add the fields "author" and "date". Set the values so 
+that in the rendered output document, your name and the current date (`Sys.date()`) 
+will be shown.
+
+2. Further, change the document visual theme of the HTML document. 
+To do so, inspect the documentation of `?html_document` to find out which themes can be chosen. 
+Go to &lt;https://bootswatch.com/&gt; to see a preview of the available themes and pick 
+the theme you like most. 
+
+
+
+
+---
+
+name: params
+
+## Parametrized reports
+
+Create document templates to produce different reports with a single `.Rmd` using **parameters**.
+
+Application scenarios:
+
+- serial letters
+- separate reports for different subsets of a dataset
+- documents with different `knitr` behavior (e.g. one document showing the code and one document not showing the code)
+
+&lt;iframe src="04-rmarkdown-materials/04-rmarkdown-parameter.Rmd" width="60%" height="300px"&gt;&lt;/iframe&gt;
+
+---
+
+## Parametrized reports
+
+Parametrized reports can be created using the **Knit** button, or by calling `rmarkdown::render()`. 
+The later option is particularly useful if you have to create many parametrized reports.
+
+Example: create a custom report for each species of Iris data.
+
+
+```r
+library(dplyr)
+reports &lt;- tibble(
+  my_species = unique(iris$Species),
+  output_file = paste0("slides/04-rmarkdown-materials/iris-", my_species, ".html"),
+  params = purrr::map(my_species, ~ list(my_species = .))
+)
+reports
+```
+
+```
+## # A tibble: 3 x 3
+##   my_species output_file                                        params          
+##   &lt;fct&gt;      &lt;chr&gt;                                              &lt;list&gt;          
+## 1 setosa     slides/04-rmarkdown-materials/iris-setosa.html     &lt;named list [1]&gt;
+## 2 versicolor slides/04-rmarkdown-materials/iris-versicolor.html &lt;named list [1]&gt;
+## 3 virginica  slides/04-rmarkdown-materials/iris-virginica.html  &lt;named list [1]&gt;
+```
+
+---
+
+## Parametrized reports
+
+
+
+.content-box-green[
+.font90[
+`purrr::pwalk` applies a function to a list of arguments. It is similar to `purrr::pmap`, 
+but instead of returning an output value, it is called for its **side-effects**. 
+Here, it is used to iterate over each row of the `reports` tibble, calling 
+`rmarkdown::render()` to generate a `.html` document for each Iris species. 
+]
+]
+
+--
+
+&lt;iframe src="04-rmarkdown-materials/iris-setosa.html" width="32%" height="350px"&gt;&lt;/iframe&gt;&lt;iframe src="04-rmarkdown-materials/iris-versicolor.html" width="32%" height="350px"&gt;&lt;/iframe&gt;&lt;iframe src="04-rmarkdown-materials/iris-virginica.html" width="32%" height="350px"&gt;&lt;/iframe&gt;
+
+.footnote[
+
+More information in R Markdown: The Definitive Guide. [Chapter Parameterized reports](https://bookdown.org/yihui/rmarkdown/parameterized-reports.html).
+
+]
+
+---
+
+## Bibliography
+
+    ---
+    output: html_document
+    bibliography: refs.bib
+    csl: ieee.csl
+    ---
+    
+    Insert a reference [@bib-key1; @bib-key2] in your Markdown text.
+    
+
+&amp;rarr; The bibliography will be inserted at the end of the document.
+
+
+.footnote[
+
+More information about bibliographies in R Markdown documents on the [R Markdown Website](https://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html) from RStudio. 
+
+]
+
+???
+
+- Pandoc can automatically generate citations and a bibliography in a number of styles. In order to use this feature, you will need to specify a **bib file** using the "bibliography" metadata field in a YAML metadata section.
+- citations inside square brackets, separated by semicolons
+- citation style: By default, pandoc will use a Chicago author-date format for citations and references. To use another style, you will need to specify a CSL 1.0 style file in the csl metadata field.
+
+---
+
+name: extensions
+class: middle, center
+
+&lt;iframe src="https://rmarkdown.rstudio.com/gallery.html" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+## htmlwidgets: &lt;http://www.htmlwidgets.org/index.html&gt;
+
+&lt;iframe src="http://www.htmlwidgets.org/index.html" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+## flexdashboards: .font80[&lt;https://rmarkdown.rstudio.com/flexdashboard/&gt;]
+
+&lt;iframe src="http://jkunst.com/flexdashboard-highcharter-examples/pokemon/" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+## xaringan presentations: .font80[&lt;https://slides.yihui.org/xaringan/&gt;]
+
+&lt;iframe src="https://slides.yihui.org/xaringan/" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+## blogdown websites: .font80[&lt;https://bookdown.org/yihui/blogdown/&gt;]
+
+Example blogdown website: &lt;https://alison.rbind.io/&gt;
+
+&lt;iframe src="https://alison.rbind.io/" width="100%" height="500px"&gt;&lt;/iframe&gt;
+
+---
+
+## bookdown: &lt;https://bookdown.org/&gt;
+
+&lt;iframe src="https://bookdown.org/" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+## rticles: &lt;https://github.com/rstudio/rticles&gt;
+
+The **rticles** package provides a suite of custom [R Markdown](http://rmarkdown.rstudio.com) 
+LaTeX formats and templates for various formats, including:
+
+- [ACM](http://www.acm.org/) articles
+- [ACS](http://pubs.acs.org/) articles
+- [AMS](https://www.ametsoc.org/) articles
+- [Elsevier](https://www.elsevier.com) journal submissions
+- [IEEE Transaction](http://www.ieee.org/publications_standards/publications/authors/author_templates.html) journal submissions
+- [Sage](https://uk.sagepub.com/en-gb/eur/manuscript-submission-guidelines) journal submissions
+- [Springer](https://www.springer.com/gp/livingreviews/latex-templates) journal submissions
+- [Frontiers](https://www.frontiersin.org/) articles
+- [Taylor &amp; Francis](http://www.tandf.co.uk/) articles
+
+..and [more](https://github.com/rstudio/rticles).
+
+---
+
+## distill: &lt;https://rstudio.github.io/distill/&gt;
+
+&lt;iframe src="https://rstudio.github.io/distill/" width="100%" height="550px"&gt;&lt;/iframe&gt;
+
+---
+
+
+## Materials
+
+.pull-left70[
+
+- **Yihui Xie, J. J. Allaire, and Garrett Grolemund. [R Markdown: The Definitive Guide](https://bookdown.org/yihui/rmarkdown/). Chapman &amp; Hall/CRC, 2018.**
+- RStudio's [R Markdown "Get Started" Tutorial](https://rmarkdown.rstudio.com/lesson-1.html)
+- RStudio's [R Markdown Articles](https://rmarkdown.rstudio.com/articles.html)
+- **[R Markdown Gallery](https://rmarkdown.rstudio.com/gallery.html)**
+- **10-minute interactive  [Markdown tutorial](https://www.markdowntutorial.com/)**
+- Hadley Wickham, and Garrett Grolemund. ["R for Data Science"](http://r4ds.had.co.nz/). O'Reilly, 2017. Chapters: 
+  - [R Markdown](http://r4ds.had.co.nz/r-markdown.html)
+  - [R Markdown formats](http://r4ds.had.co.nz/r-markdown-formats.html)
+  - [R Markdown workflow](http://r4ds.had.co.nz/r-markdown-workflow.html)
+- RStudio's [`rmarkdown` cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)
+- RStudio's [`rmarkdown` reference guide](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/04-rmarkdown/rmarkdown_book.png" width="100%" /&gt;
+
+]
+
+---
+
+background-image: url("figures/04-rmarkdown/rmarkdown-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/04-rmarkdown/rmarkdown-cheatsheet_2.png")
+background-size: contain
+
+---
+
+
+## Session info
+
+
+```
+##  setting  value                       
+##  version  R version 3.6.3 (2020-02-29)
+##  os       Windows 10 x64              
+##  system   x86_64, mingw32             
+##  ui       RTerm                       
+##  language (EN)                        
+##  collate  English_United States.1252  
+##  ctype    English_United States.1252  
+##  tz       Europe/Berlin               
+##  date     2020-04-17
+```
+
+&lt;div style="font-size:80%;"&gt;
+
+.pull-left[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; package &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; version &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; date &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; source &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; countdown &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.3.5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-20 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (gadenbuie/countdown@a544fa4) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; dplyr &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.8.99.9002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-29 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/dplyr@c7f2936) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; DT &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.13 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-23 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ggplot2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.3.0.9000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/ggplot2@53815f8) &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+.pull-right[
+
+
+
+]
+
+&lt;/div&gt;
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&amp;nbsp;
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
+
+
+
+&lt;!-- ggplot(iris, aes(Species, Sepal.Length)) + --&gt;
+&lt;!--   geom_histogram() --&gt;
+
+&lt;!-- eval = FALSE --&gt;
+&lt;!-- fig.width = 10 --&gt;
+&lt;!-- fig.height = 5 --&gt;
+
+
+&lt;!-- toc --&gt;
+
+&lt;!-- 1. Ergänze die Felder "author" und "date" im YAML-Header. Es soll das aktuelle  --&gt;
+&lt;!-- Datum ausgegeben werden. Tipp: Funktion `Sys.time()` --&gt;
+
+&lt;!-- 1. Experimentiere ein wenig mit Inline-Code.   --&gt;
+&lt;!-- Inline-Code wird normalerweise verwendet um Hard-Coding zu vermeiden.  --&gt;
+&lt;!--     - Schlecht: Der Datensatz besteht aus 30 Spalten.  --&gt;
+&lt;!--     (bei Änderungen im Datensatz veraltet) --&gt;
+&lt;!--     - Besser: Der Datensatz besteht aus ` ncol(dc)` Spalten. --&gt;
+
+&lt;!--     1. Besser wäre es, wenn der Code nur angezeigt wird, wenn der Leser diesen  --&gt;
+&lt;!-- auch wirklich sehen will. Füge im YAML-Header eine Option für "Code Folding"  --&gt;
+&lt;!-- hinzu. Standardmäßig soll Code ausgeblendet sein. Hilfe:  --&gt;
+&lt;!-- [HTML Document Code Folding](https://bookdown.org/yihui/rmarkdown/html-document.html#code-folding) --&gt;
+
+
+&lt;!-- ref.label = "iris_plot" --&gt;
+
+&lt;!-- cache --&gt;
+
+
+&lt;!-- rticles --&gt;
+
+&lt;!--     The rticles package contains a range of ready-made templates for paper submissions --&gt;
+&lt;!--     At the moment, many of the templates are not well documented, and it can be difficult to understand what's going on under the hood --&gt;
+&lt;!--     It's useful to know a bit about how it works, if you need to submit a paper formatted with LaTeX but want to write in R Markdown --&gt;
+&lt;!--     Let's have a look at the PLOS LaTeX template --&gt;
+
+
+&lt;!-- n HTML output, you can use theme or a custom .css style sheet --&gt;
+&lt;!-- theme options (see them at bootswatch.com) : “cerulean”, “journal”, “flatly”, “darkly”, “readable”, “spacelab”, “united”, “cosmo”, “lumen”, “paper”, “sandstone”, “simplex”, “yeti” --&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

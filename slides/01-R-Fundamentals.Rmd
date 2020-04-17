@@ -324,7 +324,7 @@ knitr::include_graphics(file.path(fig_path, "source.gif"))
 
 .pull-left[
 
-**Environment**-Tab enthält Objekte der aktuellen Environment = **Workspace**
+**Environment** tab contains object of the current environment = **Workspace**
 
 ```{r, echo=FALSE}
 knitr::include_graphics(file.path(fig_path, "environment.png"))
@@ -336,7 +336,7 @@ knitr::include_graphics(file.path(fig_path, "environment.png"))
 
 .pull-right[
 
-The **History** tab contains previously executed commands-
+The **History** tab contains previously executed commands.
 
 ```{r, echo=FALSE}
 knitr::include_graphics(file.path(fig_path, "history.png"))
@@ -1232,7 +1232,7 @@ x[x %in% c(1,4,5)] # elements == 1, 4 OR 5
 
 .content-box-blue[
 
-A vector must be homogenous with respect to the type of its elements. 
+An atomic vector must be homogeneous with respect to the type of its elements. 
 In case elements are of mixed types, `R` tries to convert the elements into the 
 **most flexible** type (=**vector coercion**) of its elements. 
 As a result, creating a vector with 
@@ -2090,10 +2090,11 @@ for(i in 1:ncol(df)) {
 
 --
 
-Mögliche Verbesserungen für dieses erste Beispiel:
+Suggested improvements for this first example:
 
-- Erstellung einer robusten Sequenz mit `seq_along()`
-- Speichern des Outputs als Variable (statt Konsolenprint)
+- create a _robust_ sequence with `seq_along()`
+- save output as variable instead of printing it to the console
+
 ???
 
 - it is also possible to loop over columns of a data frame or elements of a list
@@ -2170,8 +2171,7 @@ knitr::include_graphics(file.path(fig_path, "apply.png"))
 .footnote[
 .content-box-green[
 
-Going further:  
-The `purrr` package provides various functionals which are more 
+Going further: The `purrr` package provides various functionals which are more 
 intuitive to use and produce more robust outputs in comparison with `apply()`.
 ]
 ]
