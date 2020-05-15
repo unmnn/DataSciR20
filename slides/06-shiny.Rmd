@@ -1,0 +1,1176 @@
+---
+title: "Interactive web applications with Shiny"
+subtitle: "Data Science with R &#183; Summer 2020"
+author: "Uli Niemann"
+session: "06"
+institute: "Knowledge Management & Discovery Lab"
+output:
+  xaringan::moon_reader:
+    css: ["default", "assets/css/my-theme.css", "assets/css/my-fonts.css"]
+    seal: false # custom title slide
+    lib_dir: libs
+    nature:
+      # highlightStyle: solarized-light
+      highlightStyle: github
+      highlightLines: true
+      # highlightLanguage: ["r", "css", "yaml"]
+      countIncrementalSlides: true
+      ratio: "16:9"
+      beforeInit: "https://platform.twitter.com/widgets.js"
+params:
+  url: "https://brain.cs.uni-magdeburg.de/kmd/DataSciR/"
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale("LC_ALL","English")
+Sys.setenv(LANG = "en_US.UTF-8")
+Sys.setlocale("LC_TIME", "English")
+
+# The version number in the directory name of an HTML dependency can be
+# suppressed by setting options(htmltools.dir.version = FALSE) when the
+# dependency is copied via `copyDependencyToDir()`. 
+options(htmltools.dir.version = FALSE)
+options(width = 90) # width of console output
+options(scipen = 999) # avoid expressing numbers in scientific notation
+# load fonts (mainly Fira Sans)
+# extrafont::font_import()
+extrafont::loadfonts("win", quiet = TRUE)
+
+yt_counter <- 0
+
+# set default knitr options
+knitr::opts_chunk$set(fig.width = 15/2.54, fig.height = 11/2.54, fig.retina = 4)
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE, warning = TRUE, 
+                      message = TRUE, cache = TRUE)
+# directory of generated figures
+knitr::opts_chunk$set(fig.path = "figures/_gen/06-shiny/")
+# directory of included figures
+fig_path <- "figures/06-shiny"
+
+library(countdown)
+
+source("ggplot2_theme.R", echo = FALSE)
+```
+
+class: title-slide, center, bottom
+
+# `r paste(rmarkdown::metadata$session, "-", rmarkdown::metadata$title)`
+
+## `r rmarkdown::metadata$subtitle`
+
+### `r rmarkdown::metadata$author` &#183; `r rmarkdown::metadata$institute`
+
+#### [`r params$url`](`r params$url`)
+
+.courtesy[&#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: middle
+name: beispiel-apps
+
+### [Access to hospital care in the US](http://colorado.rstudio.com:3939/content/188/)
+
+.pull-left60[
+
+```{r ex-hospital-care-1, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "example_hospital_care_2.png"))
+```
+
+]
+
+.pull-right40[
+
+Interactive chloropleth map of access to hospital care in US counties. 
+Underserved counties are highlighted. 
+
+```{r ex-hospital-care-2, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "example_hospital_care_1.png"))
+```
+
+]
+
+---
+
+class: middle
+
+### [Sales analytics dashboard of a bycicle shop](https://mdancho84.shinyapps.io/shiny-app/)
+
+.pull-left60[
+
+Analysis and visualization of historic sale transactions, stratified by 
+bike type, bike model and US state.
+
+```{r ex-bycicle-1, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "example_bycicle_sales_1.png"))
+```
+
+]
+
+.pull-right40[
+
+```{r ex-bycicle-2, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "example_bycicle_sales_2.png"))
+```
+
+]
+
+---
+
+class: middle
+
+### [Prevention of hospital infections](https://hospinf.shinyapps.io/hospinf/#section-graphs)
+
+Frequency of hospital infections, use of antibiotic agents, antibiotic resistance, 
+operations, ... over time
+
+```{r ex-hospital-infections, echo=FALSE, out.width="80%"}
+knitr::include_graphics(file.path(fig_path, "example_hospital_infections.png"))
+```
+
+---
+
+class: middle
+
+### [Network visualiztion of biochemical processes](https://dgranjon.shinyapps.io/entry_level/)
+
+```{r ex-biochem, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "example_calcium.png"))
+```
+
+---
+
+class: middle
+
+### [Memory game app](https://dreamrs.shinyapps.io/memory-hex/)
+
+```{r ex-memory, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "example_memory.png"))
+```
+
+---
+
+class: middle
+
+### [New Zealand tourism dashboard](https://mbienz.shinyapps.io/tourism_dashboard_prod/)
+
+```{r ex-nz-tourism, echo=FALSE, out.width="75%"}
+knitr::include_graphics(file.path(fig_path, "example_tourism.png"))
+```
+
+---
+
+class: middle
+
+### [Shiny gallery: user showcases & demos](https://shiny.rstudio.com/gallery/)
+
+```{r shiny-user-showcase, echo=FALSE, out.width="80%"}
+knitr::include_graphics(file.path(fig_path, "shiny_user_showcase.png"))
+```
+
+---
+
+class: middle
+
+## ["Hello, World!" app](http://shiny.rstudio.com/gallery/faithful.html)
+
+```{r ex-faithful, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "faithful_app.png"))
+```
+
+???
+
+- histogram shows distribution of eruptions durations of a famous 
+geyser in Yellowstone NP (Old Faithful)
+- bimodal distribtion
+- user can modify the plot in several ways
+- number of bins in histogram (dropdown-menu)
+- whether to show individual obs. as rugs (checkbox)
+- whether to augment the histogram with a density estimate curve
+- dropdown-menu pops up -> bandwidth adjustment
+- on the webserver, a R session runs  that handles the user‘s inputs and updates 
+the plot accordingly
+- Demo with the app's code in the sidebar -> 2 components
+- Script with user interface (front-end) -> necessary HTML to render the site
+- Script for functionality (back-end) -> instructions to draw the plot
+
+---
+
+name: grundlagen
+
+## What is Shiny?
+
+.pull-left70[
+
+- `R` package to create **interactive web apps** without deep knowledge of 
+HTML, CSS and JavaScript
+- based on **reactive programming**: manipulable **inputs** trigger 
+automatic re-computation of **outputs**
+
+### Application scenarios
+
+- Dashboards that allow users to interactively toggle between compact at-a-glace 
+summary and specific performance values &rarr; customizable to the 
+level of detail the users need 
+- present complex models to a non-technical audience with interactive 
+visualizations
+- replace very long PDF documents or printed reports: 
+allow users to drill down to sections they are most interested in
+
+<!-- - **`R`-Session**, die im Hintergrund läuft, stämmt sämtliche Berechnungen -->
+<!-- - Aufbau:  -->
+<!--   - **User Interface** (ui-Komponente) -->
+<!--   - **Server Instructions** (server-Komponente) -->
+
+]
+
+.pull-right30[
+
+```{r shiny-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "shiny_logo.png"))
+```
+
+]
+
+???
+
+- web app: runs in any web browser (also mobile), user does not need to have R installed
+- no installation required: all computers have a browser
+- reactive programming vs. event-driven programming: 
+  - automatically track dependencies between an input (eg drop-down menu) and 
+  outputs (eg plots) that depend on that input
+  - whenever an input changes, Shiny can automatically update all related 
+  outputs without you having to define specific event handlers  
+
+<!-- * Create dashboards that track important performance indicators, and facilitate -->
+<!--   drill down into surprising results. -->
+
+<!-- * Replace hundreds of pages of PDFs with interactive apps that allow the  -->
+<!--   user to jump to the exact slice of the results that they care about. -->
+
+<!-- * Communicate complex models to a non-technical audience with informative -->
+<!--   visualisations and interactive sensitivity analysis. -->
+
+<!-- * Provide self-service data analysis for common workflows where replacing  -->
+<!--   email requests with a Shiny app that allows people to upload their own -->
+<!--   data and perform standard analyses. -->
+
+<!-- * Create interactive demos for teaching statistics and data science concepts  -->
+<!--   that allow learners to tweak inputs and observe the downstream effects of  -->
+<!--   these changes in an analysis. -->
+
+
+
+---
+
+## Minimal template of a Shiny app
+
+```{r minimal-template, eval=FALSE}
+library(shiny)
+ui <- fluidPage() # controls layout & appearance (e.g. `bootstrapPage()`, `fluidPage()`, `fixedPage()`)
+server <- function(input, output, session) {} # function that maps inputs to outputs
+shinyApp(ui = ui, server = server) # runs the app
+```
+
+---
+
+## ["Hello, World!" app](http://shiny.rstudio.com/gallery/faithful.html)
+
+```{r ref.label='ex-faithful', echo=FALSE, out.width="100%"}
+```
+
+---
+
+class: middle
+
+```{r faithful-code, echo=FALSE, out.width="90%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "faithful_code.png"))
+```
+
+---
+
+## ui.R
+
+```{r faithful-code-1, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "faithful_code_1.png"))
+```
+
+???
+
+- dropdown menu for the number of bins in the histogram
+- a checkbox to indicate whether individual observations should be displayed as 
+rugs (tiny lines) along the x-axis
+- a checkbox to indicate whether the estimated probability density function 
+should be displayed as curve on top of the histogram
+- sole outpt: a plot container for the histogram
+- ui objects are comma-separated
+
+---
+
+## Example input: dropdown list
+
+```{r faithful-code-2, echo=FALSE, out.width="80%"}
+knitr::include_graphics(file.path(fig_path, "faithful_code_2.png"))
+```
+
+---
+
+## Example input: dropdown list
+
+```{r faithful-inputs, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "faithful_inputs.png"))
+```
+
+**Mandatory arguments** of input widgets:
+
+- `inputId`: unique identifier
+- `label`: descriptive label
+
+**Input-specific arguments** (see `?selectInput)`:
+
+  - `choices`: list of values
+  - `selected`: selected value at the start
+  - `multiple`: whether the selection of multiple values is allowed
+  - ...
+
+---
+
+## Input widgets
+
+```{r input-widgets, echo=FALSE, out.width="90%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "inputs.png"))
+```
+
+.footnote[[Shiny Input Widgets](https://shiny.rstudio.com/tutorial/written-tutorial/lesson3/)]
+
+---
+
+### Inputs have values...
+
+```{r widget-gallery, echo=FALSE, out.width="90%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "widget_gallery.png"))
+```
+
+.footnote[[Widget gallery](http://shiny.rstudio.com/gallery/widget-gallery.html)]
+
+---
+
+## Outputs
+
+```{r outputs, echo=FALSE, out.width="65%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "outputs.png"))
+```
+
+.pull-left60[
+
+.font90[
+
+**Mandatory argument**:
+
+- `outputId`: unique identifier
+
+**output-specific arguments** (see `?plotOutput`):
+
+- `width`, `height`: width and height as CSS command
+- ...
+
+]
+
+]
+
+.pull-right40[
+
+```{r output-types, eval=FALSE}
+textOutput() # text
+htmlOutput() # raw HTML
+imageOutput() # image
+plotOutput() # plot
+tableOutput() # table
+uiOutput() # Shiny UI element
+```
+
+]
+
+???
+
+- all outputs are generated with *Output()
+- This code generates the HTML container for the histogram
+- If we would run this code without further instructions, we would not see the plot
+- We have to say explicitly what sort of plot we want to show -> server
+
+- Small recap up to this point:
+- Basic architecture of a Shiny app: ui and server part
+- UI elements (dropdown-menus, radiobuttons, plots and tables) are specified in UI
+- Create Reactive Inputs with input functions (selectInput, sliderInput)
+- Create Reactive outputs with output functions (plotOutput, tableOutput)
+- Inside the server functions, inputs are used to create outputs
+
+---
+
+## server.R
+
+.pull-left[
+
+```{r server, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "server.png"))
+```
+
+]
+
+.pull-right[
+
+.orange[
+
+Function `server()` takes 2 arguments:
+
+- `input`: list of input objects (`input$<inputId>`)
+- `output`: list of output objects (`output$<outputId>`)
+
+]
+
+.red[
+
+Output objects are saved as `output$<outputId>`.
+
+]
+
+.blue[
+
+Output objects are created with `render*()` functions.
+
+]
+
+.green[
+
+Input objects are called using `input$<inputId>`.
+
+]
+
+]
+
+---
+
+## Access current value of an input in server.R
+
+```{r input-server, echo=FALSE, out.width="90%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "inputs_server_ui.png"))
+```
+
+---
+
+## Use an output from ui.R
+
+```{r output-ui, echo=FALSE, out.width="90%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "outputs_server_ui.png"))
+```
+
+---
+
+## Render functions 
+
+.pull-left60[
+
+Output objects are created within `render*()` functions.
+
+```{r render, echo=FALSE, out.width="65%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "render.png"))
+```
+
+]
+
+.pull-right40[
+
+Example: `renderPlot(boxplot(iris$Sepal.Length))`
+
+```{r render-functions, eval = FALSE}
+renderText()
+renderPrint()
+renderImage()
+renderPlot()
+renderTable()
+renderUI()
+```
+
+]
+
+???
+
+- curly brackets are necessary for multi-line commands
+
+---
+
+## Reactivity
+
+```{r reactivity, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "reactivity.png"))
+```
+
+Whenever an input objects is called within a `render*()` function via 
+`input$<inputId>`, Shiny will automatically the associated output object.
+
+---
+
+## Inputs & Outputs
+
+.pull-left[
+
+**Reactive Programming**: when an input changes, 
+all related outputs are automatically updated.
+
+.red[Compare this to the normal behaviour of `R`:]
+
+```{r shiny-vs-r, eval=FALSE}
+x <- 1
+y <- x + 2
+x <- 9
+# What value does y have? 3 or 11?
+```
+
+]
+
+.pull-right[
+
+```{r inputs-outputs, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "inputs_outputs.png"))
+```
+
+]
+
+---
+
+class: middle
+
+## Recap: basic structure of a Shiny app
+
+- **ui** component and **server** component
+- **ui** contains **reactive inputs** (dropdown lists, radio buttons, ...) and 
+**reactive outputs** (charts, tables, ...)
+- reactive inputs are placed into the ui using **input functions** 
+(`selectInput()`, `radioButtons()`, ...)
+- reactive output containers are placed into the ui  using **output functions** 
+(`plotOutput()`, `tableOutput()`, ...)
+- **server** contains code to create outputs, whose re-computation is triggered 
+by one of the associated inputs
+- output values (plots, tables) are generated within **render functions** 
+(`renderPlot()`, `render(Table)`, ...)
+
+---
+
+class: exercise-blue, middle
+
+## Your turn `r (yt_counter <- yt_counter + 1)`
+
+`r countdown::countdown(15)`
+
+.pull-left[
+
+Create an app, which shows a histogram of N random values from a standard normal 
+distribution. 
+The user can specify N via a slider input.
+
+- The minimum value that can be selected is 10.
+- The maximum value that can be selected is 150.
+- The interval between each selectable value on the slider is 10.
+- Random values from a normal distribution can be generated using `rnorm()`.
+
+]
+
+.pull-right[
+
+```{r first-app, out.width = "100%", echo=FALSE}
+knitr::include_graphics(file.path(fig_path, "first-app.png"))
+```
+
+]
+
+---
+
+name: modularisierung
+ 
+## Code modularization
+
+Often, we need intermediate results (computed from reactive inputs) for multiple 
+render functions.
+
+```{r app-02-modularity, echo=FALSE, out.width="60%"}
+knitr::include_graphics(file.path(fig_path, "app-02_modularity.png"))
+```
+
+---
+
+## Code modularization
+
+.font90[
+
+```{r app-02-code, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("dplyr")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  plotOutput(outputId = "plot"),
+  verbatimTextOutput(outputId = "summary")
+)
+
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    x <- tibble(x = rnorm(input$slider)) #<<
+    ggplot(x, aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+  output$summary <- renderPrint({
+    x <- rnorm(input$slider) #<<
+    summary(x)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+]
+
+&#x1F914; _Which 2 problems does this code have?_
+
+--
+
+&rarr; Histogram and summary text output do not depict the same data.  
+&rarr; **Code duplication** leads to problems in the long run. 
+For example, if `runif()` shall be used instead of `rnorm()`,  we would have to 
+change the code at 2 places. 
+
+--
+
+&xrarr; Solution: we create a **reactive object** for random values which can 
+be used by both render functions. 
+
+---
+
+## Code modularization
+
+```{r app-02-incorrect, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  plotOutput(outputId = "plot"),
+  verbatimTextOutput(outputId = "summary")
+)
+
+server <- function(input, output) {
+  values <- rnorm(input$slider)#<<
+  
+  output$plot <- renderPlot({
+    ggplot(tibble(x = values), aes(x)) + #<<
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+  
+  output$summary <- renderPrint({
+    summary(values) #<<
+  })
+}
+
+shinyApp(ui, server)
+```
+
+.red[.font90[.remark-code[Error in .getReactiveEnvironment()$currentContext() : Operation not allowed without an active reactive context. (You tried to do something that can only be done from inside a reactive expression or observer.)]
+]
+]
+
+
+---
+
+## Code modularization
+
+&rarr; Enclose with `reactive()`: `values <- reactive(rnorm(input$slider))`
+
+We can access reactive values in reactive functions using `values()` 
+(.red[mind the parentheses]):
+
+```{r app-02-correct, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  plotOutput(outputId = "plot"),
+  verbatimTextOutput(outputId = "summary")
+)
+
+server <- function(input, output) {
+  values <- reactive({rnorm(input$slider)}) #<<
+  
+  output$plot <- renderPlot({
+    ggplot(tibble(x = values()), aes(x)) + #<<
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+  
+  output$summary <- renderPrint({
+    summary(values()) #<<
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+name: reaktivitaet
+
+## Prevent re-computations
+
+```{r app-03-isolate, echo=FALSE, out.width="70%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "app-03-org-2.png"))
+```
+
+---
+
+## Prevent re-computations
+
+```{r app-03-incorrect, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  textInput(inputId = "text", label = "histogram title", value = "fancy title"),
+  plotOutput(outputId = "plot")
+)
+
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    ggplot(tibble(x = rnorm(input$slider)), aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10) +
+      labs(title = input$text) #<<
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+## Prevent re-computations
+
+&rarr; Enclose with `isolate()`: `isolate({input$title})` returns the result as 
+non-reactive value.
+
+```{r app-03-correct, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  textInput(inputId = "text", label = "histogram title", value = "fancy title"),
+  plotOutput(outputId = "plot")
+)
+
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    ggplot(tibble(x = rnorm(input$slider)), aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10) +
+      labs(title = isolate({input$text})) #<<
+  })
+}
+
+shinyApp(ui, server)
+```
+
+The histogram will only be re-rendered if the value of the slider changes. 
+
+---
+
+## Trigger computations with reactive values
+
+Example: action button
+
+```{r app-04-button, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "observeEvent.png"))
+```
+
+---
+
+## Trigger computations with reactive values
+
+```{r app-04-code, eval = FALSE}
+library("shiny")
+
+ui <- fluidPage(
+  actionButton(inputId = "button", label = "Go!") #<<
+)
+
+server <- function(input, output) {
+  observeEvent(input$button, { #<<
+    print(input$button) #<<
+  }) #<<
+  
+}
+
+shinyApp(ui, server)
+```
+
+&#x1F973; ... with `observeEvent(<input$inputId>, <CODE>)`
+
+Only if `<input$inputId>` changes, the `<CODE>` will be run!
+
+This means, if `<input$otherInputId>` (that is used within `<CODE>`) changes, 
+re-computation of `<CODE>` will not be triggered.
+
+---
+
+## Create an reactive observer
+
+```{r app-04-observer, eval = FALSE}
+library("shiny")
+
+ui <- fluidPage(
+  actionButton(inputId = "button", label = "Go!") #<<
+)
+
+server <- function(input, output) {
+  observe(print(input$button)) #<<
+}
+
+shinyApp(ui, server)
+```
+
+In contrast to `reactive()`, `observe()` does not return a value. 
+It is called for its _side effects_.
+
+---
+
+
+## Delay re-computations
+
+```{r app-05, echo=FALSE, out.width="65%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "app05.png"))
+```
+
+---
+
+## Delay re-computations
+
+```{r app-05-code, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  textInput(inputId = "text", label = "histogram title", value = "fancy title"),
+  actionButton(inputId = "button", label = "Go!"),
+  plotOutput(outputId = "plot")
+)
+
+server <- function(input, output) {
+  rp <- eventReactive(input$button, { #<<
+    ggplot(tibble(x = rnorm(input$slider)), aes(x)) +  #<<
+      geom_histogram(color = "black", fill = "royalblue", bins = 10) + #<<
+      labs(title = input$text) #<<
+  }) #<<
+  
+  output$plot <- renderPlot(rp()) #<<
+}
+
+shinyApp(ui, server)
+```
+
+Template: `rv <- eventReactive(<input$inputId>, <CODE>)`
+
+Only if `<input$inputId>` changes, `<CODE>` will be run and the output will be 
+stored as `rv`.
+
+Similar to `reactive()`, you can access reactive values created by 
+`eventReactive()` using `rv()` (mind the parentheses). 
+
+---
+
+## Manipulable reactive values
+
+Create a list of reactive values that can later be modified by input changes. 
+
+Template: `data <- reactiveValues(x1 = ..., x2 = ...)`
+
+```{r app-06, echo=FALSE, out.width="65%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "app-06.png"))
+```
+
+---
+
+## Manipulable reactive values
+
+```{r app-06-code, eval = FALSE}
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui <- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  actionButton(inputId = "normal", label = "normal distribution"), #<<
+  actionButton(inputId = "unif", label = "uniform distribution"), #<<
+  plotOutput(outputId = "plot")
+)
+
+server <- function(input, output) {
+  
+  data <- reactiveValues(x = rnorm(100)) #<<
+  
+  observeEvent(input$normal, data$x <- rnorm(input$slider)) #<<
+  observeEvent(input$unif, data$x <- runif(input$slider)) #<<
+  
+  output$plot <- renderPlot({
+    ggplot(tibble(x = data$x), aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+## Recap: reactivity
+
+- `render*()`: create **reactive outputs** that will be re-computed after every change 
+in one of the inputs' value
+
+--
+
+- `reactive()`: create a **reactive expression**, that will be re-computed after 
+every change in one of the inputs' value
+
+--
+
+- `isolate()`: **prevent reactivity** for all enclosed inputs
+
+--
+
+- `observeEvent(x, ...)`: code will only be executed if the value of a reactive 
+expression  `x` changes. Does _not_ return a value.
+
+--
+
+- `observe()`: code is executed in a reactive context. Does _not_ return a value.
+
+--
+
+- `eventReactive(x, ...)`: code will only be executed if the value of a reactive 
+expression  `x` changes. Does return a value. 
+
+--
+
+- `reactiveValues()`: creates a list of reactive values, which can be modified 
+later. 
+
+---
+
+name: misc
+
+## Layouts
+
+.pull-left[
+
+```{r fluidrow, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "ui_layout_fluidrow.png"))
+```
+
+```{r sidebar, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "ui_layout_sidebar_split.png"))
+```
+
+
+]
+
+.pull-right[
+
+```{r flow, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "ui_layout_flowlayout.png"))
+```
+
+```{r tabset-navbar, echo=FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, "ui_layout_tabset_navbar.png"))
+```
+
+]
+
+.footnote[
+
+&#x1F4DA; [Application layout guide](https://shiny.rstudio.com/articles/layout-guide.html)
+
+]
+
+---
+
+## HTML tags
+
+.pull-left[
+
+- Shiny apps are websites.
+- Websites are written in HTML.
+- Shiny apps are written in `R`.
+- HTML element can be inserted with `tags$<element>()` into the UI.
+
+.footnote[
+
+&#x1F4DA; [Customize your UI with HTML](https://shiny.rstudio.com/articles/html-tags.html)
+
+]
+   
+]
+
+.pull-right[
+
+```{r html-tags, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "html_tags.png"))
+```
+
+]
+
+---
+
+class: center, middle
+
+.large[`tags$h1("Title")` .green[&#11020;] `<h1>Title</h1>`]
+
+--
+
+&nbsp;
+
+.large[`tags$strong("Boldface")`]  
+.large[.green[&#11020;]]  
+.large[`<strong>Boldface</strong>`]
+
+--
+
+&nbsp;
+
+.large[`tags$a("URL", href = "https://www.google.com")`  
+.green[&#11020;]  
+`<a href="https://www.google.com">URL</a>`] 
+
+---
+
+class: middle
+
+```{r html-tags-h1, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "html_tags_h1.png"))
+```
+
+---
+
+class: middle
+
+```{r html-tags-misc, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "html_tags_misc.png"))
+```
+
+---
+
+## Dashboards with [AdminLTE](https://adminlte.io/) theme
+
+```{r admin-lte, echo=FALSE, out.width="50%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "adminlte.png"))
+```
+
+Features: [Notification Menus](https://rstudio.github.io/shinydashboard/structure.html#notification-menus), [Task Menus](https://rstudio.github.io/shinydashboard/structure.html#task-menus), [infoBoxes](https://rstudio.github.io/shinydashboard/structure.html#infobox), [valueBoxes](https://rstudio.github.io/shinydashboard/structure.html#valuebox), ...
+
+
+.footnote[
+
+&#x1F4DA; [Getting Started Guide](https://rstudio.github.io/shinydashboard/index.html), [Webinar Dynamic Dashboards with Shiny](https://www.rstudio.com/resources/webinars/dynamic-dashboards-with-shiny/), [Building Dashboards with Shiny Tutorial](https://www.rstudio.com/resources/videos/building-dashboards-with-shiny-tutorial/)
+
+]
+
+---
+
+## App Deployment
+
+&nbsp; | Pros | Cons
+:----- | :--- | :----
+local  | + free<br>+ data remains local | - every user has to install R and shiny<br>- maintenance
+[shinyapps.io](https://www.shinyapps.io/) | + free up to 5 apps / account<br>+ no installation or hardware necessary<br>+ minimal maintenance<br>+ push button publishing | - tariffs with authentication 99+ USD/Monat<br>- data in external cloud
+[Shiny Server](https://rstudio.com/products/rstudio/#rstudio-server) | + free (open source license)<br>+ data remains behind own firewall<br>+ authentication | - deployment and maintenance require more effort compared to shinyapps.io
+[RStudio Connect](https://www.rstudio.com/products/connect/) | + easy "push button" deployment<br>+ data remain behind own firewall<br>+ authentication | - more expensive than shinyapps.io
+[Electron](https://github.com/ColumbusCollaboratory/electron-quick-start) <br>(unofficial) | + free<br>+ local offline app (.exe) | - requires more effort to set up compared to  shinyapps.io<br>- no official support<br>- large file size (portable R installation)
+
+.footnote[
+
+&#x1F4DA; [What is the difference between RStudio Connect, Shiny Server Pro, and Shinyapps.io?](https://support.rstudio.com/hc/en-us/articles/217240558-What-is-the-difference-between-RStudio-Connect-Shiny-Server-Pro-and-Shinyapps-io)
+
+]
+
+???
+
+Electron enables executing cross platform desktop application using 
+the Chromium web browser and the node.js framework.
+https://www.youtube.com/watch?time_continue=821&v=ARrbbviGvjc
+https://github.com/ksasso/useR_electron_meet_shiny
+
+---
+
+## More Shiny & materials
+
+.footnote[
+
+&#x1F4DA; Curated list of ["Awesome Shiny Extensions"](https://github.com/nanxstats/awesome-shiny-extensions)
+
+]
+
+.pull-left80[
+Extension packages:
+
+- [`shinyWidgets`](https://github.com/dreamRs/shinyWidgets): additional input widgets
+- [`shinycssloaders`](https://github.com/andrewsali/shinycssloaders): add loading animations
+- [`shinyjs`](https://github.com/daattali/shinyjs): extend Shiny apps with basic JavaScript
+- [`reactlog`](https://github.com/rstudio/reactlog): visually debug Shiny apps
+
+
+
+]
+
+.pull-right20[
+
+```{r ref.label="shiny-logo", echo=FALSE, out.width="100%"}
+```
+
+]
+
+--
+
+- Hadley Wickham. [Mastering Shiny](https://mastering-shiny.org/). O'Reilly, 2020. Draft version.
+- [Shiny introductory webinar](https://shiny.rstudio.com/tutorial/)
+- [Shiny user showcase](https://www.rstudio.com/products/shiny/shiny-user-showcase/)
+- Business Science. [The Shiny AWS Book: A proven process for deploying applications in the Cloud with Shiny and AWS](https://business-science.github.io/shiny-production-with-aws-book/). 
+- [Shiny cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/shiny.pdf)
+
+---
+
+background-image: url("figures/06-shiny/shiny-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/06-shiny/shiny-cheatsheet_2.png")
+background-size: contain
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&nbsp;
+
+.courtesy[&#x1F4F7; Photo courtesy of Stefan Berger]

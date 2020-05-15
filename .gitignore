@@ -49,9 +49,9 @@ slides/*.Rmd
 slides/*.html
 slides/figures/*
 slides/04-rmarkdown-materials/
-slides/06-shiny-materials/
 slides/my_project/
 slides/emji.txt
+slides/*drake/
 !slides/session_info.Rmd
 !slides/00-intro.Rmd
 !slides/00-intro.html
@@ -65,6 +65,8 @@ slides/emji.txt
 !slides/04-rmarkdown.html
 !slides/05-tidymodels.Rmd
 !slides/05-tidymodels.html
+!slides/06-shiny.Rmd
+!slides/06-shiny.html
 !slides/figures/_gen/
 !slides/figures/00-intro/
 !slides/figures/01-R-Fundamentals/
@@ -72,6 +74,7 @@ slides/emji.txt
 !slides/figures/03-ggplot2/
 !slides/figures/04-rmarkdown/
 !slides/figures/05-tidymodels/
+!slides/figures/06-shiny/
 !exercises/ex-tidyverse.R
 !exercises/ex-ggplot2.R
 !exercises/ex-tidymodels.R

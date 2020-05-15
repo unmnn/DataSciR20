@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Interactive web applications with Shiny</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Uli Niemann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/countdown/countdown.css" rel="stylesheet" />
+    <script src="libs/countdown/countdown.js"></script>
+    <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+class: title-slide, center, bottom
+
+# 06 - Interactive web applications with Shiny
+
+## Data Science with R &amp;#183; Summer 2020
+
+### Uli Niemann &amp;#183; Knowledge Management &amp; Discovery Lab
+
+#### [https://brain.cs.uni-magdeburg.de/kmd/DataSciR/](https://brain.cs.uni-magdeburg.de/kmd/DataSciR/)
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: middle
+name: beispiel-apps
+
+### [Access to hospital care in the US](http://colorado.rstudio.com:3939/content/188/)
+
+.pull-left60[
+
+&lt;img src="figures/06-shiny/example_hospital_care_2.png" width="100%" /&gt;
+
+]
+
+.pull-right40[
+
+Interactive chloropleth map of access to hospital care in US counties. 
+Underserved counties are highlighted. 
+
+&lt;img src="figures/06-shiny/example_hospital_care_1.png" width="100%" /&gt;
+
+]
+
+---
+
+class: middle
+
+### [Sales analytics dashboard of a bycicle shop](https://mdancho84.shinyapps.io/shiny-app/)
+
+.pull-left60[
+
+Analysis and visualization of historic sale transactions, stratified by 
+bike type, bike model and US state.
+
+&lt;img src="figures/06-shiny/example_bycicle_sales_1.png" width="100%" /&gt;
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/06-shiny/example_bycicle_sales_2.png" width="100%" /&gt;
+
+]
+
+---
+
+class: middle
+
+### [Prevention of hospital infections](https://hospinf.shinyapps.io/hospinf/#section-graphs)
+
+Frequency of hospital infections, use of antibiotic agents, antibiotic resistance, 
+operations, ... over time
+
+&lt;img src="figures/06-shiny/example_hospital_infections.png" width="80%" /&gt;
+
+---
+
+class: middle
+
+### [Network visualiztion of biochemical processes](https://dgranjon.shinyapps.io/entry_level/)
+
+&lt;img src="figures/06-shiny/example_calcium.png" width="100%" /&gt;
+
+---
+
+class: middle
+
+### [Memory game app](https://dreamrs.shinyapps.io/memory-hex/)
+
+&lt;img src="figures/06-shiny/example_memory.png" width="100%" /&gt;
+
+---
+
+class: middle
+
+### [New Zealand tourism dashboard](https://mbienz.shinyapps.io/tourism_dashboard_prod/)
+
+&lt;img src="figures/06-shiny/example_tourism.png" width="75%" /&gt;
+
+---
+
+class: middle
+
+### [Shiny gallery: user showcases &amp; demos](https://shiny.rstudio.com/gallery/)
+
+&lt;img src="figures/06-shiny/shiny_user_showcase.png" width="80%" /&gt;
+
+---
+
+class: middle
+
+## ["Hello, World!" app](http://shiny.rstudio.com/gallery/faithful.html)
+
+&lt;img src="figures/06-shiny/faithful_app.png" width="100%" /&gt;
+
+???
+
+- histogram shows distribution of eruptions durations of a famous 
+geyser in Yellowstone NP (Old Faithful)
+- bimodal distribtion
+- user can modify the plot in several ways
+- number of bins in histogram (dropdown-menu)
+- whether to show individual obs. as rugs (checkbox)
+- whether to augment the histogram with a density estimate curve
+- dropdown-menu pops up -&gt; bandwidth adjustment
+- on the webserver, a R session runs  that handles the user‘s inputs and updates 
+the plot accordingly
+- Demo with the app's code in the sidebar -&gt; 2 components
+- Script with user interface (front-end) -&gt; necessary HTML to render the site
+- Script for functionality (back-end) -&gt; instructions to draw the plot
+
+---
+
+name: grundlagen
+
+## What is Shiny?
+
+.pull-left70[
+
+- `R` package to create **interactive web apps** without deep knowledge of 
+HTML, CSS and JavaScript
+- based on **reactive programming**: manipulable **inputs** trigger 
+automatic re-computation of **outputs**
+
+### Application scenarios
+
+- Dashboards that allow users to interactively toggle between compact at-a-glace 
+summary and specific performance values &amp;rarr; customizable to the 
+level of detail the users need 
+- present complex models to a non-technical audience with interactive 
+visualizations
+- replace very long PDF documents or printed reports: 
+allow users to drill down to sections they are most interested in
+
+&lt;!-- - **`R`-Session**, die im Hintergrund läuft, stämmt sämtliche Berechnungen --&gt;
+&lt;!-- - Aufbau:  --&gt;
+&lt;!--   - **User Interface** (ui-Komponente) --&gt;
+&lt;!--   - **Server Instructions** (server-Komponente) --&gt;
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/06-shiny/shiny_logo.png" width="100%" /&gt;
+
+]
+
+???
+
+- web app: runs in any web browser (also mobile), user does not need to have R installed
+- no installation required: all computers have a browser
+- reactive programming vs. event-driven programming: 
+  - automatically track dependencies between an input (eg drop-down menu) and 
+  outputs (eg plots) that depend on that input
+  - whenever an input changes, Shiny can automatically update all related 
+  outputs without you having to define specific event handlers  
+
+&lt;!-- * Create dashboards that track important performance indicators, and facilitate --&gt;
+&lt;!--   drill down into surprising results. --&gt;
+
+&lt;!-- * Replace hundreds of pages of PDFs with interactive apps that allow the  --&gt;
+&lt;!--   user to jump to the exact slice of the results that they care about. --&gt;
+
+&lt;!-- * Communicate complex models to a non-technical audience with informative --&gt;
+&lt;!--   visualisations and interactive sensitivity analysis. --&gt;
+
+&lt;!-- * Provide self-service data analysis for common workflows where replacing  --&gt;
+&lt;!--   email requests with a Shiny app that allows people to upload their own --&gt;
+&lt;!--   data and perform standard analyses. --&gt;
+
+&lt;!-- * Create interactive demos for teaching statistics and data science concepts  --&gt;
+&lt;!--   that allow learners to tweak inputs and observe the downstream effects of  --&gt;
+&lt;!--   these changes in an analysis. --&gt;
+
+
+
+---
+
+## Minimal template of a Shiny app
+
+
+```r
+library(shiny)
+ui &lt;- fluidPage() # controls layout &amp; appearance (e.g. `bootstrapPage()`, `fluidPage()`, `fixedPage()`)
+server &lt;- function(input, output, session) {} # function that maps inputs to outputs
+shinyApp(ui = ui, server = server) # runs the app
+```
+
+---
+
+## ["Hello, World!" app](http://shiny.rstudio.com/gallery/faithful.html)
+
+&lt;img src="figures/06-shiny/faithful_app.png" width="100%" /&gt;
+
+---
+
+class: middle
+
+&lt;img src="figures/06-shiny/faithful_code.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## ui.R
+
+&lt;img src="figures/06-shiny/faithful_code_1.png" width="100%" /&gt;
+
+???
+
+- dropdown menu for the number of bins in the histogram
+- a checkbox to indicate whether individual observations should be displayed as 
+rugs (tiny lines) along the x-axis
+- a checkbox to indicate whether the estimated probability density function 
+should be displayed as curve on top of the histogram
+- sole outpt: a plot container for the histogram
+- ui objects are comma-separated
+
+---
+
+## Example input: dropdown list
+
+&lt;img src="figures/06-shiny/faithful_code_2.png" width="80%" /&gt;
+
+---
+
+## Example input: dropdown list
+
+&lt;img src="figures/06-shiny/faithful_inputs.png" width="100%" /&gt;
+
+**Mandatory arguments** of input widgets:
+
+- `inputId`: unique identifier
+- `label`: descriptive label
+
+**Input-specific arguments** (see `?selectInput)`:
+
+  - `choices`: list of values
+  - `selected`: selected value at the start
+  - `multiple`: whether the selection of multiple values is allowed
+  - ...
+
+---
+
+## Input widgets
+
+&lt;img src="figures/06-shiny/inputs.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+.footnote[[Shiny Input Widgets](https://shiny.rstudio.com/tutorial/written-tutorial/lesson3/)]
+
+---
+
+### Inputs have values...
+
+&lt;img src="figures/06-shiny/widget_gallery.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+.footnote[[Widget gallery](http://shiny.rstudio.com/gallery/widget-gallery.html)]
+
+---
+
+## Outputs
+
+&lt;img src="figures/06-shiny/outputs.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+.pull-left60[
+
+.font90[
+
+**Mandatory argument**:
+
+- `outputId`: unique identifier
+
+**output-specific arguments** (see `?plotOutput`):
+
+- `width`, `height`: width and height as CSS command
+- ...
+
+]
+
+]
+
+.pull-right40[
+
+
+```r
+textOutput() # text
+htmlOutput() # raw HTML
+imageOutput() # image
+plotOutput() # plot
+tableOutput() # table
+uiOutput() # Shiny UI element
+```
+
+]
+
+???
+
+- all outputs are generated with *Output()
+- This code generates the HTML container for the histogram
+- If we would run this code without further instructions, we would not see the plot
+- We have to say explicitly what sort of plot we want to show -&gt; server
+
+- Small recap up to this point:
+- Basic architecture of a Shiny app: ui and server part
+- UI elements (dropdown-menus, radiobuttons, plots and tables) are specified in UI
+- Create Reactive Inputs with input functions (selectInput, sliderInput)
+- Create Reactive outputs with output functions (plotOutput, tableOutput)
+- Inside the server functions, inputs are used to create outputs
+
+---
+
+## server.R
+
+.pull-left[
+
+&lt;img src="figures/06-shiny/server.png" width="90%" /&gt;
+
+]
+
+.pull-right[
+
+.orange[
+
+Function `server()` takes 2 arguments:
+
+- `input`: list of input objects (`input$&lt;inputId&gt;`)
+- `output`: list of output objects (`output$&lt;outputId&gt;`)
+
+]
+
+.red[
+
+Output objects are saved as `output$&lt;outputId&gt;`.
+
+]
+
+.blue[
+
+Output objects are created with `render*()` functions.
+
+]
+
+.green[
+
+Input objects are called using `input$&lt;inputId&gt;`.
+
+]
+
+]
+
+---
+
+## Access current value of an input in server.R
+
+&lt;img src="figures/06-shiny/inputs_server_ui.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Use an output from ui.R
+
+&lt;img src="figures/06-shiny/outputs_server_ui.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Render functions 
+
+.pull-left60[
+
+Output objects are created within `render*()` functions.
+
+&lt;img src="figures/06-shiny/render.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right40[
+
+Example: `renderPlot(boxplot(iris$Sepal.Length))`
+
+
+```r
+renderText()
+renderPrint()
+renderImage()
+renderPlot()
+renderTable()
+renderUI()
+```
+
+]
+
+???
+
+- curly brackets are necessary for multi-line commands
+
+---
+
+## Reactivity
+
+&lt;img src="figures/06-shiny/reactivity.png" width="100%" /&gt;
+
+Whenever an input objects is called within a `render*()` function via 
+`input$&lt;inputId&gt;`, Shiny will automatically the associated output object.
+
+---
+
+## Inputs &amp; Outputs
+
+.pull-left[
+
+**Reactive Programming**: when an input changes, 
+all related outputs are automatically updated.
+
+.red[Compare this to the normal behaviour of `R`:]
+
+
+```r
+x &lt;- 1
+y &lt;- x + 2
+x &lt;- 9
+# What value does y have? 3 or 11?
+```
+
+]
+
+.pull-right[
+
+&lt;img src="figures/06-shiny/inputs_outputs.png" width="90%" /&gt;
+
+]
+
+---
+
+class: middle
+
+## Recap: basic structure of a Shiny app
+
+- **ui** component and **server** component
+- **ui** contains **reactive inputs** (dropdown lists, radio buttons, ...) and 
+**reactive outputs** (charts, tables, ...)
+- reactive inputs are placed into the ui using **input functions** 
+(`selectInput()`, `radioButtons()`, ...)
+- reactive output containers are placed into the ui  using **output functions** 
+(`plotOutput()`, `tableOutput()`, ...)
+- **server** contains code to create outputs, whose re-computation is triggered 
+by one of the associated inputs
+- output values (plots, tables) are generated within **render functions** 
+(`renderPlot()`, `render(Table)`, ...)
+
+---
+
+class: exercise-blue, middle
+
+## Your turn 1
+
+<div class="countdown" id="timer_5ebea4b0" style="right:0;bottom:0;" data-warnwhen="0">
+<code class="countdown-time"><span class="countdown-digits minutes">15</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+.pull-left[
+
+Create an app, which shows a histogram of N random values from a standard normal 
+distribution. 
+The user can specify N via a slider input.
+
+- The minimum value that can be selected is 10.
+- The maximum value that can be selected is 150.
+- The interval between each selectable value on the slider is 10.
+- Random values from a normal distribution can be generated using `rnorm()`.
+
+]
+
+.pull-right[
+
+&lt;img src="figures/06-shiny/first-app.png" width="100%" /&gt;
+
+]
+
+---
+
+name: modularisierung
+ 
+## Code modularization
+
+Often, we need intermediate results (computed from reactive inputs) for multiple 
+render functions.
+
+&lt;img src="figures/06-shiny/app-02_modularity.png" width="60%" /&gt;
+
+---
+
+## Code modularization
+
+.font90[
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("dplyr")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  plotOutput(outputId = "plot"),
+  verbatimTextOutput(outputId = "summary")
+)
+
+server &lt;- function(input, output) {
+  output$plot &lt;- renderPlot({
+*   x &lt;- tibble(x = rnorm(input$slider))
+    ggplot(x, aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+  output$summary &lt;- renderPrint({
+*   x &lt;- rnorm(input$slider)
+    summary(x)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+]
+
+&amp;#x1F914; _Which 2 problems does this code have?_
+
+--
+
+&amp;rarr; Histogram and summary text output do not depict the same data.  
+&amp;rarr; **Code duplication** leads to problems in the long run. 
+For example, if `runif()` shall be used instead of `rnorm()`,  we would have to 
+change the code at 2 places. 
+
+--
+
+&amp;xrarr; Solution: we create a **reactive object** for random values which can 
+be used by both render functions. 
+
+---
+
+## Code modularization
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  plotOutput(outputId = "plot"),
+  verbatimTextOutput(outputId = "summary")
+)
+
+server &lt;- function(input, output) {
+* values &lt;- rnorm(input$slider)
+  
+  output$plot &lt;- renderPlot({
+*   ggplot(tibble(x = values), aes(x)) +
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+  
+  output$summary &lt;- renderPrint({
+*   summary(values)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+.red[.font90[.remark-code[Error in .getReactiveEnvironment()$currentContext() : Operation not allowed without an active reactive context. (You tried to do something that can only be done from inside a reactive expression or observer.)]
+]
+]
+
+
+---
+
+## Code modularization
+
+&amp;rarr; Enclose with `reactive()`: `values &lt;- reactive(rnorm(input$slider))`
+
+We can access reactive values in reactive functions using `values()` 
+(.red[mind the parentheses]):
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  plotOutput(outputId = "plot"),
+  verbatimTextOutput(outputId = "summary")
+)
+
+server &lt;- function(input, output) {
+* values &lt;- reactive({rnorm(input$slider)})
+  
+  output$plot &lt;- renderPlot({
+*   ggplot(tibble(x = values()), aes(x)) +
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+  
+  output$summary &lt;- renderPrint({
+*   summary(values())
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+name: reaktivitaet
+
+## Prevent re-computations
+
+&lt;img src="figures/06-shiny/app-03-org-2.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Prevent re-computations
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  textInput(inputId = "text", label = "histogram title", value = "fancy title"),
+  plotOutput(outputId = "plot")
+)
+
+server &lt;- function(input, output) {
+  output$plot &lt;- renderPlot({
+    ggplot(tibble(x = rnorm(input$slider)), aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10) +
+*     labs(title = input$text)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+## Prevent re-computations
+
+&amp;rarr; Enclose with `isolate()`: `isolate({input$title})` returns the result as 
+non-reactive value.
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  textInput(inputId = "text", label = "histogram title", value = "fancy title"),
+  plotOutput(outputId = "plot")
+)
+
+server &lt;- function(input, output) {
+  output$plot &lt;- renderPlot({
+    ggplot(tibble(x = rnorm(input$slider)), aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10) +
+*     labs(title = isolate({input$text}))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+The histogram will only be re-rendered if the value of the slider changes. 
+
+---
+
+## Trigger computations with reactive values
+
+Example: action button
+
+&lt;img src="figures/06-shiny/observeEvent.png" width="100%" /&gt;
+
+---
+
+## Trigger computations with reactive values
+
+
+```r
+library("shiny")
+
+ui &lt;- fluidPage(
+* actionButton(inputId = "button", label = "Go!")
+)
+
+server &lt;- function(input, output) {
+* observeEvent(input$button, {
+*   print(input$button)
+* })
+  
+}
+
+shinyApp(ui, server)
+```
+
+&amp;#x1F973; ... with `observeEvent(&lt;input$inputId&gt;, &lt;CODE&gt;)`
+
+Only if `&lt;input$inputId&gt;` changes, the `&lt;CODE&gt;` will be run!
+
+This means, if `&lt;input$otherInputId&gt;` (that is used within `&lt;CODE&gt;`) changes, 
+re-computation of `&lt;CODE&gt;` will not be triggered.
+
+---
+
+## Create an reactive observer
+
+
+```r
+library("shiny")
+
+ui &lt;- fluidPage(
+* actionButton(inputId = "button", label = "Go!")
+)
+
+server &lt;- function(input, output) {
+* observe(print(input$button))
+}
+
+shinyApp(ui, server)
+```
+
+In contrast to `reactive()`, `observe()` does not return a value. 
+It is called for its _side effects_.
+
+---
+
+
+## Delay re-computations
+
+&lt;img src="figures/06-shiny/app05.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Delay re-computations
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+  textInput(inputId = "text", label = "histogram title", value = "fancy title"),
+  actionButton(inputId = "button", label = "Go!"),
+  plotOutput(outputId = "plot")
+)
+
+server &lt;- function(input, output) {
+* rp &lt;- eventReactive(input$button, {
+*   ggplot(tibble(x = rnorm(input$slider)), aes(x)) +
+*     geom_histogram(color = "black", fill = "royalblue", bins = 10) +
+*     labs(title = input$text)
+* })
+  
+* output$plot &lt;- renderPlot(rp())
+}
+
+shinyApp(ui, server)
+```
+
+Template: `rv &lt;- eventReactive(&lt;input$inputId&gt;, &lt;CODE&gt;)`
+
+Only if `&lt;input$inputId&gt;` changes, `&lt;CODE&gt;` will be run and the output will be 
+stored as `rv`.
+
+Similar to `reactive()`, you can access reactive values created by 
+`eventReactive()` using `rv()` (mind the parentheses). 
+
+---
+
+## Manipulable reactive values
+
+Create a list of reactive values that can later be modified by input changes. 
+
+Template: `data &lt;- reactiveValues(x1 = ..., x2 = ...)`
+
+&lt;img src="figures/06-shiny/app-06.png" width="65%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Manipulable reactive values
+
+
+```r
+library("shiny")
+library("ggplot2")
+library("tibble")
+
+ui &lt;- fluidPage(
+  sliderInput(inputId = "slider", label = "Number of random values",
+              min = 10, max = 150, step = 10, value = 50),
+* actionButton(inputId = "normal", label = "normal distribution"),
+* actionButton(inputId = "unif", label = "uniform distribution"),
+  plotOutput(outputId = "plot")
+)
+
+server &lt;- function(input, output) {
+  
+* data &lt;- reactiveValues(x = rnorm(100))
+  
+* observeEvent(input$normal, data$x &lt;- rnorm(input$slider))
+* observeEvent(input$unif, data$x &lt;- runif(input$slider))
+  
+  output$plot &lt;- renderPlot({
+    ggplot(tibble(x = data$x), aes(x)) + 
+      geom_histogram(color = "black", fill = "royalblue", bins = 10)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+## Recap: reactivity
+
+- `render*()`: create **reactive outputs** that will be re-computed after every change 
+in one of the inputs' value
+
+--
+
+- `reactive()`: create a **reactive expression**, that will be re-computed after 
+every change in one of the inputs' value
+
+--
+
+- `isolate()`: **prevent reactivity** for all enclosed inputs
+
+--
+
+- `observeEvent(x, ...)`: code will only be executed if the value of a reactive 
+expression  `x` changes. Does _not_ return a value.
+
+--
+
+- `observe()`: code is executed in a reactive context. Does _not_ return a value.
+
+--
+
+- `eventReactive(x, ...)`: code will only be executed if the value of a reactive 
+expression  `x` changes. Does return a value. 
+
+--
+
+- `reactiveValues()`: creates a list of reactive values, which can be modified 
+later. 
+
+---
+
+name: misc
+
+## Layouts
+
+.pull-left[
+
+&lt;img src="figures/06-shiny/ui_layout_fluidrow.png" width="90%" /&gt;
+
+&lt;img src="figures/06-shiny/ui_layout_sidebar_split.png" width="90%" /&gt;
+
+
+]
+
+.pull-right[
+
+&lt;img src="figures/06-shiny/ui_layout_flowlayout.png" width="90%" /&gt;
+
+&lt;img src="figures/06-shiny/ui_layout_tabset_navbar.png" width="90%" /&gt;
+
+]
+
+.footnote[
+
+&amp;#x1F4DA; [Application layout guide](https://shiny.rstudio.com/articles/layout-guide.html)
+
+]
+
+---
+
+## HTML tags
+
+.pull-left[
+
+- Shiny apps are websites.
+- Websites are written in HTML.
+- Shiny apps are written in `R`.
+- HTML element can be inserted with `tags$&lt;element&gt;()` into the UI.
+
+.footnote[
+
+&amp;#x1F4DA; [Customize your UI with HTML](https://shiny.rstudio.com/articles/html-tags.html)
+
+]
+   
+]
+
+.pull-right[
+
+&lt;img src="figures/06-shiny/html_tags.png" width="100%" /&gt;
+
+]
+
+---
+
+class: center, middle
+
+.large[`tags$h1("Title")` .green[&amp;#11020;] `&lt;h1&gt;Title&lt;/h1&gt;`]
+
+--
+
+&amp;nbsp;
+
+.large[`tags$strong("Boldface")`]  
+.large[.green[&amp;#11020;]]  
+.large[`&lt;strong&gt;Boldface&lt;/strong&gt;`]
+
+--
+
+&amp;nbsp;
+
+.large[`tags$a("URL", href = "https://www.google.com")`  
+.green[&amp;#11020;]  
+`&lt;a href="https://www.google.com"&gt;URL&lt;/a&gt;`] 
+
+---
+
+class: middle
+
+&lt;img src="figures/06-shiny/html_tags_h1.png" width="100%" /&gt;
+
+---
+
+class: middle
+
+&lt;img src="figures/06-shiny/html_tags_misc.png" width="100%" /&gt;
+
+---
+
+## Dashboards with [AdminLTE](https://adminlte.io/) theme
+
+&lt;img src="figures/06-shiny/adminlte.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+Features: [Notification Menus](https://rstudio.github.io/shinydashboard/structure.html#notification-menus), [Task Menus](https://rstudio.github.io/shinydashboard/structure.html#task-menus), [infoBoxes](https://rstudio.github.io/shinydashboard/structure.html#infobox), [valueBoxes](https://rstudio.github.io/shinydashboard/structure.html#valuebox), ...
+
+
+.footnote[
+
+&amp;#x1F4DA; [Getting Started Guide](https://rstudio.github.io/shinydashboard/index.html), [Webinar Dynamic Dashboards with Shiny](https://www.rstudio.com/resources/webinars/dynamic-dashboards-with-shiny/), [Building Dashboards with Shiny Tutorial](https://www.rstudio.com/resources/videos/building-dashboards-with-shiny-tutorial/)
+
+]
+
+---
+
+## App Deployment
+
+&amp;nbsp; | Pros | Cons
+:----- | :--- | :----
+local  | + free&lt;br&gt;+ data remains local | - every user has to install R and shiny&lt;br&gt;- maintenance
+[shinyapps.io](https://www.shinyapps.io/) | + free up to 5 apps / account&lt;br&gt;+ no installation or hardware necessary&lt;br&gt;+ minimal maintenance&lt;br&gt;+ push button publishing | - tariffs with authentication 99+ USD/Monat&lt;br&gt;- data in external cloud
+[Shiny Server](https://rstudio.com/products/rstudio/#rstudio-server) | + free (open source license)&lt;br&gt;+ data remains behind own firewall&lt;br&gt;+ authentication | - deployment and maintenance require more effort compared to shinyapps.io
+[RStudio Connect](https://www.rstudio.com/products/connect/) | + easy "push button" deployment&lt;br&gt;+ data remain behind own firewall&lt;br&gt;+ authentication | - more expensive than shinyapps.io
+[Electron](https://github.com/ColumbusCollaboratory/electron-quick-start) &lt;br&gt;(unofficial) | + free&lt;br&gt;+ local offline app (.exe) | - requires more effort to set up compared to  shinyapps.io&lt;br&gt;- no official support&lt;br&gt;- large file size (portable R installation)
+
+.footnote[
+
+&amp;#x1F4DA; [What is the difference between RStudio Connect, Shiny Server Pro, and Shinyapps.io?](https://support.rstudio.com/hc/en-us/articles/217240558-What-is-the-difference-between-RStudio-Connect-Shiny-Server-Pro-and-Shinyapps-io)
+
+]
+
+???
+
+Electron enables executing cross platform desktop application using 
+the Chromium web browser and the node.js framework.
+https://www.youtube.com/watch?time_continue=821&amp;v=ARrbbviGvjc
+https://github.com/ksasso/useR_electron_meet_shiny
+
+---
+
+## More Shiny &amp; materials
+
+.footnote[
+
+&amp;#x1F4DA; Curated list of ["Awesome Shiny Extensions"](https://github.com/nanxstats/awesome-shiny-extensions)
+
+]
+
+.pull-left80[
+Extension packages:
+
+- [`shinyWidgets`](https://github.com/dreamRs/shinyWidgets): additional input widgets
+- [`shinycssloaders`](https://github.com/andrewsali/shinycssloaders): add loading animations
+- [`shinyjs`](https://github.com/daattali/shinyjs): extend Shiny apps with basic JavaScript
+- [`reactlog`](https://github.com/rstudio/reactlog): visually debug Shiny apps
+
+
+
+]
+
+.pull-right20[
+
+&lt;img src="figures/06-shiny/shiny_logo.png" width="100%" /&gt;
+
+]
+
+--
+
+- Hadley Wickham. [Mastering Shiny](https://mastering-shiny.org/). O'Reilly, 2020. Draft version.
+- [Shiny introductory webinar](https://shiny.rstudio.com/tutorial/)
+- [Shiny user showcase](https://www.rstudio.com/products/shiny/shiny-user-showcase/)
+- Business Science. [The Shiny AWS Book: A proven process for deploying applications in the Cloud with Shiny and AWS](https://business-science.github.io/shiny-production-with-aws-book/). 
+- [Shiny cheat sheet](https://github.com/rstudio/cheatsheets/raw/master/shiny.pdf)
+
+---
+
+background-image: url("figures/06-shiny/shiny-cheatsheet_1.png")
+background-size: contain
+
+---
+
+background-image: url("figures/06-shiny/shiny-cheatsheet_2.png")
+background-size: contain
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&amp;nbsp;
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
