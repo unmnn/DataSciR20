@@ -2274,7 +2274,7 @@ background-image: url("figures/03-ggplot2/gg-ext.png")
 background-size: contain
 
 
-## [ggplot2-exts.org](http://www.ggplot2-exts.org/gallery/)
+## [https://exts.ggplot2.tidyverse.org/gallery](https://exts.ggplot2.tidyverse.org/gallery)
 
 ---
 
