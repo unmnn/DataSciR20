@@ -4,6 +4,7 @@
     <title>R Markdown</title>
     <meta charset="utf-8" />
     <meta name="author" content="Uli Niemann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
     <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
@@ -33,6 +34,12 @@ class: middle, center
 &lt;iframe src="https://player.vimeo.com/video/178485416?color=428bca&amp;title=0&amp;byline=0&amp;portrait=0" width="800" height="450" frameborder="0" allow="autoplay; fullscreen" allowfullscreen&gt;&lt;/iframe&gt;
 &lt;p&gt;&lt;a href="https://vimeo.com/178485416"&gt;What is R Markdown?&lt;/a&gt; from &lt;a href="https://vimeo.com/rstudioinc"&gt;RStudio, Inc.&lt;/a&gt; on &lt;a href="https://vimeo.com"&gt;Vimeo&lt;/a&gt;.&lt;/p&gt;
 
+???
+
+- basic idea: rmd = text file that includes narrative text, code and results
+- the same rmd doc can be "rendered" into multiple output types such as html, pdf, or word
+- "rendered": R code is run and the rmd is converted to an md doc, and this md doc is in turn converted to the desired output format
+
 ---
 
 class: middle, center
@@ -41,8 +48,7 @@ class: middle, center
 
 ???
 
-- blogdown
-- xaringan
+- types of output formats
 
 ---
 
@@ -51,6 +57,17 @@ class: middle, center
 &lt;iframe src="https://www.youtube.com/embed/s3JldKoA0zw?rel=0" width="800px" height="450px"&gt;&lt;/iframe&gt;
 
 &lt;!-- &lt;iframe width="800" height="450" src="https://www.youtube.com/embed/s3JldKoA0zw?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen&gt;&lt;/iframe&gt; --&gt;
+
+???
+
+application scenario: write research paper based on data analysis results
+
+- repetitive manual workflow
+- raw data is stored in Excel
+- then manually run analysis.R (lin. regression)
+- make charts
+- copy-paste results (beta-coeffs, charts into your docx)
+- redo whole workflow if there one value in one of the Excel files changes
 
 ---
 
@@ -72,23 +89,15 @@ name: intro
 
 ## Introduction
 
-.pull-left80[
+.pull-left60[
 
 **R Markdown** is a file format to combine **code**, the associated **results** 
 and **narrative text** in a simple text file, to create **reproducible reports** 
-which can be **flexibly distributed in [multiple ways](https://rmarkdown.rstudio.com/gallery.html)**.  
+which can be **flexibly distributed in multiple ways**.  
 
 An R Markdown document is saved as `.Rmd` file. It contains both the (`R`) code 
 and a prose description of a data analysis task. The R Markdown document can be 
 rendered as HTML, PDF, Word and various other output formats.
-
-]
-
-.pull-right20[
-
-&lt;img src="figures/04-rmarkdown/rmarkdown-logo.png" width="100%" /&gt;
-
-]
 
 **Benefits** of using R Markdown:
 
@@ -99,18 +108,29 @@ target audiences / purposes
 system
 - **simple syntax**
 
-&lt;img src="figures/04-rmarkdown/three_outputs.png" width="40%" style="display: block; margin: auto;" /&gt;
+]
 
+.pull-right40[
+
+&lt;img src="figures/04-rmarkdown/rmarkdown-logo.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+&amp;nbsp;
+
+&lt;img src="figures/04-rmarkdown/three_outputs.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
 
 ???
 
-- R package that is similar to Jupyter notebooks in Python
-Three major target audiences of R Markdown documents:
-
-1. **Yourself**: use an Rmd file as lab notebook which captures code, conclusions and reasoning behind your analysis 
-1. **Decision makers**: focus on conclusions
-1. **Fellow data scientists** (including yourself in the future): focus both on conclusions and analysis code to facilitate collaborating
-
+- file extension
+- Jupyter notebooks in Python (combine text, code and results)
+- flexibility in terms of type of output document
+- flexibility in terms of target audience -&gt; parametrized reports
+  - you: lab notebook containing code, conclusions and reasoning behind your analysis
+  - decision makers: hide code, focus on charts and conclusions
+  - colleagues: focus both on conclusions and code to ensure reproducibility and to facilitate collaborating
+- rmd is plain text file so it can be managed by a version control system
+- simple syntax
 
 ---
 
@@ -121,10 +141,12 @@ class: center, middle
 
 ???
 
-- code: can be R but there are other languages supported, such as python, javascript, sql, ruby
-- narration makes code easy to understand
-- if something changes (e.g. data source), you can simply rerun the Rmd and the report gets updated 
-- website and slides were made with markdown
+- process: Rmd -&gt; md -&gt; rendered document
+- rmd: md + r-code
+- knitr: run code and combine these code results (charts, models, console output) with md markup of rmd file
+- pandoc (general file converter) converts this augmented md file to the desired output HTML, pdf, word etc.
+- simplified process - based on the output, more packages are needed
+- e.g. blogdown: Hugo required (open-source static site generator)
 
 ---
 
@@ -132,6 +154,13 @@ class: middle
 
 &lt;img src="figures/04-rmarkdown/rmd_first_example_1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
+???
+
+- YAML header: meta data
+- code chunks: can be R but there are other languages supported, such as python, javascript, sql, ruby
+- Markdown text
+- inline code: allows for dynamic content (e.g.how many records) using simple commands
+  - no need for manual copy and paste of the code output into the narrative text. 
 
 ---
 
@@ -178,7 +207,7 @@ the HTML file in the "Files" tab. Try to knit the rmd file with the Keyboard
 shortcut **Ctrl**+**⇧Shift**+**K**.
 - Click on the small downwards arrow right to the **Knit** button and try to 
 render the document as Word and PDF output, respectively.
-- Click on the _cog_ button right to the **Knit** button 
+- Click on the _gear_ button right to the **Knit** button 
 to explore the R Markdown format options.
 
 
@@ -200,6 +229,11 @@ In contrast to other markup languages like **HTML** and **XML**, Markdown markup
 &lt;img src="figures/04-rmarkdown/html_example.png" width="85%" /&gt;
 
 ]
+
+???
+
+- no closing tag
+- accomplish the same output with much less typing
 
 --
 
@@ -352,7 +386,7 @@ class: exercise-blue, middle
 
 ## Your turn 2
 
-In the Rmd document you create, locate the words/phrases that are written 
+In the Rmd document you have created in the previous exercise, locate the words/phrases that are written 
 
 - in bold face,
 - in italics,
@@ -390,6 +424,8 @@ some code
 ```
 ````
 
+Code chunks can be inserted with the &lt;img src="figures/04-rmarkdown/insert.png" width="88" /&gt; button in the toolbar or using the keyboard shortcut **Ctrl + Alt + I**.
+
 ]
 
 .pull-right30[
@@ -398,23 +434,25 @@ some code
 
 ]
 
-Code chunks can be inserted with the &lt;img src="figures/04-rmarkdown/insert.png" width="88" /&gt; button in the toolbar or using the keyboard shortcut **Ctrl + Alt + I**.
-
-
 ???
 
 - knitr doesnt need to be attached at the start of an R Markdown document
 - knitr removes backticks, runs the code and returns the code, and the output
-- engine option to switch between languages: not limited to R, can handle also python, bash, css, sql
 - backtick-backtick-backtick is minimum to define a starting R chunk
-- include options in curly brackets
-
 
 ---
 
 class: center, middle
 
 &lt;img src="figures/04-rmarkdown/chunk.png" width="100%" /&gt;
+
+???
+
+structure of a code chunk
+
+- code enclosed by 3 backticks before and after
+- after first 3 backticks: code engine, chunk label, comma-separated chunk options in curly brackets
+- engine: option to switch between languages: not limited to R, can handle also python, bash, css, sql
 
 ---
 
@@ -466,6 +504,7 @@ We can override this default behavior by setting `warning = FALSE` inside the co
 c(1,2,3) + c(4,5)
 ```
 ````
+&lt;!-- &lt;span style="color: yellow;"&gt;warning = FALSE&lt;/span&gt; --&gt;
 
 
 ```
@@ -474,9 +513,11 @@ c(1,2,3) + c(4,5)
 
 ???
 
-- optional arguments after the r in backtick-backtick-backtick-curvedopenbrackets-r
-- message = FALSE: dont show messages (e.g. when attaching libraries)
-- error = TRUE: causes the render to continue even if code returns an error. This is rarely something you'll want to include in the final version of your report, but can be very useful if you need to debug exactly what is going on insie your rmd. ...also useful for teching R and want to deliberately include an error. The default, error = FALSE, causes knitting to fail if there is a single error in the document.
+- optional arguments
+- by default, warning = TRUE
+- message = FALSE: don't show messages (e.g. when attaching libraries)
+- error = TRUE: continue rendering even if code returns an error (debugging, teachings)
+  - default: error = FALSE, causes knitting to fail if there is a single error in the document
 
 ---
 
@@ -492,30 +533,24 @@ Option | Description | Default
 `fig.width` | Figure width in inch | `7L`
 `fig.height` | Figure height in inch | `7L`
 `fig.align` | Figure alignment | `"default"`
+`warning` | Should warnings be displayed? | `TRUE`
+`message` | Should messages be displayed? | `TRUE`
 
 --
 
 .footnote[
 
-.content-box-green[
-
-Run `knitr::opts_chunk$get()` to see the current default values for all chunk options and package options.
-
-]
-
-.content-box-green[
-
-Run `knitr::opts_chunk$get()` to see the current default values for all chunk options and package options.
-
-]
+- Run `knitr::opts_chunk$get()` to see the current default values for all chunk options.  
+- Use `knitr::opts_chunk$set()` to modify these defaults, e.g. `knitr::opts_chunk$set(warning = FALSE)`.
 
 ]
 
 ???
 
+- echo = FALSE prevents that the code is shown in the rendered doc; still gets executed; useful for sending the document to your boss/supervisor who is only interested in the results and not the code
 - eval= FALSE prevents code from being evaluated. useful for displaying example code, or for disabling a large block of code without commentating each line
-- include = FALSE runs the code, but doesn't show the code or the results in the final document
-- echo = FALSE prevents code, but not the results from appearing in the rendered file. useful for sending the document for your boss who is only interested in the results and not the code
+- include = FALSE runs the code, but doesn't show the code or the results in the final document (supresses output)
+  - When you are trying to set echo = FALSE, results = 'hide', warning = FALSE, and message = FALSE, chances are you simply mean a single option include = FALSE instead of suppressing different types of text output individually. https://bookdown.org/yihui/rmarkdown/r-code.html
 - results = 'hide': hides printed output
 
 ---
@@ -541,7 +576,7 @@ Consider the code chunk below. Answer the following questions:
 .font120[
 
 ````markdown
-```{r, echo=FALSE}
+```{r boxplot-iris-species, echo=FALSE}
 library(ggplot2)
 ggplot(iris, aes(x = Species, y = Sepal.Length)) +
   geom_boxplot()
@@ -638,7 +673,7 @@ chunk. Try to run the "faithful" code chunk. Does it (still) work?
 .pull-left70[
 
 ````markdown
-```{r, fig.cap="R Markdown Logo"}
+```{r r-markdown-logo, fig.cap="R Markdown Logo"}
 knitr::include_graphics("figures/rmarkdown-logo.png")
 ```
 ````
@@ -663,7 +698,7 @@ name: tables
 ## Tables: kable
 
 ````markdown
-```{r}
+```{r kable-iris}
 knitr::kable(head(iris), caption = "A knitr kable table")
 ```
 ````
@@ -725,6 +760,10 @@ knitr::kable(head(iris), caption = "A knitr kable table")
 &lt;/tbody&gt;
 &lt;/table&gt;
 
+???
+
+- kable: robust table generator for html, pdf word docs
+
 ---
 
 R Markdown Cookbook: &lt;https://bookdown.org/yihui/rmarkdown-cookbook/kable.html&gt;
@@ -736,6 +775,13 @@ R Markdown Cookbook: &lt;https://bookdown.org/yihui/rmarkdown-cookbook/kable.htm
 `kableExtra` package: .font90[&lt;https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html&gt;]
 
 &lt;iframe src="https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+???
+
+- custom style: cell backgrounds, conditional formatting
+- multi-row and multi-column cells
+- tooltips
+- etc.
 
 ---
 
@@ -762,6 +808,12 @@ DT::datatable(iris)
 
 ???
 
+- paginated table
+- sort rows by column
+- search for strings
+- modify the number of rows shown simultaneously on one page
+
+
 , fillContainer = FALSE
 
 ---
@@ -773,6 +825,8 @@ DT package: &lt;https://rstudio.github.io/DT/&gt;
 ---
 
 ## Tables: gt
+
+[`gt`](https://gt.rstudio.com/): "Easily generate information-rich, publication-quality tables from R"
 
 ````markdown
 ```{r}
@@ -1173,19 +1227,19 @@ gt::gt(head(iris))
   
 </table></div>
 
-&amp;nbsp;
+???
 
-.content-box-purple[
-
-&amp;#x1F913; [Easily generate information-rich, publication-quality tables from R](https://gt.rstudio.com/)
-
-]
+- alternative 
 
 ---
 
 `gt`: "Easily generate information-rich, publication-quality tables from R" &lt;https://gt.rstudio.com/&gt;
 
 &lt;iframe src="https://gt.rstudio.com/" width="100%" height="530px"&gt;&lt;/iframe&gt;
+
+???
+
+
 
 ---
 
@@ -1263,7 +1317,7 @@ ggplot(iris, aes(Species, Sepal.Length)) +
 
 .pull-right[
 
-&lt;img src="figures/_gen/04-rmarkdown/unnamed-chunk-1-1.png" width="425.196850393701" /&gt;
+&lt;img src="figures/_gen/04-rmarkdown/unnamed-chunk-1-2.png" width="425.196850393701" /&gt;
 
 
 ]
@@ -1444,8 +1498,6 @@ reports
 
 ## Parametrized reports
 
-
-
 .content-box-green[
 .font90[
 `purrr::pwalk` applies a function to a list of arguments. It is similar to `purrr::pmap`, 
@@ -1455,7 +1507,152 @@ Here, it is used to iterate over each row of the `reports` tibble, calling
 ]
 ]
 
---
+
+```r
+reports %&gt;% 
+  select(output_file, params) %&gt;% 
+  mutate(output_file = here::here(output_file)) %&gt;%
+  purrr::pwalk(rmarkdown::render, input = "04-rmarkdown-materials/04-rmarkdown-parameter.Rmd")
+```
+
+```
+## 
+## 
+## processing file: 04-rmarkdown-parameter.Rmd
+```
+
+```
+## 
+  |                                                                                      
+  |                                                                                |   0%
+  |                                                                                      
+  |....................                                                            |  25%
+##   ordinary text without R code
+## 
+## 
+  |                                                                                      
+  |........................................                                        |  50%
+## label: iris-setup (with options) 
+## List of 3
+##  $ include: logi FALSE
+##  $ message: logi FALSE
+##  $ warning: logi FALSE
+## 
+## 
+  |                                                                                      
+  |............................................................                    |  75%
+##   ordinary text without R code
+## 
+## 
+  |                                                                                      
+  |................................................................................| 100%
+## label: hist
+```
+
+```
+## output file: 04-rmarkdown-parameter.knit.md
+```
+
+```
+## "C:/Program Files/RStudio/bin/pandoc/pandoc" +RTS -K512m -RTS 04-rmarkdown-parameter.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash+smart --output pandoc2814367b6623.html --email-obfuscation none --self-contained --standalone --section-divs --template "C:\Users\ulini\Documents\R\win-library\3.6\rmarkdown\rmd\h\default.html" --no-highlight --variable highlightjs=1 --variable "theme:bootstrap" --include-in-header "C:\Users\ulini\AppData\Local\Temp\Rtmpy8HI4k\rmarkdown-str281468d3477f.html" --mathjax --variable "mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" --lua-filter "C:/Users/ulini/Documents/R/win-library/3.6/rmarkdown/rmd/lua/pagebreak.lua" --lua-filter "C:/Users/ulini/Documents/R/win-library/3.6/rmarkdown/rmd/lua/latex-div.lua"
+```
+
+```
+## 
+## Output created: 04-rmarkdown-materials/iris-setosa.html
+## 
+## 
+## processing file: 04-rmarkdown-parameter.Rmd
+```
+
+```
+## 
+  |                                                                                      
+  |                                                                                |   0%
+  |                                                                                      
+  |....................                                                            |  25%
+##   ordinary text without R code
+## 
+## 
+  |                                                                                      
+  |........................................                                        |  50%
+## label: iris-setup (with options) 
+## List of 3
+##  $ include: logi FALSE
+##  $ message: logi FALSE
+##  $ warning: logi FALSE
+## 
+## 
+  |                                                                                      
+  |............................................................                    |  75%
+##   ordinary text without R code
+## 
+## 
+  |                                                                                      
+  |................................................................................| 100%
+## label: hist
+```
+
+```
+## output file: 04-rmarkdown-parameter.knit.md
+```
+
+```
+## "C:/Program Files/RStudio/bin/pandoc/pandoc" +RTS -K512m -RTS 04-rmarkdown-parameter.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash+smart --output pandoc2814550f787a.html --email-obfuscation none --self-contained --standalone --section-divs --template "C:\Users\ulini\Documents\R\win-library\3.6\rmarkdown\rmd\h\default.html" --no-highlight --variable highlightjs=1 --variable "theme:bootstrap" --include-in-header "C:\Users\ulini\AppData\Local\Temp\Rtmpy8HI4k\rmarkdown-str281426cf2830.html" --mathjax --variable "mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" --lua-filter "C:/Users/ulini/Documents/R/win-library/3.6/rmarkdown/rmd/lua/pagebreak.lua" --lua-filter "C:/Users/ulini/Documents/R/win-library/3.6/rmarkdown/rmd/lua/latex-div.lua"
+```
+
+```
+## 
+## Output created: 04-rmarkdown-materials/iris-versicolor.html
+## 
+## 
+## processing file: 04-rmarkdown-parameter.Rmd
+```
+
+```
+## 
+  |                                                                                      
+  |                                                                                |   0%
+  |                                                                                      
+  |....................                                                            |  25%
+##   ordinary text without R code
+## 
+## 
+  |                                                                                      
+  |........................................                                        |  50%
+## label: iris-setup (with options) 
+## List of 3
+##  $ include: logi FALSE
+##  $ message: logi FALSE
+##  $ warning: logi FALSE
+## 
+## 
+  |                                                                                      
+  |............................................................                    |  75%
+##   ordinary text without R code
+## 
+## 
+  |                                                                                      
+  |................................................................................| 100%
+## label: hist
+```
+
+```
+## output file: 04-rmarkdown-parameter.knit.md
+```
+
+```
+## "C:/Program Files/RStudio/bin/pandoc/pandoc" +RTS -K512m -RTS 04-rmarkdown-parameter.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash+smart --output pandoc281416924a53.html --email-obfuscation none --self-contained --standalone --section-divs --template "C:\Users\ulini\Documents\R\win-library\3.6\rmarkdown\rmd\h\default.html" --no-highlight --variable highlightjs=1 --variable "theme:bootstrap" --include-in-header "C:\Users\ulini\AppData\Local\Temp\Rtmpy8HI4k\rmarkdown-str28142a226ab6.html" --mathjax --variable "mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" --lua-filter "C:/Users/ulini/Documents/R/win-library/3.6/rmarkdown/rmd/lua/pagebreak.lua" --lua-filter "C:/Users/ulini/Documents/R/win-library/3.6/rmarkdown/rmd/lua/latex-div.lua"
+```
+
+```
+## 
+## Output created: 04-rmarkdown-materials/iris-virginica.html
+```
+
+---
+
+## Parametrized reports
 
 &lt;iframe src="04-rmarkdown-materials/iris-setosa.html" width="32%" height="350px"&gt;&lt;/iframe&gt;&lt;iframe src="04-rmarkdown-materials/iris-versicolor.html" width="32%" height="350px"&gt;&lt;/iframe&gt;&lt;iframe src="04-rmarkdown-materials/iris-virginica.html" width="32%" height="350px"&gt;&lt;/iframe&gt;
 
@@ -1584,6 +1781,10 @@ LaTeX formats and templates for various formats, including:
 
 ]
 
+???
+
+- reference
+
 ---
 
 background-image: url("figures/04-rmarkdown/rmarkdown-cheatsheet_1.png")
@@ -1610,7 +1811,7 @@ background-size: contain
 ##  collate  English_United States.1252  
 ##  ctype    English_United States.1252  
 ##  tz       Europe/Berlin               
-##  date     2020-04-17
+##  date     2020-06-08
 ```
 
 &lt;div style="font-size:80%;"&gt;
@@ -1635,9 +1836,9 @@ background-size: contain
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; dplyr &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.8.99.9002 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-29 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Github (tidyverse/dplyr@c7f2936) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.8.5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-03-07 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; DT &lt;/td&gt;
@@ -1648,8 +1849,8 @@ background-size: contain
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; ggplot2 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 3.3.0.9000 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Github (tidyverse/ggplot2@53815f8) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-01 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidyverse/ggplot2@101c68d) &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -1675,47 +1876,6 @@ class: last-slide, center, bottom
 .courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
 
 
-
-&lt;!-- ggplot(iris, aes(Species, Sepal.Length)) + --&gt;
-&lt;!--   geom_histogram() --&gt;
-
-&lt;!-- eval = FALSE --&gt;
-&lt;!-- fig.width = 10 --&gt;
-&lt;!-- fig.height = 5 --&gt;
-
-
-&lt;!-- toc --&gt;
-
-&lt;!-- 1. Ergänze die Felder "author" und "date" im YAML-Header. Es soll das aktuelle  --&gt;
-&lt;!-- Datum ausgegeben werden. Tipp: Funktion `Sys.time()` --&gt;
-
-&lt;!-- 1. Experimentiere ein wenig mit Inline-Code.   --&gt;
-&lt;!-- Inline-Code wird normalerweise verwendet um Hard-Coding zu vermeiden.  --&gt;
-&lt;!--     - Schlecht: Der Datensatz besteht aus 30 Spalten.  --&gt;
-&lt;!--     (bei Änderungen im Datensatz veraltet) --&gt;
-&lt;!--     - Besser: Der Datensatz besteht aus ` ncol(dc)` Spalten. --&gt;
-
-&lt;!--     1. Besser wäre es, wenn der Code nur angezeigt wird, wenn der Leser diesen  --&gt;
-&lt;!-- auch wirklich sehen will. Füge im YAML-Header eine Option für "Code Folding"  --&gt;
-&lt;!-- hinzu. Standardmäßig soll Code ausgeblendet sein. Hilfe:  --&gt;
-&lt;!-- [HTML Document Code Folding](https://bookdown.org/yihui/rmarkdown/html-document.html#code-folding) --&gt;
-
-
-&lt;!-- ref.label = "iris_plot" --&gt;
-
-&lt;!-- cache --&gt;
-
-
-&lt;!-- rticles --&gt;
-
-&lt;!--     The rticles package contains a range of ready-made templates for paper submissions --&gt;
-&lt;!--     At the moment, many of the templates are not well documented, and it can be difficult to understand what's going on under the hood --&gt;
-&lt;!--     It's useful to know a bit about how it works, if you need to submit a paper formatted with LaTeX but want to write in R Markdown --&gt;
-&lt;!--     Let's have a look at the PLOS LaTeX template --&gt;
-
-
-&lt;!-- n HTML output, you can use theme or a custom .css style sheet --&gt;
-&lt;!-- theme options (see them at bootswatch.com) : “cerulean”, “journal”, “flatly”, “darkly”, “readable”, “spacelab”, “united”, “cosmo”, “lumen”, “paper”, “sandstone”, “simplex”, “yeti” --&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

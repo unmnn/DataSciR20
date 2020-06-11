@@ -36,7 +36,7 @@ options(scipen = 999) # avoid expressing numbers in scientific notation
 # extrafont::font_import()
 extrafont::loadfonts("win", quiet = TRUE)
 
-yt_counter <- 01
+yt_counter <- 0L
 
 # set default knitr options
 knitr::opts_chunk$set(fig.width = 15/2.54, fig.height = 11/2.54, fig.retina = 4)
@@ -78,11 +78,17 @@ knitr::include_graphics(file.path(fig_path, "tidymodels-workflow.png"))
 
 tidymodels is a "meta-package" for modeling and statistical analysis that share the underlying design philosophy, grammar, and data structures of the tidyverse.
 
+R is free, open source and provides a high flexibility in terms of how things ca be implemented -> large community of developers with different backgrounds and different design philosophies -> inconsistent syntax API of modeling packages.
+
+It provides a unified interface to various predictive modeling packages with a consistent syntax.
+
+similarly to tidyverse, multiple small packages for dedicated subtasks instead of one single huge package 
+
 Today, we will cover the packages
 
-- parsnip: tidy, unified interface to creating models
-- rsample: resampling data
-- yardstick: model evaluation (metrics such as accuracy, RMSE)
+- parsnip: general API to modeling and analysis functions
+- rsample: resampling data: holdout validation, cross-validation, bootstrap validation
+- yardstick: model evaluation metrics (accuracy, RMSE)
 - tune: hyperparameter optimization
 - workflows: combine pre-processing steps and models into single objects
 - recipes: data preprocessing: feature engineering, imputation, etc
@@ -94,6 +100,10 @@ class: bottom, center
 
 background-image: url("figures/05-tidymodels/caret-obs.png")
 background-size: contain
+
+???
+
+tidymodels is the official successor of caret, also from the same author, Max Kuhn.
 
 <!-- .font100[Data Science with R WS 2018/19] -->
 
@@ -247,10 +257,10 @@ nearest_neighbor() %>%
 
 class: middle
 
-All available models are listed at <https://tidymodels.github.io/parsnip/articles/articles/Models.html>.
+All available models are listed at <https://www.tidymodels.org/find/parsnip/#models>.
 
 ```{r include-url-parsnip-models, echo=FALSE, out.width="100%"}
-knitr::include_url("https://tidymodels.github.io/parsnip/articles/articles/Models.html", height = "450px")
+knitr::include_url("https://www.tidymodels.org/find/parsnip/#models", height = "450px")
 ```
 
 ---
@@ -300,9 +310,10 @@ linear_reg(
 
 linear_reg() is a way to generate a specification of a model before fitting and allows the model to be created using different packages in R, Stan, keras, or via Spark. The main arguments for the model are:
 
-penalty: The total amount of regularization in the model. Note that this must be zero for some engines.
+penalty (lambda for glmnet): The total amount of regularization in the model. in other words: the degree of shrinking the model coefficients towards 0
 
-mixture: The proportion of L1 regularization in the model. Note that this will be ignored for some engines.
+mixture (alpha for glmnet): The proportion of L1 regularization in the model.
+One of the extreme cases "Lasso" or "ridge", or a combination of the two.
 
 ---
 
@@ -383,7 +394,6 @@ linear_reg() %>%
 
 ]
 
-
 ---
 
 ## `fit()`
@@ -422,7 +432,8 @@ ggplot(ames, aes(Gr_Liv_Area, Sale_Price)) +
 
 ???
 
-- fit: fit a model using the parsnip model spec, a formula (lhs: target attribute, rhs: predictors) and the training data
+- until now, we have only _specified_ the model, but we haven't run it.
+- fit(): fit a model using the parsnip model spec, a formula (lhs: target attribute, rhs: predictors) and the training data
 
 ---
 
@@ -535,8 +546,10 @@ rmse(price_pred, truth = truth, estimate = .pred) #<<
 
 ## Available metrics in yardstick
 
+<https://yardstick.tidymodels.org/articles/metric-types.html#metrics>
+
 ```{r include-url-yardstick-metrics, echo=FALSE, out.width="100%"}
-knitr::include_url("https://tidymodels.github.io/yardstick/articles/metric-types.html#metrics", height = "450px")
+knitr::include_url("https://yardstick.tidymodels.org/articles/metric-types.html#metrics", height = "450px")
 ```
 
 ---
@@ -659,8 +672,8 @@ instances with the specified split percentages from each bin
 
 General drawback of holdout method:
 
-- If testing set is small, performance metrics may be unreliable
 - If training set is small, model fit may be poor
+- If testing set is small, performance values have high variance
 
 -> resampling
 
@@ -732,7 +745,7 @@ res
 
 ???
 
-- we need fit_resamples because we have more than 1 split
+- instead of fit, we need fit_resamples because we have more than 1 split
 - returns a tibble with 5 rows (number of resamples)
 - several list columns (add pull, pluck)
 - `splits`: info on training and test set assignment in resample
@@ -803,7 +816,7 @@ class: exercise-blue, middle
 
 Modify the code below to return the **Mean Absolute Error** and **R²**. 
 Visit 
-<https://tidymodels.github.io/yardstick/reference/index.html#section-regression-metrics> 
+<https://yardstick.tidymodels.org/reference/index.html#section-regression-metrics> 
 to find the right function to use.
 
 ```{r yt-3, eval = FALSE}
@@ -811,8 +824,8 @@ set.seed(100)
 
 folds <- vfold_cv(ames, v = 5)
 
-fit_res <- fit_resamples(Sale_Price ~ Gr_Liv_Area,
-                         model = lm_spec,
+fit_res <- fit_resamples(object = lm_spec,
+                         preprocessor = Sale_Price ~ Gr_Liv_Area,
                          resamples = folds)
 
 collect_metrics(fit_res, summarize = TRUE)
@@ -1726,7 +1739,7 @@ Reasons for Modifying the Data
 
 ## step_*()
 
-Complete list at: <https://tidymodels.github.io/recipes/reference/index.html>
+Complete list at: <https://recipes.tidymodels.org/reference/index.html>
 
 ```{r include-url-recipe-step-functions, echo=FALSE, out.width="100%"}
 knitr::include_url("https://tidymodels.github.io/recipes/reference/index.html#section-step-functions-imputation", height = "450px")
@@ -1781,7 +1794,7 @@ A z-score is calculated by subtracting the variable mean from an individual
 raw value and then dividing the difference by the variable standard deviation.
 
 Tip: Look up the appropriate `step_*()` functions at 
-<https://tidymodels.github.io/recipes/reference/index.html>.
+<https://recipes.tidymodels.org/reference/index.html>.
 
 ---
 

@@ -1,0 +1,1253 @@
+---
+title: "Good practices for programming with R"
+subtitle: "Data Science with R &#183; Summer 2020"
+author: "Uli Niemann"
+session: "07"
+institute: "Knowledge Management & Discovery Lab"
+output:
+  xaringan::moon_reader:
+    css: ["default", "assets/css/my-theme.css", "assets/css/my-fonts.css"]
+    seal: false # custom title slide
+    lib_dir: libs
+    nature:
+      # highlightStyle: solarized-light
+      highlightStyle: github
+      highlightLines: true
+      # highlightLanguage: ["r", "css", "yaml"]
+      countIncrementalSlides: true
+      ratio: "16:9"
+      beforeInit: "https://platform.twitter.com/widgets.js"
+params:
+  url: "https://brain.cs.uni-magdeburg.de/kmd/DataSciR/"
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale("LC_ALL","English")
+Sys.setenv(LANG = "en_US.UTF-8")
+Sys.setlocale("LC_TIME", "English")
+
+# The version number in the directory name of an HTML dependency can be
+# suppressed by setting options(htmltools.dir.version = FALSE) when the
+# dependency is copied via `copyDependencyToDir()`. 
+options(htmltools.dir.version = FALSE)
+options(width = 90) # width of console output
+options(scipen = 999) # avoid expressing numbers in scientific notation
+# load fonts (mainly Fira Sans)
+# extrafont::font_import()
+extrafont::loadfonts("win", quiet = TRUE)
+
+yt_counter <- 0
+
+# set default knitr options
+knitr::opts_chunk$set(fig.width = 15/2.54, fig.height = 11/2.54, fig.retina = 4)
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE, warning = TRUE, 
+                      message = TRUE, cache = TRUE)
+# directory of generated figures
+knitr::opts_chunk$set(fig.path = "figures/_gen/07-practices/")
+# directory of included figures
+fig_path <- "figures/07-practices"
+
+library(countdown)
+
+source("ggplot2_theme.R", echo = FALSE)
+```
+
+```{r xaringan-tile-view, echo=FALSE, eval=require('xaringanExtra')}
+xaringanExtra::use_tile_view()
+```
+
+class: title-slide, center, bottom
+
+# `r paste(rmarkdown::metadata$session, "-", rmarkdown::metadata$title)`
+
+## `r rmarkdown::metadata$subtitle`
+
+### `r rmarkdown::metadata$author` &#183; `r rmarkdown::metadata$institute`
+
+#### [`r params$url`](`r params$url`)
+
+.courtesy[&#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: middle
+
+.pull-left60[
+
+## Agenda
+
+- [Miscellaneous tips for reproducible programming](#misc)
+- [Reproducible and efficient project pipelines with drake](#drake)
+- [Recommendations on naming files & folders](#naming)
+- [Package library management with renv](#renv)
+- [Debugging](#debugging)
+
+### Recommended reading
+
+&#x1F4DA; Jennifer Bryan, and Jim Hester. [What They Forgot to Teach You About R](https://rstats.wtf/). 2019. Last accessed 02.06.2020.
+
+]
+
+.pull-right40[
+
+```{r unsplash-late-night-trails, echo = FALSE, out.width="90%"}
+knitr::include_graphics(file.path(fig_path, 'unsplash-late-night-trails.jpg'))
+```
+
+.font80[Photo by [Guillaume Jaillet](https://unsplash.com/photos/Nl-GCtizDHg)]
+
+]
+
+???
+
+- now you know some of the most useful packages
+- however, you would like to improve the efficacy of your programming habits
+- miscellaneous tips I wish somebody had told me when I started programming 
+with R
+- book: compendium of tips, tricks and best practices
+
+- &#x1F4DA; Jonathan McPherson. [Debugging with RStudio](https://support.rstudio.com/hc/en-us/articles/200713843). Last accessed 02.06.2020. 
+
+&#x1F4DA; Will Landau, Kirill Müller, Alex Axthelm, Jasper Clarkberg, Lorenz Walthert, Ellis Hughes, and Matthew Mark Strasiotto. 
+[The drake R Package User Manual](https://books.ropensci.org/drake/). 2020.
+
+&#x1F4DA; Jennifer Bryan. [Code smells and feels](https://www.youtube.com/watch?v=7oyiPBjLAWY). 
+Keynote at the useR! conference 2018. 
+
+https://www.tidyverse.org/blog/2017/12/workflow-vs-script/
+
+
+---
+
+class: center, inverse, middle
+name: misc
+
+.pull-left60[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+## Miscellaneous tips for reproducible programming
+
+]
+
+.pull-right40[
+
+```{r unsplash-advice, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "unsplash-advice.jpg"))
+```
+
+.font80[Photo by [John Schnobrich](https://unsplash.com/photos/FlPc9_VocJ4)]
+
+]
+
+---
+
+class: middle
+
+.pull-left60[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+#### &#x2705; Save code, not the workspace
+
+<!-- .font130[&#x2705; **Save code, not the workspace**] -->
+
+&xrarr; Save your commands in an R script (.R file) or R Markdown 
+document (.Rmd) instead of saving the results of your interactive 
+analysis as workspace (.Rdata)
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+]
+
+
+.pull-right40[
+
+```{r dont-save-rdata, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "dont-save-rdata-1.png"))
+```
+
+Tip: disable automatic saving of workspace in RStudio 
+
+]
+
+???
+
+- when you start programming with R, you tend to predominantly use the console
+- at the end: save result as workspace -> discouraged
+- when you load an .RData file after 3 months, do you remember every single step
+you executed to get to this workspace?
+- better: Save your commands in an R script (.R file) or R Markdown 
+document (.Rmd) instead of saving the results of your interactive 
+analysis as workspace (.Rdata)
+- these files may be a bit messy (prototyping) 
+- don't need to be perfectly polished
+
+
+<!-- - working with files is easier using an IDE like RStudio in comparison with  -->
+<!--  the inbuilt RGui -->
+
+---
+
+class: middle
+
+.pull-left60[
+
+&nbsp;
+
+#### &#x2705; Restart R often
+
+- Restart R in RStudio: _Session &rarr; Restart R_  
+(keyboard shortcut **Ctrl**+**⇧Shift**+**F10**)
+- Restart R from the shell: **Ctrl**+**D** or `q()` to quit current session, 
+then restart R
+- Restart development where you left off, i.e., re-run all code above cursor position:
+  - in an R script: **Ctrl**+**Alt**+**B**
+  - in an R Markdown file: **Ctrl**+**Alt**+**P**
+
+&nbsp;
+
+]
+
+.pull-right40[
+
+```{r restart-r, echo=FALSE, out.width="80%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "restart-r.png"))
+```
+
+Tip: restart R every now and then 
+
+]
+
+???
+
+- to ensure that your code doesn't depend on settings of your current interactive session
+- e.g. global options, unusual order of packages in search path, or other objects in workspace 
+
+---
+
+class: middle
+
+#### &#x2705; Avoid using `rm(list = ls())`
+
+Unlike restarting R, the command `rm(list = ls())` .red[**does not**] 
+create a new R session.
+
+- &#x2757; It only removes all user-created objects from the environment.
+- &#x2757; Previously loaded packages are still in the search path.
+- &#x2757; Modifications to global options are still there.
+
+`rm(list = ls())` makes a script **vulnerable to hidden dependencies** 
+on commands that were ran in the R session before executing `rm(list = ls())`.
+
+???
+
+- popular modification: `options(scipen = 999)` to get rid of scientific notation of numbers
+- scipen: integer. A penalty to be applied when deciding to print numeric values in fixed or exponential notation.
+
+```{r dont, eval=FALSE}
+library(Hmisc)
+library(dplyr)
+summarize(iris$Sepal.Width, iris$Species, mean)
+
+rm(list = ls())
+
+library(Hmisc)
+summarize(iris$Sepal.Width, iris$Species, mean)
+
+hist(rnorm(1000, 1e10)) # draw random sample of 1000 values from a normal distribution with a mean = 10 billion
+
+options(scipen = 999)
+hist(rnorm(1000, 1e10))
+
+rm(list = ls())
+
+hist(rnorm(1000, 1e10))
+```
+
+---
+
+class: middle
+
+&#x1F914; _"What about time-consuming scripts that take hours or maybe even 
+days? It is impracticable to re-run these scripts every time we need the 
+results."_
+
+???
+
+Rerunning an end-to-end analysis is sometimes impractical, because parts of the 
+computations are very time-consuming.
+
+It is recommended to split this computationally heavy part of your code into 
+a new script. At the end of this script, you save the output as `.rds` file:
+
+`saveRDS(data_prep, "results/data_preprocessed.rds"))`
+
+--
+
+Split the computationally expensive part of your code 
+(e.g. fetching and pre-processing large amounts of raw data from a database) 
+into a new script. 
+At the end of this script, you save the output as `.rds` file (<u>R</u> 
+<u>data</u> <u>single</u>). 
+
+`saveRDS(data_prep, "results/data_preprocessed.rds")`
+
+---
+
+class: middle
+
+<!-- ## Projects -->
+
+<!-- & the [`here`](https://here.r-lib.org/index.html) package -->
+
+#### &#x2705; Organize code as self-contained "projects":
+
+.content-box-blue[
+
+- Organize each logical project into a separate directory.
+- Organize all files related to the project into subfolders, e.g. `data/`, 
+`code/`, `figures/`, `reports/`, etc.
+- The top-level folder of the project must be clearly recognizable 
+(e.g. by containing a .Rproj file)
+- Create paths **relative to the top-level folder**.
+- Launch the R session from the project’s top-level folder.
+
+<!-- <sup>1</sup> -->
+
+]
+
+.footnote[
+&#x1F4DA; Jennifer Bryan. [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/). 2017. Last accessed 03.06.2020.
+
+]
+
+???
+
+- separate directory and subfolders orga: not R-specific, general good practice
+- advantage of here: 
+_How can we avoid setwd() at the top of every script?_
+
+.. always start at the top-level folder of the project. -> handy for rmd reports
+
+---
+
+class: middle
+
+## RStudio projects
+
+.pull-left60[
+
+Create a new RStudio project:  
+_File_ &rarr; _New Project_ &rarr; _New Directoy_ &rarr; _Empty Project_
+
+The working directory corresponds to the top-level folder of the project 
+(where the `.Rproj` file is). All project files should be organized in 
+subfolders of the project's top-level folder. In the code, the files should 
+be referenced with relative paths. 
+
+]
+
+.pull-right40[
+
+```{r new-rstudio-project-gif, echo=FALSE}
+knitr::include_graphics(file.path(fig_path, "new_rstudio_project.gif"))
+```
+
+```{r new-project, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "new_project.png"))
+```
+
+]
+
+.footnote[
+
+&#x1F4DA; Further reading:
+
+- Best practices: [RStudio Projects](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects)
+- Chapter [Where does your analysis live?](http://r4ds.had.co.nz/workflow-projects.html#where-does-your-analysis-live) in [R for Data Science](http://r4ds.had.co.nz/)
+- [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+
+]
+
+???
+
+- file extension `.Rproj`: text file with project-specific settings
+- hidden folder `.Rproj.user`: project-specific temporary files (_better not touch it_)
+- open .Rproj: starts R, working directory to top-level folder 
+of project, restore previously opened files (pick up where you left off)
+- switch to another .Rproj: new R session, working directory to top-level folder 
+of project, restore previously opened files (pick up where you left off)
+- simultaneously work on 2 projects where each project has its own R session
+
+---
+
+class: middle
+
+A basic folder structure could look like so:
+
+```{r, eval = FALSE, echo = FALSE}
+fs::dir_tree(path = here::here("slides", "my_project"), recurse = TRUE)
+```
+
+```
+my_project
++-- data
+|   +-- processed
+|   \-- raw
++-- my_project.Rproj
++-- output
++-- R
++-- README.md
+\-- run_analyses.R
+```
+
+???
+
+also helpful: https://chrisvoncsefalvay.com/2018/08/09/structuring-r-projects/
+
+---
+
+
+#### &#x2705; Use `here::here()`<sup>1</sup> instead of `setwd()` to set your working directory.
+
+.pull-left[
+
+&#x1F620; Specifying absolute file paths are bad practice:
+
+.font90[
+
+```{r setwd-example-1, eval=FALSE}
+library(ggplot2)
+setwd("C:/Users/uli/verbose_funicular/foofy/data")
+df <- read.delim("raw_foofy_data.csv")
+p <- ggplot(df, aes(x, y)) + geom_point()
+ggsave("../figs/foofy_scatterplot.png")
+```
+
+]
+
+
+&xrarr; not self-contained, not portable 
+
+- file paths will not work for anyone besides the author
+- high chance that objects from one project will leak into another project
+
+<!-- &#x2705; Adhere to "project-oriented workflow"  -->
+<!-- (separate R session and directory) -->
+
+]
+
+
+.footnote[
+<sup>1</sup>`here::here()` is a robust version of `file.path()`, because 
+`here()` creates paths that (1) work across different operating systems and (2) always start at the top-level folder of the project.  
+Example from: Jennifer Bryan. [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/#whats-wrong-with-setwd). 2017. Last accessed 02.06.2020.
+
+]
+
+--
+
+.pull-right[
+
+&#x1F60A; Use file paths relative to project root folder.
+
+.font90[
+
+```{r setwd-example-2, eval = FALSE}
+library(ggplot2)
+library(here) #<<
+df <- read.delim(here("data", "raw_foofy_data.csv")) #<<
+p <- ggplot(df, aes(x, y)) + geom_point()
+ggsave(here("figs", "foofy_scatterplot.png")) #<<
+```
+
+]
+
+]
+
+
+???
+
+- it's convenient to put setwd() at the top of each script
+- if we move our folders containing raw data or R scripts we need to change the 
+file path at every occurrence of setwd() which can be tedious 
+- doesn't even work for the same author when switching to a new computer or OS
+- example of bad practice: not self-contained, not portable 
+- file paths will not work for anyone besides the author
+- chance that objects from one project will leak into the set of objects 
+from another project in case a new R session is not started
+
+---
+
+class: middle
+
+.pull-left60[
+
+Exemplary content in `R` folder of your project:
+
+File | Description
+:--- | :----------
+`01_fetch-data.R` | Fetch raw data from a database with millions of rows
+`02_clean-data.R` | Pre-process and tidies data
+`03-eda.R`        | Exploratory data analysis, including plotting the data
+`04-model.R`      | Train a prediction model (takes some hours &#x23F1;)
+`05-report.R`     | Create an R Markdown project report 
+`run-analysis.R`  | Successively runs all scripts above
+
+&#x1F914; _"If we want to make a small change in one of these scripts, do we 
+have to rerun all scripts from scratch again?"_
+
+]
+
+???
+
+- saving intermediate objects as .rds becomes impracticable for 
+more complex projects involving multiple data sources, preprocessing, 
+modeling and multiple scripts for dissemination
+- q
+
+--
+
+.pull-right40[
+
+```{r twitter-drake, eval = FALSE,echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "twitter-drake.png"))
+```
+
+<div>
+<blockquote class="twitter-tweet" data-conversation="none" data-dnt="true"><p lang="en" dir="ltr">Save me from myself and having to remember all this when files change <a href="https://t.co/hVeSFQOimj">pic.twitter.com/hVeSFQOimj</a></p>&mdash; Brianna McHorse, PhD <a href="https://twitter.com/fossilosophy/status/966408174470299648?ref_src=twsrc%5Etfw">February 21, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+[URL](https://t.co/hVeSFQOimj)
+
+]
+
+???
+
+sometimes not a simple pipeline but complex graph of dependencies between inputs and outputs
+
+---
+
+class: center, inverse, middle
+name: drake
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+## drake: reproducible and efficient project pipelines
+
+]
+
+.pull-right30[
+
+```{r drake-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "drake.png"))
+```
+
+]
+
+???
+
+"an R-focused pipeline toolkit for reproducibility and high-performance computing"
+
+---
+
+## The [drake](https://docs.ropensci.org/drake/) package
+
+.pull-left80[
+
+> A general-purpose computational engine for data analysis, drake rebuilds intermediate data objects when their dependencies change, and it skips work when the results are already up to date. Not every execution starts from scratch, there is native support for parallel and distributed computing, and completed projects have tangible evidence that they are reproducible.  
+&mdash; [drake package description](https://cloud.r-project.org/web/packages/drake/index.html)
+
+]
+
+.pull-right20[
+
+```{r ref.label="drake-logo", echo=FALSE, fig.align='center', out.width="100%"}
+```
+
+]
+
+.footnote[&#x1F4DA; drake manual: <https://books.ropensci.org/drake/>]
+
+--
+
+_In other words:_
+
+- With drake, we can set-up a **pipeline of successively executed commands**.
+- The **return value** of each command is stored as **target**.
+- drake automatically identifies **dependencies** between **targets**. 
+- drake ensures that only targets **affected** by a change in one of its inputs (= **outdated targets**) need to be recomputed.
+
+---
+
+class: middle
+
+```{r drake-secret-1, echo=FALSE, eval=TRUE, results='hide', cache=FALSE}
+library(drake)
+clean(destroy = TRUE)
+new_cache(here::here("slides", ".drake"))
+# make(plan)
+#> Warning message:
+#> Running make() in a subdirectory of your project. 
+#> This could cause problems if your file_in()/file_out()/knitr_in() files are relative paths.
+#> Please either
+#>   (1) run make() from your drake project root, or
+#>   (2) create a cache in your working directory with new_cache('path_name'), or
+#>   (3) supply a cache of your own (e.g. make(cache = your_cache))
+#>       whose folder name is not '.drake'.
+#>   running make() from: /home/landau/Downloads
+#>   drake project root:  /home/landau
+#>   cache directory:     /home/landau/.drake 
+```
+
+```{r drake-plan, message=FALSE, cache=FALSE}
+library(tidyverse)
+library(drake)
+
+create_plot <- function(data) {
+  ggplot(data, aes(x = Petal.Width, fill = Species)) + 
+    geom_histogram()
+}
+
+plan <- drake_plan(
+  raw_data = readxl::read_excel(file_in("drake/raw_iris.xlsx")),
+  data = raw_data %>% 
+    mutate(Species = fct_inorder(Species)),
+  hist = create_plot(data), 
+  fit = lm(Sepal.Width ~ Petal.Width + Species, data),
+  report = rmarkdown::render(
+    knitr_in("drake/report.Rmd"), 
+    output_file = "report.html", quiet = TRUE)
+)
+plan
+```
+
+???
+
+- example data analysis pipeline (explain)
+- drake_plan()
+- argument names = targets
+- argument values = commands that produce the target
+- surround input and output files with some special functions so that drake knows that these files also have to be checked for changes 
+- print plan: simple tibble containing the names of the targets and the associated 
+command.
+
+some special functions that indicate input files and output files: file_in, 
+knitr_in, file_out
+
+---
+
+```{r drake-network, fig.width=35/2.54, fig.height=19/2.54, cache=FALSE}
+library(visNetwork)
+vis_drake_graph(plan)
+```
+
+???
+
+- we can visually check whether we have correctly set up our drake workflow
+- dependency graph powered by visNetwork, a package for network visualization, using the vis.js javascript library (http://visjs.org)
+- interactive: click, drag, zoom
+- color and shape legend on the left
+- outdated = have not been created yet
+- AUTOMATICALLY identifies dependencies between targets
+- example: "report" knits an Rmd, contains references to fit and hist
+
+
+- outdated target: black 
+- imported target: blue
+- failed target: red
+- up to date target: green
+- function: triangle
+- object: circle
+- file: square
+
+---
+
+class: middle
+
+#### report.Rmd
+
+```{r drake-rmd, echo = FALSE, out.width="80%"}
+knitr::include_url("drake/report.Rmd", height = "350px")
+```
+
+???
+
+- readd(): return built target from cache
+- loadd(): loads built target from cache into environment
+
+---
+
+class: middle
+
+Now we can "make" our plan: `make()` runs all the steps of `plan` and 
+builds the targets. 
+
+```{r drake-make, cache = FALSE}
+make(plan)
+```
+
+---
+
+class: middle
+
+```{r drake-network-2, cache=FALSE, echo=FALSE, fig.width=35/2.54, fig.height=19/2.54}
+vis_drake_graph(plan, main = "")
+```
+
+???
+
+- black circles have become green (outdated -> up to date)
+
+---
+
+class: middle
+
+.pull-left[
+
+Return a built target with `readd()`: 
+
+```{r hist-1, fig.width=15/2.54, R.options=list(width = 45)}
+readd(hist)
+```
+
+]
+
+--
+
+.pull-right[
+
+_What happens if we would like to make some changes to the histogram?_
+The number of bins should be set to 15 and a different theme should be applied.
+
+The histogram should rather look like this:
+
+```{r hist-2, fig.width=15/2.54, echo=FALSE}
+readd(data) %>% 
+  ggplot(aes(x = Petal.Width, fill = Species)) + 
+  geom_histogram(bins = 15) +
+  ggthemes::theme_fivethirtyeight(base_size = 18)
+```
+
+]
+
+???
+
+skipping any work that is already up to date
+
+---
+
+class: middle
+
+We change the plotting function accordingly: 
+
+```{r drake-histogram-function-1, cache=FALSE}
+library(ggthemes)
+create_plot <- function(data) {
+  ggplot(data, aes(x = Petal.Width, fill = Species)) + 
+    geom_histogram(bins = 15) + #<<
+    theme_fivethirtyeight(base_size = 18) #<<
+}
+```
+
+---
+
+class: middle
+
+```{r drake-network-3, cache=FALSE, echo=FALSE, fig.width=35/2.54, fig.height=19/2.54}
+vis_drake_graph(plan, main = "")
+```
+
+Note that the targets `hist` and `report` (and only these targets) have 
+become outdated.
+
+???
+
+- the target hist depends on the create_plot() function and the target report 
+in turn depends on hist
+- these targets have become outdated
+since drake automatically created this provenance graph of dependencies, 
+it knows that the other three targets raw_data, data and fit are not affected by 
+the change in create_plot and thus, their code does not need to be rerun, 
+drake takes the values from the cache
+
+---
+
+We rerun the plan. Only `hist` and `report` are recomputed. The values of the 
+other targets are pulled from drake's cache.
+
+```{r ref.label='drake-make', cache = FALSE}
+```
+
+---
+
+class: middle
+
+In the dependency graph, all targets are up-to-date: 
+
+```{r drake-network-4, cache=FALSE, echo=FALSE, fig.width=35/2.54, fig.height=19/2.54}
+vis_drake_graph(plan, main = "")
+```
+
+---
+
+class: center, inverse, middle
+name: naming
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+## Recommendations on naming<br />files & folders
+
+]
+
+.pull-right30[
+
+```{r unsplash-via-dell-orso, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "unsplash-via-dell-orso.jpg"))
+```
+
+.font80[Photo by [Jeff Ackley](https://unsplash.com/photos/d2UIDnuti-M)]
+
+]
+
+---
+
+class: middle
+
+<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 74.9296%;"><iframe src="https://speakerdeck.com/player/5e4b07f0d9a94f8e9a29b902bad6ed0b" style="border: 0; top: 0; left: 0; width: 70%; height: 70%; position: absolute;" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
+
+.footnote[[PDF version](http://www2.stat.duke.edu/~rcs46/lectures_2015/01-markdown-git/slides/naming-slides/naming-slides.pdf)]
+
+???
+
+- avoid special characters such as German Umlaute, space character and capitalization
+- stick to lower-case letters, numbers, hyphen and underscore characters
+- 3 principles
+- 1: machine readable: structure names in a way that let's you refind them using 
+regular expressions
+- elements of a semantic unit are connected with hyphens, e.g. first sematic unit 
+"date": year, month and date are connected by hyphen
+- different semantic units are separated by underscore, e.g. date, 
+assay, plasmid type, well number
+- use str_split_fixed to recover meta-data from file names
+- 2: human readable: instead of 01.R, 02.R etc, put some information in the file name 
+on what the script does -> 01_read-data.R, 02-filter-data.R, etc.
+- again semantic units: prefix (order of execution), then what the file is about
+- plays well with default ordering: chronological (data that have time-stamps) 
+or logical (order of execution in a project workflow)
+- longtime payoff for little short-term pain
+
+---
+
+class: center, inverse, middle
+name: renv
+
+.pull-left60[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+## Package library management with renv
+
+]
+
+.pull-right40[
+
+```{r unsplash-packages, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "unsplash-packages.jpg"))
+```
+
+.font80[Photo by [🇨🇭 Claudio Schwarz | @purzlbaum](https://unsplash.com/photos/q8kR_ie6WnI)]
+
+]
+
+---
+
+## Package library management
+
+- R packages are stored in one or more directories on your computer (`.libPaths()`)
+  + **user library**: packages that _you_ install are (usually) contained in `.libPaths()[1]`
+  + **system library**: default packages are (usually) contained in `.libPaths()[2]`
+
+--
+
+- RStudio Packages tab provides a convenient interface for installing and 
+updating packages
+
+???
+
+- why CRAN: most effective way to make a package available for public use
+- Linux: automatically have tools installed to install "bundled" version of a package (.tar.gz)
+
+--
+
+- Use `install.packages(<pkgname>)` to install or update packages via the console
+  + installs **_binary_** version from CRAN (no additional tools required)
+  + binary: single, OS-specific file (.zip for Windows, .tgz for macOS)
+
+
+--
+
+Sometimes, you need the latest development version hosted on GitHub, BitBucket, etc.
+
+- Use `remotes::install_github(<username>/<pckname>)` to install or packages via the console 
+  + installs **_source_** version 
+  + source: OS-independent directory with a specific structure
+  + example: `remotes::install_github("rstudio/gt")`
+  + additional tools for compilation necessary, e.g. Rtools for Windows
+  
+---
+
+## Package library management
+
+- many packages are continuously under development even after CRAN release
+- package maintainers generally pay attention to backwards compatibility, but there is no guarantee that there will not be changes that introduce existing code to fail
+
+--
+
+Scenarios where we need another way of package management:
+
+- &#x2757; _We want to ship the final project code to our customers. The code does not only have to work now, but also in 3 months, 6 months, 1 year from now on._
+- &#x2757; _We do not want to keep track of code-breaking package updates._
+- &#x2757; _For other projects, we must be able to update packages, in order to make use of new useful features._ 
+
+???
+
+- we have a finished, stable project
+- we don't want to make changes to your code every time there is a code-breaking  change in one of the packages
+- we still want to be able to update our packages for other projects so that we can work with the latest features of the packages
+- we want your project code to be reproducible, portable and isolated from other projects
+
+For example, tools like renv (and its predecessor packrat) automate the process of managing project-specific libraries. This can be important for making data products reproducible, portable, and isolated from one another. A package developer might prepend the library search path with a temporary library, containing a set of packages at specific versions, in order to explore issues with backwards and forwards compatibility, without affecting other day-to-day work
+
+---
+
+## Package library management with renv
+
+`renv`: **dependency manager** that helps to set up and maintain **project-local R libraries**
+
+.pull-left70[
+
+- **isolated**: each project has its own library of packages
+  + &xrarr; updating packages globally or in another package will not affect current project
+- **portable**: version numbers of all "active" packages are tracked in a "lock file" 
+  + &xrarr; facilitates collaboration
+- **reproducible**: enables saving a "snapshot", i.e., a state of the project library that you know is working 
+  + &xrarr; safety net in case a package update causes problems 
+- **disk-space-efficient**: packages are installed into a global cache; different projects that use the same version of a package will pull a "shared" package installation from the global cache 
+  + &xrarr; also reduces installation time when a package has already been installed by another project that is managed with renv
+
+]
+
+.pull-right30[
+
+```{r renv-logo, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "renv-logo.png"))
+```
+
+]
+  
+.footnote[&#x1F4DA; Kevin Ushey. Introduction to renv. <https://rstudio.github.io/renv/articles/renv.html>. Last accessed 26.05.2020.  
+&#x1F4DA; RStudio. Upgrading Packages: How to Safely Upgrade Packages. <https://environments.rstudio.com/upgrades.html>. Last accessed 26.05.2020.
+]
+
+???
+
+- renv-test
+- renv.lock
+- .libPaths()
+
+renv vocabulary
+
+- Tools -> Project Options -> Environments -> Use renv with this project
+
+- renv::init(): initialize new project-local package library
+- renv:: snapshot(): save the current state of the project package library to 
+a "lock file" (`renv.lock`)
+- renv::restore(): revert to previously saved state
+
+---
+
+class: middle
+
+<p><a href="https://rstudio.com/resources/rstudioconf-2020/renv-project-environments-for-r/?wvideo=17qyzuqb2h"><img src="https://embed-fastly.wistia.com/deliveries/ff49e1b5c192ee19683c3f530ce0e945.jpg?image_play_button_size=2x&amp;image_crop_resized=960x540&amp;image_play_button=1&amp;image_play_button_color=4287c7e0" style="width: 800px; height: 450px;" width="800" height="450"></a></p>
+
+&#x1F4FA; Kevin Ushey. [renv: Project Environments for R. Keynote at RSTUDIO::CONF 2020.](https://rstudio.com/resources/rstudioconf-2020/renv-project-environments-for-r/) Last accessed 03.06.2020.
+
+---
+
+class: middle
+
+## Activate project-local package library in RStudio
+
+.pull-left[
+
+```{r rstudio-renv-new, echo=FALSE, out.width="90%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "renv-new-project.png"))
+```
+
+Create a new RStudio project with renv
+
+]
+
+
+.pull-right[
+
+```{r rstudio-renv, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "rstudio-renv.png"))
+```
+
+Use renv in your existing RStudio project
+
+]
+
+---
+
+class: middle
+
+## Example of renv.lock file
+
+```{r renv-lock, echo=FALSE, out.width="50%"}
+knitr::include_graphics(file.path(fig_path, "renv-lockfile.png"))
+```
+
+???
+
+- JSON file
+- version of R used in that project
+- list of R repositories
+- package records: name of R package, version number, installation source
+
+---
+
+class: center, inverse, middle
+name: debugging
+
+.pull-left70[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+## Debugging
+
+]
+
+.pull-right30[
+
+```{r unsplash-bug, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "unsplash-bug.jpg"))
+```
+
+.font80[Photo by [David Clode](https://unsplash.com/photos/zE99_-6MdYM)]
+
+]
+
+---
+
+class: middle
+
+## Error handling
+
+How to find the source of an error in your R code?
+
+Recommended strategy:
+
+1. **Restart R.** &rarr; Make sure the error _always_ occurs.
+
+???
+
+1. rule out errors due to hidden dependencies
+1. it is very likely that somebody else had the error before you and posted this error and meanwhile there is a working solution
+1. short intro
+1. Use internet communities (Twitter, SO, RStudio Community, ...). 
+Includes creating a minimal reproducible example (code snippet)
+  - reproducible: self-contained, everything needed to reproduce the error message is included
+  - minimal: remove code that is irrelevant for the error message. helps isolating the cause of the error
+  
+- automated testing
+
+--
+
+1. **Google the error message.** &rarr; It is likely that there is already an existing solution on Stack Overflow, RStudio Community, Twitter or other fora.
+
+--
+
+1. **Debug.**
+
+--
+
+1. **Ask for help.** &rarr; Prepare a [reproducible example](https://reprex.tidyverse.org/) and ask the internet. 
+
+---
+
+## Debugging
+
+```{r debug-1}
+f <- function(a) g(a)
+g <- function(b) h(b)
+h <- function(c) i(c)
+i <- function(d) {
+  if (!is.numeric(d)) {
+    stop("`d` must be numeric", call. = FALSE)
+  }
+  d + 10
+}
+```
+
+&#x1F914; What is the result of this code when we run `f("10")`?
+
+.footnote[
+
+Useful resources:
+
+&#x1F4DA; Example from: Hadley Wickham. Advanced R. [Chapter Debugging](https://adv-r.hadley.nz/debugging.html). Second Edition. Chapman & Hall/CRC, 2019.  
+&#x1F4DA; Jonathan McPherson. [Debugging with RStudio](https://support.rstudio.com/hc/en-us/articles/200713843). Last accessed 02.06.2020.  
+&#x1F4FA; Jenny Bryan. [Object of type ‘closure’ is not subsettable ](https://rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/). Keynote at RSTUDIO::CONF 2020. Last accessed 02.06.2020.  
+&#x1F4DA; Garett Grolemund. Hands-On Programming with R. [Appendix E: Debugging R Code.](https://rstudio-education.github.io/hopr/debug.html). O'Reilly, 2014.
+
+
+]
+
+--
+
+```{r debug-2, error=TRUE}
+f("10")
+```
+
+---
+
+## Interactive debug mode
+
+???
+
+- show **traceback** aka the call stack: sequence of functions called that led to the error
+- rerun with Debug: set a break point immediately before the error is thrown
+  - code execution is paused
+  - allows to inspect environment of a function
+
+--
+
+1. set break point (click on gray space left to line number or **⇧Shift**+**F9**)
+
+???
+
+- stop executing code exactly at the line of the break point
+
+--
+
+2. console debugging commands (`n,s,f,c,Q`)
+
+???
+
+- n: execute next step
+- s: step into function
+- f: finish execution of current loop/function
+- c: stop debugging & continue code execution until next break point
+- Q: leave interactive debugging & continue code execution
+
+--
+
+3. `browser()`
+
+???
+
+- similar to first approach, but source code is changed
+
+--
+
+4. `debug()`, `debugOnce()`
+
+???
+
+- just for completeness: adds break point at the beginning of a function
+- debugOnce: one-shot break point, i.e., the function will enter the debugger the very next time it runs, but not after that
+
+--
+
+5. `undebug()`
+
+--
+
+6. RStudio: _Debug_ &xrarr; _On Error_ &xrarr; _Break in Code_
+
+???
+
+- enters interactive debugging at the line where the error occurs
+
+--
+
+7. `debugSource()`
+
+???
+
+- advantage of browser(): recursive debugging of scripts
+
+--
+
+8. `options(error = recover)`
+
+???
+
+- interactive prompt that displays the traceback
+
+--
+
+9. `options(warn = 2)`
+
+???
+
+- convert warning to error
+
+???
+
+Tools > Global Options -> General -> Advanced -> Uncheck "Use debug handler only when my code contains errors"
+
+
+
+---
+
+class: middle
+
+```{r mental-model_debugging, echo=FALSE, out.width="100%"}
+knitr::include_graphics(file.path(fig_path, "mental-model_debugging.png"))
+```
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&nbsp;
+
+.courtesy[&#x1F4F7; Photo courtesy of Stefan Berger]

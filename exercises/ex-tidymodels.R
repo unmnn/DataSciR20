@@ -53,15 +53,15 @@ ______(price_pred, truth = ______, estimate = ______)
 # Your turn 3 ----
 # Modify the code below to return the **Mean Absolute Error** and **R²**. 
 # Visit 
-# <https://tidymodels.github.io/yardstick/reference/index.html#section-regression-metrics> 
+# <https://yardstick.tidymodels.org/reference/index.html#section-regression-metrics> 
 # to find the right function to use.
 
 ______(100)
 
 folds <- vfold_cv(ames, v = 5)
 
-fit_res <- fit_resamples(Sale_Price ~ Gr_Liv_Area,
-                         model = lm_spec,
+fit_res <- fit_resamples(object = lm_spec,
+                         preprocessor = Sale_Price ~ Gr_Liv_Area,
                          resamples = folds,
                          ______)
 
@@ -159,5 +159,39 @@ knn_rmse
 # Tip: Look up the appropriate `step_*()` functions at 
 # <https://tidymodels.github.io/recipes/reference/index.html>.
 
+# Your Turn 7 ----
+
+# Create a recipe that performs z-score normalization on each numeric 
+# variable of the ames data. 
+# 
+# A z-score is calculated by subtracting the variable mean from an individual 
+# raw value and then dividing the difference by the variable standard deviation.
+# 
+# Tip: Look up the appropriate `step_*()` functions at 
+# <https://recipes.tidymodels.org/reference/index.html>.
+
+_____(Sale_Price ~ ., data = ames) %>% 
+  step_____(_____())
 
 
+## Your Turn 8 ----
+# Write a recipe for the ames data that:
+#   
+# 1. adds a novel level to all factors
+# 1. converts all factors to dummy variables
+# 1. catches any zero variance variables
+# 1. centers all of the predictors
+# 1. scales all of the predictors
+# 1. computes the first 3 principal components
+# 
+# Save the result as `pca_rec`.
+
+pca_rec <- 
+  _____(Sale_Price ~ ., data = ames) %>%
+  step_____(_____()) %>%
+  step_____(_____()) %>%
+  step_____(_____()) %>%
+  step_____(_____()) %>%
+  step_scale(_____()) %>%
+  step_____(_____(), _____ = 3)
+pca_rec

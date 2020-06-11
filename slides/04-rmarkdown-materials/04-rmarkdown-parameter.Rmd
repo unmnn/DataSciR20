@@ -1,0 +1,19 @@
+---
+output: html_document
+params:
+  my_species: "versicolor"
+---
+
+```{r iris-setup, include=FALSE, message = FALSE, warning = FALSE}
+library(dplyr)
+library(ggplot2)
+my_species <- params$my_species
+irs <- iris %>% filter(Species == my_species)
+```
+
+```{r hist}
+ggplot(irs,aes(Sepal.Length)) +
+  geom_histogram(bins=15,
+                 color="black",
+                 fill= "gray90")
+```

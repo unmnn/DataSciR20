@@ -72,6 +72,12 @@ class: middle, center
 <iframe src="https://player.vimeo.com/video/178485416?color=428bca&title=0&byline=0&portrait=0" width="800" height="450" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <p><a href="https://vimeo.com/178485416">What is R Markdown?</a> from <a href="https://vimeo.com/rstudioinc">RStudio, Inc.</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 
+???
+
+- basic idea: rmd = text file that includes narrative text, code and results
+- the same rmd doc can be "rendered" into multiple output types such as html, pdf, or word
+- "rendered": R code is run and the rmd is converted to an md doc, and this md doc is in turn converted to the desired output format
+
 ---
 
 class: middle, center
@@ -82,8 +88,7 @@ knitr::include_url("https://rmarkdown.rstudio.com/gallery.html", height = "550px
 
 ???
 
-- blogdown
-- xaringan
+- types of output formats
 
 ---
 
@@ -94,6 +99,17 @@ knitr::include_url("https://www.youtube.com/embed/s3JldKoA0zw?rel=0", height = "
 ```
 
 <!-- <iframe width="800" height="450" src="https://www.youtube.com/embed/s3JldKoA0zw?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe> -->
+
+???
+
+application scenario: write research paper based on data analysis results
+
+- repetitive manual workflow
+- raw data is stored in Excel
+- then manually run analysis.R (lin. regression)
+- make charts
+- copy-paste results (beta-coeffs, charts into your docx)
+- redo whole workflow if there one value in one of the Excel files changes
 
 ---
 
@@ -115,25 +131,15 @@ name: intro
 
 ## Introduction
 
-.pull-left80[
+.pull-left60[
 
 **R Markdown** is a file format to combine **code**, the associated **results** 
 and **narrative text** in a simple text file, to create **reproducible reports** 
-which can be **flexibly distributed in [multiple ways](https://rmarkdown.rstudio.com/gallery.html)**.  
+which can be **flexibly distributed in multiple ways**.  
 
 An R Markdown document is saved as `.Rmd` file. It contains both the (`R`) code 
 and a prose description of a data analysis task. The R Markdown document can be 
 rendered as HTML, PDF, Word and various other output formats.
-
-]
-
-.pull-right20[
-
-```{r rmarkdown-logo, echo=FALSE, out.width="100%"}
-knitr::include_graphics(file.path(fig_path, "rmarkdown-logo.png"))
-```
-
-]
 
 **Benefits** of using R Markdown:
 
@@ -144,20 +150,33 @@ target audiences / purposes
 system
 - **simple syntax**
 
-```{r 1-file-3-outputs, echo=FALSE, out.width="40%", fig.align='center'}
+]
+
+.pull-right40[
+
+```{r rmarkdown-logo, echo=FALSE, out.width="40%", fig.align='center'}
+knitr::include_graphics(file.path(fig_path, "rmarkdown-logo.png"))
+```
+
+&nbsp;
+
+```{r 1-file-3-outputs, echo=FALSE, out.width="100%", fig.align='center'}
 knitr::include_graphics(file.path(fig_path, "three_outputs.png"))
 ```
 
+]
 
 ???
 
-- R package that is similar to Jupyter notebooks in Python
-Three major target audiences of R Markdown documents:
-
-1. **Yourself**: use an Rmd file as lab notebook which captures code, conclusions and reasoning behind your analysis 
-1. **Decision makers**: focus on conclusions
-1. **Fellow data scientists** (including yourself in the future): focus both on conclusions and analysis code to facilitate collaborating
-
+- file extension
+- Jupyter notebooks in Python (combine text, code and results)
+- flexibility in terms of type of output document
+- flexibility in terms of target audience -> parametrized reports
+  - you: lab notebook containing code, conclusions and reasoning behind your analysis
+  - decision makers: hide code, focus on charts and conclusions
+  - colleagues: focus both on conclusions and code to ensure reproducibility and to facilitate collaborating
+- rmd is plain text file so it can be managed by a version control system
+- simple syntax
 
 ---
 
@@ -170,10 +189,12 @@ knitr::include_graphics(file.path(fig_path, "rmarkdown_sketch.png"))
 
 ???
 
-- code: can be R but there are other languages supported, such as python, javascript, sql, ruby
-- narration makes code easy to understand
-- if something changes (e.g. data source), you can simply rerun the Rmd and the report gets updated 
-- website and slides were made with markdown
+- process: Rmd -> md -> rendered document
+- rmd: md + r-code
+- knitr: run code and combine these code results (charts, models, console output) with md markup of rmd file
+- pandoc (general file converter) converts this augmented md file to the desired output HTML, pdf, word etc.
+- simplified process - based on the output, more packages are needed
+- e.g. blogdown: Hugo required (open-source static site generator)
 
 ---
 
@@ -183,6 +204,13 @@ class: middle
 knitr::include_graphics(file.path(fig_path, "rmd_first_example_1.png"))
 ```
 
+???
+
+- YAML header: meta data
+- code chunks: can be R but there are other languages supported, such as python, javascript, sql, ruby
+- Markdown text
+- inline code: allows for dynamic content (e.g.how many records) using simple commands
+  - no need for manual copy and paste of the code output into the narrative text. 
 
 ---
 
@@ -235,7 +263,7 @@ the HTML file in the "Files" tab. Try to knit the rmd file with the Keyboard
 shortcut **Ctrl**+**⇧Shift**+**K**.
 - Click on the small downwards arrow right to the **Knit** button and try to 
 render the document as Word and PDF output, respectively.
-- Click on the _cog_ button right to the **Knit** button 
+- Click on the _gear_ button right to the **Knit** button 
 to explore the R Markdown format options.
 
 
@@ -259,6 +287,11 @@ knitr::include_graphics(file.path(fig_path, "html_example.png"))
 ```
 
 ]
+
+???
+
+- no closing tag
+- accomplish the same output with much less typing
 
 --
 
@@ -415,7 +448,7 @@ class: exercise-blue, middle
 
 ## Your turn `r (yt_counter <- yt_counter + 1)`
 
-In the Rmd document you create, locate the words/phrases that are written 
+In the Rmd document you have created in the previous exercise, locate the words/phrases that are written 
 
 - in bold face,
 - in italics,
@@ -453,6 +486,8 @@ some code
 ```
 ````
 
+Code chunks can be inserted with the `r knitr::include_graphics(file.path(fig_path, "insert.png"))` button in the toolbar or using the keyboard shortcut **Ctrl + Alt + I**.
+
 ]
 
 .pull-right30[
@@ -463,17 +498,11 @@ knitr::include_graphics(file.path(fig_path, "knitr.png"))
 
 ]
 
-Code chunks can be inserted with the `r knitr::include_graphics(file.path(fig_path, "insert.png"))` button in the toolbar or using the keyboard shortcut **Ctrl + Alt + I**.
-
-
 ???
 
 - knitr doesnt need to be attached at the start of an R Markdown document
 - knitr removes backticks, runs the code and returns the code, and the output
-- engine option to switch between languages: not limited to R, can handle also python, bash, css, sql
 - backtick-backtick-backtick is minimum to define a starting R chunk
-- include options in curly brackets
-
 
 ---
 
@@ -482,6 +511,14 @@ class: center, middle
 ```{r chunk, echo=FALSE, out.width="100%"}
 knitr::include_graphics(file.path(fig_path, "chunk.png"))
 ```
+
+???
+
+structure of a code chunk
+
+- code enclosed by 3 backticks before and after
+- after first 3 backticks: code engine, chunk label, comma-separated chunk options in curly brackets
+- engine: option to switch between languages: not limited to R, can handle also python, bash, css, sql
 
 ---
 
@@ -527,6 +564,7 @@ We can override this default behavior by setting `warning = FALSE` inside the co
 c(1,2,3) + c(4,5)
 ```
 ````
+<!-- <span style="color: yellow;">warning = FALSE</span> -->
 
 ```{r warning-2, warning = FALSE, echo = FALSE}
 c(1,2,3) + c(4,5)
@@ -534,9 +572,11 @@ c(1,2,3) + c(4,5)
 
 ???
 
-- optional arguments after the r in backtick-backtick-backtick-curvedopenbrackets-r
-- message = FALSE: dont show messages (e.g. when attaching libraries)
-- error = TRUE: causes the render to continue even if code returns an error. This is rarely something you'll want to include in the final version of your report, but can be very useful if you need to debug exactly what is going on insie your rmd. ...also useful for teching R and want to deliberately include an error. The default, error = FALSE, causes knitting to fail if there is a single error in the document.
+- optional arguments
+- by default, warning = TRUE
+- message = FALSE: don't show messages (e.g. when attaching libraries)
+- error = TRUE: continue rendering even if code returns an error (debugging, teachings)
+  - default: error = FALSE, causes knitting to fail if there is a single error in the document
 
 ---
 
@@ -552,30 +592,24 @@ Option | Description | Default
 `fig.width` | Figure width in inch | `7L`
 `fig.height` | Figure height in inch | `7L`
 `fig.align` | Figure alignment | `"default"`
+`warning` | Should warnings be displayed? | `TRUE`
+`message` | Should messages be displayed? | `TRUE`
 
 --
 
 .footnote[
 
-.content-box-green[
-
-Run `knitr::opts_chunk$get()` to see the current default values for all chunk options and package options.
-
-]
-
-.content-box-green[
-
-Run `knitr::opts_chunk$get()` to see the current default values for all chunk options and package options.
-
-]
+- Run `knitr::opts_chunk$get()` to see the current default values for all chunk options.  
+- Use `knitr::opts_chunk$set()` to modify these defaults, e.g. `knitr::opts_chunk$set(warning = FALSE)`.
 
 ]
 
 ???
 
+- echo = FALSE prevents that the code is shown in the rendered doc; still gets executed; useful for sending the document to your boss/supervisor who is only interested in the results and not the code
 - eval= FALSE prevents code from being evaluated. useful for displaying example code, or for disabling a large block of code without commentating each line
-- include = FALSE runs the code, but doesn't show the code or the results in the final document
-- echo = FALSE prevents code, but not the results from appearing in the rendered file. useful for sending the document for your boss who is only interested in the results and not the code
+- include = FALSE runs the code, but doesn't show the code or the results in the final document (supresses output)
+  - When you are trying to set echo = FALSE, results = 'hide', warning = FALSE, and message = FALSE, chances are you simply mean a single option include = FALSE instead of suppressing different types of text output individually. https://bookdown.org/yihui/rmarkdown/r-code.html
 - results = 'hide': hides printed output
 
 ---
@@ -603,7 +637,7 @@ Consider the code chunk below. Answer the following questions:
 .font120[
 
 ````markdown
-`r ''````{r, echo=FALSE}
+`r ''````{r boxplot-iris-species, echo=FALSE}
 library(ggplot2)
 ggplot(iris, aes(x = Species, y = Sepal.Length)) +
   geom_boxplot()
@@ -703,7 +737,7 @@ chunk. Try to run the "faithful" code chunk. Does it (still) work?
 .pull-left70[
 
 ````markdown
-`r ''````{r, fig.cap="R Markdown Logo"}
+`r ''````{r r-markdown-logo, fig.cap="R Markdown Logo"}
 knitr::include_graphics("figures/rmarkdown-logo.png")
 ```
 ````
@@ -730,7 +764,7 @@ name: tables
 ## Tables: kable
 
 ````markdown
-`r ''````{r}
+`r ''````{r kable-iris}
 knitr::kable(head(iris), caption = "A knitr kable table")
 ```
 ````
@@ -738,6 +772,10 @@ knitr::kable(head(iris), caption = "A knitr kable table")
 ```{r kable, echo = FALSE}
 knitr::kable(head(iris), format = "html", caption = "A knitr kable table")
 ```
+
+???
+
+- kable: robust table generator for html, pdf word docs
 
 ---
 
@@ -754,6 +792,13 @@ knitr::include_url("https://bookdown.org/yihui/rmarkdown-cookbook/kable.html", h
 ```{r include-url-kableExtra, echo=FALSE, out.width="100%"}
 knitr::include_url("https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html", height = "530px")
 ```
+
+???
+
+- custom style: cell backgrounds, conditional formatting
+- multi-row and multi-column cells
+- tooltips
+- etc.
 
 ---
 
@@ -787,6 +832,12 @@ knitr::include_url(file.path(fig_path, "dt-iris.html"))
 
 ???
 
+- paginated table
+- sort rows by column
+- search for strings
+- modify the number of rows shown simultaneously on one page
+
+
 , fillContainer = FALSE
 
 ---
@@ -801,6 +852,8 @@ knitr::include_url("https://rstudio.github.io/DT/", height = "530px")
 
 ## Tables: gt
 
+[`gt`](https://gt.rstudio.com/): "Easily generate information-rich, publication-quality tables from R"
+
 ````markdown
 `r ''````{r}
 gt::gt(head(iris))
@@ -811,13 +864,9 @@ gt::gt(head(iris))
 gt::gt(head(iris))
 ```
 
-&nbsp;
+???
 
-.content-box-purple[
-
-&#x1F913; [Easily generate information-rich, publication-quality tables from R](https://gt.rstudio.com/)
-
-]
+- alternative 
 
 ---
 
@@ -826,6 +875,10 @@ gt::gt(head(iris))
 ```{r include-url-gt, echo=FALSE, out.width="100%"}
 knitr::include_url("https://gt.rstudio.com/", height = "530px")
 ```
+
+???
+
+
 
 ---
 
@@ -1091,12 +1144,6 @@ reports
 
 ## Parametrized reports
 
-```{r parametrized-2, include=FALSE}
-reports %>% select(output_file, params) %>% 
-  mutate(output_file = here::here(output_file)) %>%
-  purrr::pwalk(rmarkdown::render, input = "04-rmarkdown-materials/04-rmarkdown-parameter.Rmd")
-```
-
 .content-box-green[
 .font90[
 `purrr::pwalk` applies a function to a list of arguments. It is similar to `purrr::pmap`, 
@@ -1106,7 +1153,16 @@ Here, it is used to iterate over each row of the `reports` tibble, calling
 ]
 ]
 
---
+```{r parametrized-2}
+reports %>% 
+  select(output_file, params) %>% 
+  mutate(output_file = here::here(output_file)) %>%
+  purrr::pwalk(rmarkdown::render, input = "04-rmarkdown-materials/04-rmarkdown-parameter.Rmd")
+```
+
+---
+
+## Parametrized reports
 
 ```{r include-iris, echo = FALSE, out.width="32%"}
 knitr::include_url("04-rmarkdown-materials/iris-setosa.html", height = "350px")
@@ -1253,6 +1309,10 @@ knitr::include_graphics(file.path(fig_path, "rmarkdown_book.png"))
 ```
 
 ]
+
+???
+
+- reference
 
 ---
 

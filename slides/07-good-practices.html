@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Good practices for programming with R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Uli Niemann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <link href="libs/vis/vis.css" rel="stylesheet" />
+    <script src="libs/vis/vis.min.js"></script>
+    <script src="libs/visNetwork-binding/visNetwork.js"></script>
+    <link rel="stylesheet" href="assets\css\my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="assets\css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+class: title-slide, center, bottom
+
+# 07 - Good practices for programming with R
+
+## Data Science with R &amp;#183; Summer 2020
+
+### Uli Niemann &amp;#183; Knowledge Management &amp; Discovery Lab
+
+#### [https://brain.cs.uni-magdeburg.de/kmd/DataSciR/](https://brain.cs.uni-magdeburg.de/kmd/DataSciR/)
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Ulrich Arendt]
+
+---
+
+class: middle
+
+.pull-left60[
+
+## Agenda
+
+- [Miscellaneous tips for reproducible programming](#misc)
+- [Reproducible and efficient project pipelines with drake](#drake)
+- [Recommendations on naming files &amp; folders](#naming)
+- [Package library management with renv](#renv)
+- [Debugging](#debugging)
+
+### Recommended reading
+
+&amp;#x1F4DA; Jennifer Bryan, and Jim Hester. [What They Forgot to Teach You About R](https://rstats.wtf/). 2019. Last accessed 02.06.2020.
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/07-practices/unsplash-late-night-trails.jpg" width="90%" /&gt;
+
+.font80[Photo by [Guillaume Jaillet](https://unsplash.com/photos/Nl-GCtizDHg)]
+
+]
+
+???
+
+- now you know some of the most useful packages
+- however, you would like to improve the efficacy of your programming habits
+- miscellaneous tips I wish somebody had told me when I started programming 
+with R
+- book: compendium of tips, tricks and best practices
+
+- &amp;#x1F4DA; Jonathan McPherson. [Debugging with RStudio](https://support.rstudio.com/hc/en-us/articles/200713843). Last accessed 02.06.2020. 
+
+&amp;#x1F4DA; Will Landau, Kirill Müller, Alex Axthelm, Jasper Clarkberg, Lorenz Walthert, Ellis Hughes, and Matthew Mark Strasiotto. 
+[The drake R Package User Manual](https://books.ropensci.org/drake/). 2020.
+
+&amp;#x1F4DA; Jennifer Bryan. [Code smells and feels](https://www.youtube.com/watch?v=7oyiPBjLAWY). 
+Keynote at the useR! conference 2018. 
+
+https://www.tidyverse.org/blog/2017/12/workflow-vs-script/
+
+
+---
+
+class: center, inverse, middle
+name: misc
+
+.pull-left60[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+## Miscellaneous tips for reproducible programming
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/07-practices/unsplash-advice.jpg" width="100%" /&gt;
+
+.font80[Photo by [John Schnobrich](https://unsplash.com/photos/FlPc9_VocJ4)]
+
+]
+
+---
+
+class: middle
+
+.pull-left60[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+#### &amp;#x2705; Save code, not the workspace
+
+&lt;!-- .font130[&amp;#x2705; **Save code, not the workspace**] --&gt;
+
+&amp;xrarr; Save your commands in an R script (.R file) or R Markdown 
+document (.Rmd) instead of saving the results of your interactive 
+analysis as workspace (.Rdata)
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+]
+
+
+.pull-right40[
+
+&lt;img src="figures/07-practices/dont-save-rdata-1.png" width="100%" /&gt;
+
+Tip: disable automatic saving of workspace in RStudio 
+
+]
+
+???
+
+- when you start programming with R, you tend to predominantly use the console
+- at the end: save result as workspace -&gt; discouraged
+- when you load an .RData file after 3 months, do you remember every single step
+you executed to get to this workspace?
+- better: Save your commands in an R script (.R file) or R Markdown 
+document (.Rmd) instead of saving the results of your interactive 
+analysis as workspace (.Rdata)
+- these files may be a bit messy (prototyping) 
+- don't need to be perfectly polished
+
+
+&lt;!-- - working with files is easier using an IDE like RStudio in comparison with  --&gt;
+&lt;!--  the inbuilt RGui --&gt;
+
+---
+
+class: middle
+
+.pull-left60[
+
+&amp;nbsp;
+
+#### &amp;#x2705; Restart R often
+
+- Restart R in RStudio: _Session &amp;rarr; Restart R_  
+(keyboard shortcut **Ctrl**+**⇧Shift**+**F10**)
+- Restart R from the shell: **Ctrl**+**D** or `q()` to quit current session, 
+then restart R
+- Restart development where you left off, i.e., re-run all code above cursor position:
+  - in an R script: **Ctrl**+**Alt**+**B**
+  - in an R Markdown file: **Ctrl**+**Alt**+**P**
+
+&amp;nbsp;
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/07-practices/restart-r.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+Tip: restart R every now and then 
+
+]
+
+???
+
+- to ensure that your code doesn't depend on settings of your current interactive session
+- e.g. global options, unusual order of packages in search path, or other objects in workspace 
+
+---
+
+class: middle
+
+#### &amp;#x2705; Avoid using `rm(list = ls())`
+
+Unlike restarting R, the command `rm(list = ls())` .red[**does not**] 
+create a new R session.
+
+- &amp;#x2757; It only removes all user-created objects from the environment.
+- &amp;#x2757; Previously loaded packages are still in the search path.
+- &amp;#x2757; Modifications to global options are still there.
+
+`rm(list = ls())` makes a script **vulnerable to hidden dependencies** 
+on commands that were ran in the R session before executing `rm(list = ls())`.
+
+???
+
+- popular modification: `options(scipen = 999)` to get rid of scientific notation of numbers
+- scipen: integer. A penalty to be applied when deciding to print numeric values in fixed or exponential notation.
+
+
+```r
+library(Hmisc)
+library(dplyr)
+summarize(iris$Sepal.Width, iris$Species, mean)
+
+rm(list = ls())
+
+library(Hmisc)
+summarize(iris$Sepal.Width, iris$Species, mean)
+
+hist(rnorm(1000, 1e10)) # draw random sample of 1000 values from a normal distribution with a mean = 10 billion
+
+options(scipen = 999)
+hist(rnorm(1000, 1e10))
+
+rm(list = ls())
+
+hist(rnorm(1000, 1e10))
+```
+
+---
+
+class: middle
+
+&amp;#x1F914; _"What about time-consuming scripts that take hours or maybe even 
+days? It is impracticable to re-run these scripts every time we need the 
+results."_
+
+???
+
+Rerunning an end-to-end analysis is sometimes impractical, because parts of the 
+computations are very time-consuming.
+
+It is recommended to split this computationally heavy part of your code into 
+a new script. At the end of this script, you save the output as `.rds` file:
+
+`saveRDS(data_prep, "results/data_preprocessed.rds"))`
+
+--
+
+Split the computationally expensive part of your code 
+(e.g. fetching and pre-processing large amounts of raw data from a database) 
+into a new script. 
+At the end of this script, you save the output as `.rds` file (&lt;u&gt;R&lt;/u&gt; 
+&lt;u&gt;data&lt;/u&gt; &lt;u&gt;single&lt;/u&gt;). 
+
+`saveRDS(data_prep, "results/data_preprocessed.rds")`
+
+---
+
+class: middle
+
+&lt;!-- ## Projects --&gt;
+
+&lt;!-- &amp; the [`here`](https://here.r-lib.org/index.html) package --&gt;
+
+#### &amp;#x2705; Organize code as self-contained "projects":
+
+.content-box-blue[
+
+- Organize each logical project into a separate directory.
+- Organize all files related to the project into subfolders, e.g. `data/`, 
+`code/`, `figures/`, `reports/`, etc.
+- The top-level folder of the project must be clearly recognizable 
+(e.g. by containing a .Rproj file)
+- Create paths **relative to the top-level folder**.
+- Launch the R session from the project’s top-level folder.
+
+&lt;!-- &lt;sup&gt;1&lt;/sup&gt; --&gt;
+
+]
+
+.footnote[
+&amp;#x1F4DA; Jennifer Bryan. [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/). 2017. Last accessed 03.06.2020.
+
+]
+
+???
+
+- separate directory and subfolders orga: not R-specific, general good practice
+- advantage of here: 
+_How can we avoid setwd() at the top of every script?_
+
+.. always start at the top-level folder of the project. -&gt; handy for rmd reports
+
+---
+
+class: middle
+
+## RStudio projects
+
+.pull-left60[
+
+Create a new RStudio project:  
+_File_ &amp;rarr; _New Project_ &amp;rarr; _New Directoy_ &amp;rarr; _Empty Project_
+
+The working directory corresponds to the top-level folder of the project 
+(where the `.Rproj` file is). All project files should be organized in 
+subfolders of the project's top-level folder. In the code, the files should 
+be referenced with relative paths. 
+
+]
+
+.pull-right40[
+
+![](figures/07-practices/new_rstudio_project.gif)&lt;!-- --&gt;
+
+&lt;img src="figures/07-practices/new_project.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.footnote[
+
+&amp;#x1F4DA; Further reading:
+
+- Best practices: [RStudio Projects](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects)
+- Chapter [Where does your analysis live?](http://r4ds.had.co.nz/workflow-projects.html#where-does-your-analysis-live) in [R for Data Science](http://r4ds.had.co.nz/)
+- [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/)
+
+]
+
+???
+
+- file extension `.Rproj`: text file with project-specific settings
+- hidden folder `.Rproj.user`: project-specific temporary files (_better not touch it_)
+- open .Rproj: starts R, working directory to top-level folder 
+of project, restore previously opened files (pick up where you left off)
+- switch to another .Rproj: new R session, working directory to top-level folder 
+of project, restore previously opened files (pick up where you left off)
+- simultaneously work on 2 projects where each project has its own R session
+
+---
+
+class: middle
+
+A basic folder structure could look like so:
+
+
+
+```
+my_project
++-- data
+|   +-- processed
+|   \-- raw
++-- my_project.Rproj
++-- output
++-- R
++-- README.md
+\-- run_analyses.R
+```
+
+???
+
+also helpful: https://chrisvoncsefalvay.com/2018/08/09/structuring-r-projects/
+
+---
+
+
+#### &amp;#x2705; Use `here::here()`&lt;sup&gt;1&lt;/sup&gt; instead of `setwd()` to set your working directory.
+
+.pull-left[
+
+&amp;#x1F620; Specifying absolute file paths are bad practice:
+
+.font90[
+
+
+```r
+library(ggplot2)
+setwd("C:/Users/uli/verbose_funicular/foofy/data")
+df &lt;- read.delim("raw_foofy_data.csv")
+p &lt;- ggplot(df, aes(x, y)) + geom_point()
+ggsave("../figs/foofy_scatterplot.png")
+```
+
+]
+
+
+&amp;xrarr; not self-contained, not portable 
+
+- file paths will not work for anyone besides the author
+- high chance that objects from one project will leak into another project
+
+&lt;!-- &amp;#x2705; Adhere to "project-oriented workflow"  --&gt;
+&lt;!-- (separate R session and directory) --&gt;
+
+]
+
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt;`here::here()` is a robust version of `file.path()`, because 
+`here()` creates paths that (1) work across different operating systems and (2) always start at the top-level folder of the project.  
+Example from: Jennifer Bryan. [Project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/#whats-wrong-with-setwd). 2017. Last accessed 02.06.2020.
+
+]
+
+--
+
+.pull-right[
+
+&amp;#x1F60A; Use file paths relative to project root folder.
+
+.font90[
+
+
+```r
+library(ggplot2)
+*library(here)
+*df &lt;- read.delim(here("data", "raw_foofy_data.csv"))
+p &lt;- ggplot(df, aes(x, y)) + geom_point()
+*ggsave(here("figs", "foofy_scatterplot.png"))
+```
+
+]
+
+]
+
+
+???
+
+- it's convenient to put setwd() at the top of each script
+- if we move our folders containing raw data or R scripts we need to change the 
+file path at every occurrence of setwd() which can be tedious 
+- doesn't even work for the same author when switching to a new computer or OS
+- example of bad practice: not self-contained, not portable 
+- file paths will not work for anyone besides the author
+- chance that objects from one project will leak into the set of objects 
+from another project in case a new R session is not started
+
+---
+
+class: middle
+
+.pull-left60[
+
+Exemplary content in `R` folder of your project:
+
+File | Description
+:--- | :----------
+`01_fetch-data.R` | Fetch raw data from a database with millions of rows
+`02_clean-data.R` | Pre-process and tidies data
+`03-eda.R`        | Exploratory data analysis, including plotting the data
+`04-model.R`      | Train a prediction model (takes some hours &amp;#x23F1;)
+`05-report.R`     | Create an R Markdown project report 
+`run-analysis.R`  | Successively runs all scripts above
+
+&amp;#x1F914; _"If we want to make a small change in one of these scripts, do we 
+have to rerun all scripts from scratch again?"_
+
+]
+
+???
+
+- saving intermediate objects as .rds becomes impracticable for 
+more complex projects involving multiple data sources, preprocessing, 
+modeling and multiple scripts for dissemination
+- q
+
+--
+
+.pull-right40[
+
+
+
+&lt;div&gt;
+&lt;blockquote class="twitter-tweet" data-conversation="none" data-dnt="true"&gt;&lt;p lang="en" dir="ltr"&gt;Save me from myself and having to remember all this when files change &lt;a href="https://t.co/hVeSFQOimj"&gt;pic.twitter.com/hVeSFQOimj&lt;/a&gt;&lt;/p&gt;&amp;mdash; Brianna McHorse, PhD &lt;a href="https://twitter.com/fossilosophy/status/966408174470299648?ref_src=twsrc%5Etfw"&gt;February 21, 2018&lt;/a&gt;&lt;/blockquote&gt; &lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+&lt;/div&gt;
+[URL](https://t.co/hVeSFQOimj)
+
+]
+
+???
+
+sometimes not a simple pipeline but complex graph of dependencies between inputs and outputs
+
+---
+
+class: center, inverse, middle
+name: drake
+
+.pull-left70[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+## drake: reproducible and efficient project pipelines
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/07-practices/drake.png" width="100%" /&gt;
+
+]
+
+???
+
+"an R-focused pipeline toolkit for reproducibility and high-performance computing"
+
+---
+
+## The [drake](https://docs.ropensci.org/drake/) package
+
+.pull-left80[
+
+&gt; A general-purpose computational engine for data analysis, drake rebuilds intermediate data objects when their dependencies change, and it skips work when the results are already up to date. Not every execution starts from scratch, there is native support for parallel and distributed computing, and completed projects have tangible evidence that they are reproducible.  
+&amp;mdash; [drake package description](https://cloud.r-project.org/web/packages/drake/index.html)
+
+]
+
+.pull-right20[
+
+&lt;img src="figures/07-practices/drake.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.footnote[&amp;#x1F4DA; drake manual: &lt;https://books.ropensci.org/drake/&gt;]
+
+--
+
+_In other words:_
+
+- With drake, we can set-up a **pipeline of successively executed commands**.
+- The **return value** of each command is stored as **target**.
+- drake automatically identifies **dependencies** between **targets**. 
+- drake ensures that only targets **affected** by a change in one of its inputs (= **outdated targets**) need to be recomputed.
+
+---
+
+class: middle
+
+
+
+
+```r
+library(tidyverse)
+library(drake)
+
+create_plot &lt;- function(data) {
+  ggplot(data, aes(x = Petal.Width, fill = Species)) + 
+    geom_histogram()
+}
+
+plan &lt;- drake_plan(
+  raw_data = readxl::read_excel(file_in("drake/raw_iris.xlsx")),
+  data = raw_data %&gt;% 
+    mutate(Species = fct_inorder(Species)),
+  hist = create_plot(data), 
+  fit = lm(Sepal.Width ~ Petal.Width + Species, data),
+  report = rmarkdown::render(
+    knitr_in("drake/report.Rmd"), 
+    output_file = "report.html", quiet = TRUE)
+)
+plan
+```
+
+```
+## # A tibble: 5 x 2
+##   target   command                                                                        
+##   &lt;chr&gt;    &lt;expr&gt;                                                                         
+## 1 raw_data readxl::read_excel(file_in("drake/raw_iris.xlsx"))                            ~
+## 2 data     raw_data %&gt;% mutate(Species = fct_inorder(Species))                           ~
+## 3 hist     create_plot(data)                                                             ~
+## 4 fit      lm(Sepal.Width ~ Petal.Width + Species, data)                                 ~
+## 5 report   rmarkdown::render(knitr_in("drake/report.Rmd"), output_file = "report.html",  ~
+```
+
+???
+
+- example data analysis pipeline (explain)
+- drake_plan()
+- argument names = targets
+- argument values = commands that produce the target
+- surround input and output files with some special functions so that drake knows that these files also have to be checked for changes 
+- print plan: simple tibble containing the names of the targets and the associated 
+command.
+
+some special functions that indicate input files and output files: file_in, 
+knitr_in, file_out
+
+---
+
+
+```r
+library(visNetwork)
+vis_drake_graph(plan)
+```
+
+<div id="htmlwidget-3886b4ea98173324ba74" style="width:992.125984251968px;height:538.582677165354px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3886b4ea98173324ba74">{"x":{"nodes":{"id":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","raw_data","data","fit","hist","report"],"imported":[true,true,true,true,true,false,false,false,false,false],"label":["readxl::read_excel","file drake/raw_iris.xlsx","rmarkdown::render","file drake/report.Rmd","create_plot","raw_data","data","fit","hist","report"],"status":["imported","imported","imported","imported","imported","outdated","outdated","outdated","outdated","outdated"],"type":["function","file","function","file","function","object","object","object","object","object"],"font.size":[20,20,20,20,20,20,20,20,20,20],"color":["#1874CD","#1874CD","#1874CD","#1874CD","#1874CD","#000000","#000000","#000000","#000000","#000000"],"shape":["triangle","square","triangle","square","triangle","dot","dot","dot","dot","dot"],"level":[1,1,1,1,1,2,3,4,4,5],"x":[-1,-1,-1,-1,-1,-0.5,0,0.5,0.5,1],"y":[-1,-0.5,2.22044604925031e-016,0.5,1,2.22044604925031e-016,2.22044604925031e-016,-0.5,0.5,2.22044604925031e-016]},"edges":{"from":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","fit","hist","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","data","data","raw_data"],"to":["raw_data","raw_data","report","report","report","report","hist","fit","hist","data"],"arrows":["to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"interaction":{"navigationButtons":true},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"Dependency graph","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Outdated","Imported","Object","Function","File"],"color":["#000000","#1874CD","#888888","#888888","#888888"],"shape":["dot","dot","dot","triangle","square"],"font.color":["black","black","black","black","black"],"font.size":[20,20,20,20,20],"id":[2,6,8,10,11]},"nodesToDataframe":true},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+
+???
+
+- we can visually check whether we have correctly set up our drake workflow
+- dependency graph powered by visNetwork, a package for network visualization, using the vis.js javascript library (http://visjs.org)
+- interactive: click, drag, zoom
+- color and shape legend on the left
+- outdated = have not been created yet
+- AUTOMATICALLY identifies dependencies between targets
+- example: "report" knits an Rmd, contains references to fit and hist
+
+
+- outdated target: black 
+- imported target: blue
+- failed target: red
+- up to date target: green
+- function: triangle
+- object: circle
+- file: square
+
+---
+
+class: middle
+
+#### report.Rmd
+
+&lt;iframe src="drake/report.Rmd" width="80%" height="350px"&gt;&lt;/iframe&gt;
+
+???
+
+- readd(): return built target from cache
+- loadd(): loads built target from cache into environment
+
+---
+
+class: middle
+
+Now we can "make" our plan: `make()` runs all the steps of `plan` and 
+builds the targets. 
+
+
+```r
+make(plan)
+```
+
+```
+## &gt; target raw_data
+```
+
+```
+## &gt; target data
+```
+
+```
+## &gt; target fit
+```
+
+```
+## &gt; target hist
+```
+
+```
+## &gt; target report
+```
+
+---
+
+class: middle
+
+<div id="htmlwidget-36b97c04342f9443b030" style="width:992.125984251968px;height:538.582677165354px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-36b97c04342f9443b030">{"x":{"nodes":{"id":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","raw_data","data","fit","hist","report"],"imported":[true,true,true,true,true,false,false,false,false,false],"label":["readxl::read_excel","file drake/raw_iris.xlsx","rmarkdown::render","file drake/report.Rmd","create_plot","raw_data\n0.04s","data\n0.01s","fit\n0.01s","hist\n0.04s","report\n0.43s"],"status":["imported","imported","imported","imported","imported","up to date","up to date","up to date","up to date","up to date"],"type":["function","file","function","file","function","object","object","object","object","object"],"font.size":[20,20,20,20,20,20,20,20,20,20],"color":["#1874CD","#1874CD","#1874CD","#1874CD","#1874CD","#228B22","#228B22","#228B22","#228B22","#228B22"],"shape":["triangle","square","triangle","square","triangle","dot","dot","dot","dot","dot"],"level":[1,1,1,1,1,2,3,4,4,5],"x":[-1,-1,-1,-1,-1,-0.5,0,0.5,0.5,1],"y":[-1,-0.5,2.22044604925031e-016,0.5,1,2.22044604925031e-016,2.22044604925031e-016,-0.5,0.5,2.22044604925031e-016]},"edges":{"from":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","fit","hist","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","data","data","raw_data"],"to":["raw_data","raw_data","report","report","report","report","hist","fit","hist","data"],"arrows":["to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"interaction":{"navigationButtons":true},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Up to date","Imported","Object","Function","File"],"color":["#228B22","#1874CD","#888888","#888888","#888888"],"shape":["dot","dot","dot","triangle","square"],"font.color":["black","black","black","black","black"],"font.size":[20,20,20,20,20],"id":[1,6,8,10,11]},"nodesToDataframe":true},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+
+???
+
+- black circles have become green (outdated -&gt; up to date)
+
+---
+
+class: middle
+
+.pull-left[
+
+Return a built target with `readd()`: 
+
+
+```r
+readd(hist)
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick
+## better value with `binwidth`.
+```
+
+&lt;img src="figures/_gen/07-practices/hist-1-1.png" width="425.196850393701" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+_What happens if we would like to make some changes to the histogram?_
+The number of bins should be set to 15 and a different theme should be applied.
+
+The histogram should rather look like this:
+
+&lt;img src="figures/_gen/07-practices/hist-2-1.png" width="425.196850393701" /&gt;
+
+]
+
+???
+
+skipping any work that is already up to date
+
+---
+
+class: middle
+
+We change the plotting function accordingly: 
+
+
+```r
+library(ggthemes)
+create_plot &lt;- function(data) {
+  ggplot(data, aes(x = Petal.Width, fill = Species)) + 
+*   geom_histogram(bins = 15) +
+*   theme_fivethirtyeight(base_size = 18)
+}
+```
+
+---
+
+class: middle
+
+<div id="htmlwidget-0a2be712c2250abda000" style="width:992.125984251968px;height:538.582677165354px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0a2be712c2250abda000">{"x":{"nodes":{"id":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","raw_data","data","fit","hist","report"],"imported":[true,true,true,true,true,false,false,false,false,false],"label":["readxl::read_excel","file drake/raw_iris.xlsx","rmarkdown::render","file drake/report.Rmd","create_plot","raw_data\n0.04s","data\n0.01s","fit\n0.01s","hist\n0.04s","report\n0.43s"],"status":["imported","imported","imported","imported","imported","up to date","up to date","up to date","outdated","outdated"],"type":["function","file","function","file","function","object","object","object","object","object"],"font.size":[20,20,20,20,20,20,20,20,20,20],"color":["#1874CD","#1874CD","#1874CD","#1874CD","#1874CD","#228B22","#228B22","#228B22","#000000","#000000"],"shape":["triangle","square","triangle","square","triangle","dot","dot","dot","dot","dot"],"level":[1,1,1,1,1,2,3,4,4,5],"x":[-1,-1,-1,-1,-1,-0.5,0,0.5,0.5,1],"y":[-1,-0.5,2.22044604925031e-016,0.5,1,2.22044604925031e-016,2.22044604925031e-016,-0.5,0.5,2.22044604925031e-016]},"edges":{"from":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","fit","hist","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","data","data","raw_data"],"to":["raw_data","raw_data","report","report","report","report","hist","fit","hist","data"],"arrows":["to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"interaction":{"navigationButtons":true},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Up to date","Outdated","Imported","Object","Function","File"],"color":["#228B22","#000000","#1874CD","#888888","#888888","#888888"],"shape":["dot","dot","dot","dot","triangle","square"],"font.color":["black","black","black","black","black","black"],"font.size":[20,20,20,20,20,20],"id":[1,2,6,8,10,11]},"nodesToDataframe":true},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+
+Note that the targets `hist` and `report` (and only these targets) have 
+become outdated.
+
+???
+
+- the target hist depends on the create_plot() function and the target report 
+in turn depends on hist
+- these targets have become outdated
+since drake automatically created this provenance graph of dependencies, 
+it knows that the other three targets raw_data, data and fit are not affected by 
+the change in create_plot and thus, their code does not need to be rerun, 
+drake takes the values from the cache
+
+---
+
+We rerun the plan. Only `hist` and `report` are recomputed. The values of the 
+other targets are pulled from drake's cache.
+
+
+```r
+make(plan)
+```
+
+```
+## &gt; target hist
+```
+
+```
+## &gt; target report
+```
+
+---
+
+class: middle
+
+In the dependency graph, all targets are up-to-date: 
+
+<div id="htmlwidget-cbc7b3c48dc15e16a86b" style="width:992.125984251968px;height:538.582677165354px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cbc7b3c48dc15e16a86b">{"x":{"nodes":{"id":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","raw_data","data","fit","hist","report"],"imported":[true,true,true,true,true,false,false,false,false,false],"label":["readxl::read_excel","file drake/raw_iris.xlsx","rmarkdown::render","file drake/report.Rmd","create_plot","raw_data\n0.04s","data\n0.01s","fit\n0.01s","hist\n0.05s","report\n0.42s"],"status":["imported","imported","imported","imported","imported","up to date","up to date","up to date","up to date","up to date"],"type":["function","file","function","file","function","object","object","object","object","object"],"font.size":[20,20,20,20,20,20,20,20,20,20],"color":["#1874CD","#1874CD","#1874CD","#1874CD","#1874CD","#228B22","#228B22","#228B22","#228B22","#228B22"],"shape":["triangle","square","triangle","square","triangle","dot","dot","dot","dot","dot"],"level":[1,1,1,1,1,2,3,4,4,5],"x":[-1,-1,-1,-1,-1,-0.5,0,0.5,0.5,1],"y":[-1,-0.5,2.22044604925031e-016,0.5,1,2.22044604925031e-016,2.22044604925031e-016,-0.5,0.5,2.22044604925031e-016]},"edges":{"from":["n-OJSWCZDYNQ5DU4TFMFSF6ZLYMNSWY","p-MRZGC23FF5ZGC527NFZGS4ZOPBWHG6A","n-OJWWC4TLMRXXO3R2HJZGK3TEMVZA","fit","hist","p-MRZGC23FF5ZGK4DPOJ2C4UTNMQ","create_plot","data","data","raw_data"],"to":["raw_data","raw_data","report","report","report","report","hist","fit","hist","data"],"arrows":["to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"interaction":{"navigationButtons":true},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Up to date","Imported","Object","Function","File"],"color":["#228B22","#1874CD","#888888","#888888","#888888"],"shape":["dot","dot","dot","triangle","square"],"font.color":["black","black","black","black","black"],"font.size":[20,20,20,20,20],"id":[1,6,8,10,11]},"nodesToDataframe":true},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+
+---
+
+class: center, inverse, middle
+name: naming
+
+.pull-left70[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+## Recommendations on naming&lt;br /&gt;files &amp; folders
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/07-practices/unsplash-via-dell-orso.jpg" width="100%" /&gt;
+
+.font80[Photo by [Jeff Ackley](https://unsplash.com/photos/d2UIDnuti-M)]
+
+]
+
+---
+
+class: middle
+
+&lt;div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 74.9296%;"&gt;&lt;iframe src="https://speakerdeck.com/player/5e4b07f0d9a94f8e9a29b902bad6ed0b" style="border: 0; top: 0; left: 0; width: 70%; height: 70%; position: absolute;" allowfullscreen scrolling="no" allow="encrypted-media"&gt;&lt;/iframe&gt;&lt;/div&gt;
+
+.footnote[[PDF version](http://www2.stat.duke.edu/~rcs46/lectures_2015/01-markdown-git/slides/naming-slides/naming-slides.pdf)]
+
+???
+
+- avoid special characters such as German Umlaute, space character and capitalization
+- stick to lower-case letters, numbers, hyphen and underscore characters
+- 3 principles
+- 1: machine readable: structure names in a way that let's you refind them using 
+regular expressions
+- elements of a semantic unit are connected with hyphens, e.g. first sematic unit 
+"date": year, month and date are connected by hyphen
+- different semantic units are separated by underscore, e.g. date, 
+assay, plasmid type, well number
+- use str_split_fixed to recover meta-data from file names
+- 2: human readable: instead of 01.R, 02.R etc, put some information in the file name 
+on what the script does -&gt; 01_read-data.R, 02-filter-data.R, etc.
+- again semantic units: prefix (order of execution), then what the file is about
+- plays well with default ordering: chronological (data that have time-stamps) 
+or logical (order of execution in a project workflow)
+- longtime payoff for little short-term pain
+
+---
+
+class: center, inverse, middle
+name: renv
+
+.pull-left60[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+## Package library management with renv
+
+]
+
+.pull-right40[
+
+&lt;img src="figures/07-practices/unsplash-packages.jpg" width="100%" /&gt;
+
+.font80[Photo by [🇨🇭 Claudio Schwarz | @purzlbaum](https://unsplash.com/photos/q8kR_ie6WnI)]
+
+]
+
+---
+
+## Package library management
+
+- R packages are stored in one or more directories on your computer (`.libPaths()`)
+  + **user library**: packages that _you_ install are (usually) contained in `.libPaths()[1]`
+  + **system library**: default packages are (usually) contained in `.libPaths()[2]`
+
+--
+
+- RStudio Packages tab provides a convenient interface for installing and 
+updating packages
+
+???
+
+- why CRAN: most effective way to make a package available for public use
+- Linux: automatically have tools installed to install "bundled" version of a package (.tar.gz)
+
+--
+
+- Use `install.packages(&lt;pkgname&gt;)` to install or update packages via the console
+  + installs **_binary_** version from CRAN (no additional tools required)
+  + binary: single, OS-specific file (.zip for Windows, .tgz for macOS)
+
+
+--
+
+Sometimes, you need the latest development version hosted on GitHub, BitBucket, etc.
+
+- Use `remotes::install_github(&lt;username&gt;/&lt;pckname&gt;)` to install or packages via the console 
+  + installs **_source_** version 
+  + source: OS-independent directory with a specific structure
+  + example: `remotes::install_github("rstudio/gt")`
+  + additional tools for compilation necessary, e.g. Rtools for Windows
+  
+---
+
+## Package library management
+
+- many packages are continuously under development even after CRAN release
+- package maintainers generally pay attention to backwards compatibility, but there is no guarantee that there will not be changes that introduce existing code to fail
+
+--
+
+Scenarios where we need another way of package management:
+
+- &amp;#x2757; _We want to ship the final project code to our customers. The code does not only have to work now, but also in 3 months, 6 months, 1 year from now on._
+- &amp;#x2757; _We do not want to keep track of code-breaking package updates._
+- &amp;#x2757; _For other projects, we must be able to update packages, in order to make use of new useful features._ 
+
+???
+
+- we have a finished, stable project
+- we don't want to make changes to your code every time there is a code-breaking  change in one of the packages
+- we still want to be able to update our packages for other projects so that we can work with the latest features of the packages
+- we want your project code to be reproducible, portable and isolated from other projects
+
+For example, tools like renv (and its predecessor packrat) automate the process of managing project-specific libraries. This can be important for making data products reproducible, portable, and isolated from one another. A package developer might prepend the library search path with a temporary library, containing a set of packages at specific versions, in order to explore issues with backwards and forwards compatibility, without affecting other day-to-day work
+
+---
+
+## Package library management with renv
+
+`renv`: **dependency manager** that helps to set up and maintain **project-local R libraries**
+
+.pull-left70[
+
+- **isolated**: each project has its own library of packages
+  + &amp;xrarr; updating packages globally or in another package will not affect current project
+- **portable**: version numbers of all "active" packages are tracked in a "lock file" 
+  + &amp;xrarr; facilitates collaboration
+- **reproducible**: enables saving a "snapshot", i.e., a state of the project library that you know is working 
+  + &amp;xrarr; safety net in case a package update causes problems 
+- **disk-space-efficient**: packages are installed into a global cache; different projects that use the same version of a package will pull a "shared" package installation from the global cache 
+  + &amp;xrarr; also reduces installation time when a package has already been installed by another project that is managed with renv
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/07-practices/renv-logo.png" width="100%" /&gt;
+
+]
+  
+.footnote[&amp;#x1F4DA; Kevin Ushey. Introduction to renv. &lt;https://rstudio.github.io/renv/articles/renv.html&gt;. Last accessed 26.05.2020.  
+&amp;#x1F4DA; RStudio. Upgrading Packages: How to Safely Upgrade Packages. &lt;https://environments.rstudio.com/upgrades.html&gt;. Last accessed 26.05.2020.
+]
+
+???
+
+- renv-test
+- renv.lock
+- .libPaths()
+
+renv vocabulary
+
+- Tools -&gt; Project Options -&gt; Environments -&gt; Use renv with this project
+
+- renv::init(): initialize new project-local package library
+- renv:: snapshot(): save the current state of the project package library to 
+a "lock file" (`renv.lock`)
+- renv::restore(): revert to previously saved state
+
+---
+
+class: middle
+
+&lt;p&gt;&lt;a href="https://rstudio.com/resources/rstudioconf-2020/renv-project-environments-for-r/?wvideo=17qyzuqb2h"&gt;&lt;img src="https://embed-fastly.wistia.com/deliveries/ff49e1b5c192ee19683c3f530ce0e945.jpg?image_play_button_size=2x&amp;amp;image_crop_resized=960x540&amp;amp;image_play_button=1&amp;amp;image_play_button_color=4287c7e0" style="width: 800px; height: 450px;" width="800" height="450"&gt;&lt;/a&gt;&lt;/p&gt;
+
+&amp;#x1F4FA; Kevin Ushey. [renv: Project Environments for R. Keynote at RSTUDIO::CONF 2020.](https://rstudio.com/resources/rstudioconf-2020/renv-project-environments-for-r/) Last accessed 03.06.2020.
+
+---
+
+class: middle
+
+## Activate project-local package library in RStudio
+
+.pull-left[
+
+&lt;img src="figures/07-practices/renv-new-project.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+Create a new RStudio project with renv
+
+]
+
+
+.pull-right[
+
+&lt;img src="figures/07-practices/rstudio-renv.png" width="100%" /&gt;
+
+Use renv in your existing RStudio project
+
+]
+
+---
+
+class: middle
+
+## Example of renv.lock file
+
+&lt;img src="figures/07-practices/renv-lockfile.png" width="50%" /&gt;
+
+???
+
+- JSON file
+- version of R used in that project
+- list of R repositories
+- package records: name of R package, version number, installation source
+
+---
+
+class: center, inverse, middle
+name: debugging
+
+.pull-left70[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+## Debugging
+
+]
+
+.pull-right30[
+
+&lt;img src="figures/07-practices/unsplash-bug.jpg" width="100%" /&gt;
+
+.font80[Photo by [David Clode](https://unsplash.com/photos/zE99_-6MdYM)]
+
+]
+
+---
+
+class: middle
+
+## Error handling
+
+How to find the source of an error in your R code?
+
+Recommended strategy:
+
+1. **Restart R.** &amp;rarr; Make sure the error _always_ occurs.
+
+???
+
+1. rule out errors due to hidden dependencies
+1. it is very likely that somebody else had the error before you and posted this error and meanwhile there is a working solution
+1. short intro
+1. Use internet communities (Twitter, SO, RStudio Community, ...). 
+Includes creating a minimal reproducible example (code snippet)
+  - reproducible: self-contained, everything needed to reproduce the error message is included
+  - minimal: remove code that is irrelevant for the error message. helps isolating the cause of the error
+  
+- automated testing
+
+--
+
+1. **Google the error message.** &amp;rarr; It is likely that there is already an existing solution on Stack Overflow, RStudio Community, Twitter or other fora.
+
+--
+
+1. **Debug.**
+
+--
+
+1. **Ask for help.** &amp;rarr; Prepare a [reproducible example](https://reprex.tidyverse.org/) and ask the internet. 
+
+---
+
+## Debugging
+
+
+```r
+f &lt;- function(a) g(a)
+g &lt;- function(b) h(b)
+h &lt;- function(c) i(c)
+i &lt;- function(d) {
+  if (!is.numeric(d)) {
+    stop("`d` must be numeric", call. = FALSE)
+  }
+  d + 10
+}
+```
+
+&amp;#x1F914; What is the result of this code when we run `f("10")`?
+
+.footnote[
+
+Useful resources:
+
+&amp;#x1F4DA; Example from: Hadley Wickham. Advanced R. [Chapter Debugging](https://adv-r.hadley.nz/debugging.html). Second Edition. Chapman &amp; Hall/CRC, 2019.  
+&amp;#x1F4DA; Jonathan McPherson. [Debugging with RStudio](https://support.rstudio.com/hc/en-us/articles/200713843). Last accessed 02.06.2020.  
+&amp;#x1F4FA; Jenny Bryan. [Object of type ‘closure’ is not subsettable ](https://rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/). Keynote at RSTUDIO::CONF 2020. Last accessed 02.06.2020.  
+&amp;#x1F4DA; Garett Grolemund. Hands-On Programming with R. [Appendix E: Debugging R Code.](https://rstudio-education.github.io/hopr/debug.html). O'Reilly, 2014.
+
+
+]
+
+--
+
+
+```r
+f("10")
+```
+
+```
+## Error: `d` must be numeric
+```
+
+---
+
+## Interactive debug mode
+
+???
+
+- show **traceback** aka the call stack: sequence of functions called that led to the error
+- rerun with Debug: set a break point immediately before the error is thrown
+  - code execution is paused
+  - allows to inspect environment of a function
+
+--
+
+1. set break point (click on gray space left to line number or **⇧Shift**+**F9**)
+
+???
+
+- stop executing code exactly at the line of the break point
+
+--
+
+2. console debugging commands (`n,s,f,c,Q`)
+
+???
+
+- n: execute next step
+- s: step into function
+- f: finish execution of current loop/function
+- c: stop debugging &amp; continue code execution until next break point
+- Q: leave interactive debugging &amp; continue code execution
+
+--
+
+3. `browser()`
+
+???
+
+- similar to first approach, but source code is changed
+
+--
+
+4. `debug()`, `debugOnce()`
+
+???
+
+- just for completeness: adds break point at the beginning of a function
+- debugOnce: one-shot break point, i.e., the function will enter the debugger the very next time it runs, but not after that
+
+--
+
+5. `undebug()`
+
+--
+
+6. RStudio: _Debug_ &amp;xrarr; _On Error_ &amp;xrarr; _Break in Code_
+
+???
+
+- enters interactive debugging at the line where the error occurs
+
+--
+
+7. `debugSource()`
+
+???
+
+- advantage of browser(): recursive debugging of scripts
+
+--
+
+8. `options(error = recover)`
+
+???
+
+- interactive prompt that displays the traceback
+
+--
+
+9. `options(warn = 2)`
+
+???
+
+- convert warning to error
+
+???
+
+Tools &gt; Global Options -&gt; General -&gt; Advanced -&gt; Uncheck "Use debug handler only when my code contains errors"
+
+
+
+---
+
+class: middle
+
+&lt;img src="figures/07-practices/mental-model_debugging.png" width="100%" /&gt;
+
+---
+
+class: last-slide, center, bottom
+
+# Thank you! Questions?
+
+&amp;nbsp;
+
+.courtesy[&amp;#x1F4F7; Photo courtesy of Stefan Berger]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

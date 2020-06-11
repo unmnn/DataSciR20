@@ -1,0 +1,17 @@
+---
+title: "Page Title"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+# A header
+
+A list with three items:
+
+* Data Science
+* with
+* R
+
+Some **bold** and some *italic* text.

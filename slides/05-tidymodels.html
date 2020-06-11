@@ -4,6 +4,7 @@
     <title>Machine Learning with tidymodels</title>
     <meta charset="utf-8" />
     <meta name="author" content="Uli Niemann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/countdown/countdown.css" rel="stylesheet" />
     <script src="libs/countdown/countdown.js"></script>
@@ -40,11 +41,17 @@ class: title-slide, center, bottom
 
 tidymodels is a "meta-package" for modeling and statistical analysis that share the underlying design philosophy, grammar, and data structures of the tidyverse.
 
+R is free, open source and provides a high flexibility in terms of how things ca be implemented -&gt; large community of developers with different backgrounds and different design philosophies -&gt; inconsistent syntax API of modeling packages.
+
+It provides a unified interface to various predictive modeling packages with a consistent syntax.
+
+similarly to tidyverse, multiple small packages for dedicated subtasks instead of one single huge package 
+
 Today, we will cover the packages
 
-- parsnip: tidy, unified interface to creating models
-- rsample: resampling data
-- yardstick: model evaluation (metrics such as accuracy, RMSE)
+- parsnip: general API to modeling and analysis functions
+- rsample: resampling data: holdout validation, cross-validation, bootstrap validation
+- yardstick: model evaluation metrics (accuracy, RMSE)
 - tune: hyperparameter optimization
 - workflows: combine pre-processing steps and models into single objects
 - recipes: data preprocessing: feature engineering, imputation, etc
@@ -56,6 +63,10 @@ class: bottom, center
 
 background-image: url("figures/05-tidymodels/caret-obs.png")
 background-size: contain
+
+???
+
+tidymodels is the official successor of caret, also from the same author, Max Kuhn.
 
 &lt;!-- .font100[Data Science with R WS 2018/19] --&gt;
 
@@ -93,18 +104,18 @@ library(tidyverse)
 ```
 
 ```
-## -- Attaching packages ------------------------------------------------------ tidyverse 1.3.0 --
+## -- Attaching packages --------------------------------------------------------------- tidyverse 1.3.0 --
 ```
 
 ```
-## v ggplot2 3.3.0.9000     v purrr   0.3.3     
-## v tibble  3.0.0          v dplyr   0.8.5     
-## v tidyr   1.0.2          v stringr 1.4.0     
-## v readr   1.3.1          v forcats 0.5.0
+## v ggplot2 3.3.1     v purrr   0.3.4
+## v tibble  3.0.1     v dplyr   1.0.0
+## v tidyr   1.1.0     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.5.0
 ```
 
 ```
-## -- Conflicts --------------------------------------------------------- tidyverse_conflicts() --
+## -- Conflicts ------------------------------------------------------------------ tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()
 ```
@@ -114,19 +125,19 @@ library(tidymodels)
 ```
 
 ```
-## -- Attaching packages ----------------------------------------------------- tidymodels 0.1.0 --
+## -- Attaching packages --------------------------------------------------------- tidymodels 0.1.0.9000 --
 ```
 
 ```
-## v broom     0.5.5      v rsample   0.0.6 
+## v broom     0.5.6      v rsample   0.0.7 
 ## v dials     0.0.6      v tune      0.1.0 
 ## v infer     0.5.1      v workflows 0.1.1 
-## v parsnip   0.1.0      v yardstick 0.0.6 
-## v recipes   0.1.10
+## v parsnip   0.1.1      v yardstick 0.0.6 
+## v recipes   0.1.12
 ```
 
 ```
-## -- Conflicts -------------------------------------------------------- tidymodels_conflicts() --
+## -- Conflicts ----------------------------------------------------------------- tidymodels_conflicts() --
 ## x scales::discard() masks purrr::discard()
 ## x dplyr::filter()   masks stats::filter()
 ## x recipes::fixed()  masks stringr::fixed()
@@ -167,6 +178,22 @@ semester regression project." Journal of Statistics Education 19.3 (2011).
 ```r
 library(AmesHousing)
 (ames &lt;- make_ames() %&gt;% select(-matches("Qu")))
+```
+
+```
+## Warning: `funs()` is deprecated as of dplyr 0.8.0.
+## Please use a list of either functions or lambdas: 
+## 
+##   # Simple named list: 
+##   list(mean = mean, median = median)
+## 
+##   # Auto named with `tibble::lst()`: 
+##   tibble::lst(mean, median)
+## 
+##   # Using lambdas
+##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.
 ```
 
 ```
@@ -302,9 +329,9 @@ nearest_neighbor() %&gt;%
 
 class: middle
 
-All available models are listed at &lt;https://tidymodels.github.io/parsnip/articles/articles/Models.html&gt;.
+All available models are listed at &lt;https://www.tidymodels.org/find/parsnip/#models&gt;.
 
-&lt;iframe src="https://tidymodels.github.io/parsnip/articles/articles/Models.html" width="100%" height="450px"&gt;&lt;/iframe&gt;
+&lt;iframe src="https://www.tidymodels.org/find/parsnip/#models" width="100%" height="450px"&gt;&lt;/iframe&gt;
 
 ---
 
@@ -354,9 +381,10 @@ linear_reg(
 
 linear_reg() is a way to generate a specification of a model before fitting and allows the model to be created using different packages in R, Stan, keras, or via Spark. The main arguments for the model are:
 
-penalty: The total amount of regularization in the model. Note that this must be zero for some engines.
+penalty (lambda for glmnet): The total amount of regularization in the model. in other words: the degree of shrinking the model coefficients towards 0
 
-mixture: The proportion of L1 regularization in the model. Note that this will be ignored for some engines.
+mixture (alpha for glmnet): The proportion of L1 regularization in the model.
+One of the extreme cases "Lasso" or "ridge", or a combination of the two.
 
 ---
 
@@ -439,7 +467,6 @@ linear_reg() %&gt;%
 
 ]
 
-
 ---
 
 ## `fit()`
@@ -486,7 +513,8 @@ m
 
 ???
 
-- fit: fit a model using the parsnip model spec, a formula (lhs: target attribute, rhs: predictors) and the training data
+- until now, we have only _specified_ the model, but we haven't run it.
+- fit(): fit a model using the parsnip model spec, a formula (lhs: target attribute, rhs: predictors) and the training data
 
 ---
 
@@ -538,7 +566,7 @@ class: middle, exercise-blue
 
 ## Your turn 1
 
-<div class="countdown" id="timer_5e99c3cd" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d180" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
@@ -612,7 +640,9 @@ price_pred &lt;- lm_fit %&gt;%
 
 ## Available metrics in yardstick
 
-&lt;iframe src="https://tidymodels.github.io/yardstick/articles/metric-types.html#metrics" width="100%" height="450px"&gt;&lt;/iframe&gt;
+&lt;https://yardstick.tidymodels.org/articles/metric-types.html#metrics&gt;
+
+&lt;iframe src="https://yardstick.tidymodels.org/articles/metric-types.html#metrics" width="100%" height="450px"&gt;&lt;/iframe&gt;
 
 ---
 
@@ -658,7 +688,7 @@ set.seed(123)
 ```
 
 ```
-## &lt;Training/Validation/Total&gt;
+## &lt;Analysis/Assess/Total&gt;
 ## &lt;2198/732/2930&gt;
 ```
 
@@ -806,7 +836,7 @@ class: exercise-blue, middle
 
 ## Your turn 2
 
-<div class="countdown" id="timer_5e99c5de" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d028" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">04</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
@@ -839,8 +869,8 @@ instances with the specified split percentages from each bin
 
 General drawback of holdout method:
 
-- If testing set is small, performance metrics may be unreliable
 - If training set is small, model fit may be poor
+- If testing set is small, performance values have high variance
 
 -&gt; resampling
 
@@ -871,7 +901,7 @@ set.seed(123)
 ## #  5-fold cross-validation 
 ## # A tibble: 5 x 2
 ##   splits             id   
-##   &lt;named list&gt;       &lt;chr&gt;
+##   &lt;list&gt;             &lt;chr&gt;
 ## 1 &lt;split [2.3K/586]&gt; Fold1
 ## 2 &lt;split [2.3K/586]&gt; Fold2
 ## 3 &lt;split [2.3K/586]&gt; Fold3
@@ -887,8 +917,8 @@ map_dbl(folds$splits, ~mean(.x$data$Sale_Price[.x$in_id]))
 ```
 
 ```
-##        1        2        3        4        5 
-## 181310.8 180991.0 180840.0 181268.6 179569.9
+## [1] 181310.8 180991.0 180840.0 181268.6
+## [5] 179569.9
 ```
 
 ]
@@ -927,7 +957,7 @@ res
 
 ???
 
-- we need fit_resamples because we have more than 1 split
+- instead of fit, we need fit_resamples because we have more than 1 split
 - returns a tibble with 5 rows (number of resamples)
 - several list columns (add pull, pluck)
 - `splits`: info on training and test set assignment in resample
@@ -1023,13 +1053,13 @@ class: exercise-blue, middle
 
 ## Your turn 3
 
-<div class="countdown" id="timer_5e99c40d" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d37e" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
 Modify the code below to return the **Mean Absolute Error** and **R²**. 
 Visit 
-&lt;https://tidymodels.github.io/yardstick/reference/index.html#section-regression-metrics&gt; 
+&lt;https://yardstick.tidymodels.org/reference/index.html#section-regression-metrics&gt; 
 to find the right function to use.
 
 
@@ -1038,8 +1068,8 @@ set.seed(100)
 
 folds &lt;- vfold_cv(ames, v = 5)
 
-fit_res &lt;- fit_resamples(Sale_Price ~ Gr_Liv_Area,
-                         model = lm_spec,
+fit_res &lt;- fit_resamples(object = lm_spec,
+                         preprocessor = Sale_Price ~ Gr_Liv_Area,
                          resamples = folds)
 
 collect_metrics(fit_res, summarize = TRUE)
@@ -1062,7 +1092,7 @@ class: exercise-blue, middle
 
 ## Your turn 4
 
-<div class="countdown" id="timer_5e99c4a3" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d23e" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
@@ -1456,11 +1486,11 @@ workflow() %&gt;%
 ```
 
 ```
-## == Workflow ===================================================================================
+## == Workflow ============================================================================================
 ## Preprocessor: Formula
 ## Model: None
 ## 
-## -- Preprocessor -------------------------------------------------------------------------------
+## -- Preprocessor ----------------------------------------------------------------------------------------
 ## remote ~ salary + open_source
 ```
 
@@ -1480,11 +1510,11 @@ workflow() %&gt;%
 ```
 
 ```
-## == Workflow ===================================================================================
+## == Workflow ============================================================================================
 ## Preprocessor: None
 ## Model: decision_tree()
 ## 
-## -- Model --------------------------------------------------------------------------------------
+## -- Model -----------------------------------------------------------------------------------------------
 ## Decision Tree Model Specification (unknown)
 ```
 
@@ -1747,14 +1777,14 @@ dt_wf_final
 ```
 
 ```
-## == Workflow ===================================================================================
+## == Workflow ============================================================================================
 ## Preprocessor: Formula
 ## Model: decision_tree()
 ## 
-## -- Preprocessor -------------------------------------------------------------------------------
+## -- Preprocessor ----------------------------------------------------------------------------------------
 ## remote ~ .
 ## 
-## -- Model --------------------------------------------------------------------------------------
+## -- Model -----------------------------------------------------------------------------------------------
 ## Decision Tree Model Specification (classification)
 ## 
 ## Main Arguments:
@@ -1782,7 +1812,7 @@ class: exercise-blue
 
 ## Your Turn 6
 
-<div class="countdown" id="timer_5e99c602" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d18a" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
@@ -1996,7 +2026,7 @@ Reasons for Modifying the Data
 
 ## step_*()
 
-Complete list at: &lt;https://tidymodels.github.io/recipes/reference/index.html&gt;
+Complete list at: &lt;https://recipes.tidymodels.org/reference/index.html&gt;
 
 &lt;iframe src="https://tidymodels.github.io/recipes/reference/index.html#section-step-functions-imputation" width="100%" height="450px"&gt;&lt;/iframe&gt;
 
@@ -2038,7 +2068,7 @@ class: exercise-blue, middle
 
 ## Your Turn 7
 
-<div class="countdown" id="timer_5e99c418" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d1c6" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">03</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
@@ -2269,7 +2299,7 @@ class: exercise-blue, middle
 
 ## Your Turn 8
 
-<div class="countdown" id="timer_5e99c674" style="right:0;bottom:0;" data-warnwhen="0">
+<div class="countdown" id="timer_5ee0d162" style="right:0;bottom:0;" data-warnwhen="0">
 <code class="countdown-time"><span class="countdown-digits minutes">05</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
 </div>
 
@@ -2391,7 +2421,7 @@ pca_results %&gt;% show_best(metric = "rmse")
 ##  collate  English_United States.1252  
 ##  ctype    English_United States.1252  
 ##  tz       Europe/Berlin               
-##  date     2020-04-17
+##  date     2020-06-09
 ```
 
 &lt;div style="font-size:80%;"&gt;
@@ -2416,8 +2446,8 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; broom &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.5.5 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-02-29 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.5.6 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-04-20 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -2434,8 +2464,8 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; dplyr &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.8.5 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-07 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.0.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-29 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -2446,9 +2476,9 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; ggplot2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 3.3.0.9000 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; Github (tidyverse/ggplot2@53815f8) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.3.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-28 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; infer &lt;/td&gt;
@@ -2464,8 +2494,8 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; parsnip &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.1.0 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-04-09 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.1.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-06 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -2476,8 +2506,8 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; purrr &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.3.3 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-10-18 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.3.4 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-04-17 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -2505,8 +2535,8 @@ pca_results %&gt;% show_best(metric = "rmse")
 &lt;tbody&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; recipes &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.1.10 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-18 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.1.12 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-01 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -2523,14 +2553,14 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; rsample &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.0.6 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-31 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.0.7 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-06-04 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; scales &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1.1.0 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-11-18 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.1.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-11 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
@@ -2541,20 +2571,20 @@ pca_results %&gt;% show_best(metric = "rmse")
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; tibble &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 3.0.0 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-03-30 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.0.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-04-20 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; tidymodels &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0.1.0 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-02-16 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0.1.0.9000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-06-09 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Github (tidymodels/tidymodels) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; tidyr &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1.0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2020-01-24 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.1.0 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2020-05-20 &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; CRAN (R 3.6.3) &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;

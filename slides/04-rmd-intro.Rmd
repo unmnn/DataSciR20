@@ -1,0 +1,27 @@
+---
+title: "R Markdown Intro"
+date: 2018-07-30
+output: 
+  html_document: 
+    fig_height: 4
+    fig_width: 5
+---
+
+```{r analysis, message = FALSE}
+library(tidyverse)
+age_threshold <- 45
+census <- read_rds(here::here("datasets", "german_census_2011_clean.rds")) 
+(young <- census %>%
+  filter(avg_age <= age_threshold))
+```
+
+We have data about `r nrow(census)` districts, 
+`r nrow(census) - nrow(young)` of them with an 
+average age above `r age_threshold` years. The 
+distribution of the remainder is shown below:
+
+```{r, echo = FALSE}
+young %>% 
+  ggplot(aes(avg_age)) + 
+  geom_histogram(color = "black")
+```
